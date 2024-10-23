@@ -420,6 +420,139 @@ Number.MIN_VALUE; // 5e-324
    
       
 
+<<<<<<< HEAD
+=======
+#  Operator
+
+## void
+
+`void` 执行表达式，但不返回任何值，或者说返回 `undefined`
+
+```javascript
+void 0; // undefined
+void (0); // undefined
+```
+
+- 使用括号 `()` ，表示优先级更高
+
+  ```javascript
+  // 两种写法结果相同
+  void 4 + 7;
+  
+  (void 4) + 7;
+  ```
+
+- 可以赋值
+
+  ```javascript
+  var x = 3;
+  void (x = 5);
+  console.log(x); // 5
+  ```
+
+**用途**：
+
+- 在浏览器的书签 ( Bookmarklet )、超链接插入，防止网页跳转
+
+  ```html
+  <script>
+  function f() {
+    console.log('Hello World');
+  }
+  </script>
+  <a href="http://example.com" onclick="f(); return false;">点击</a>
+  ```
+
+  > 点击链接后，先执行 `onclick` 的代码，由于 `onclick` 返回 `false`，所以不跳转
+
+- `void` 替代以上写法
+
+  ```html
+  <a href="javascript: void(f());">点击</a>
+  ```
+
+**实例**：
+
+当用户点击链接提交表单时，不跳转
+
+```html
+<a href="javascript: void(document.form.submit())">
+  提交
+</a>
+```
+
+## 逗号运算符
+
+对于两个表达式求值，返回后一个表达式的值
+
+```javascript
+var x = 0;
+var y = (x++, 10);
+console.log('x = ' + x + ',' + ' y = ' + y); // x = 1, y = 10
+```
+
+**用途**：在返回一个值之前，进行一些辅助操作
+
+```javascript
+var value = (console.log("Hello"), true);
+console.log(value); // Hello true
+```
+
+执行顺序：先执行逗号之前的操作，再返回逗号之后的值
+
+## Operator Precedence
+
+1. 优先级高的先执行，先乘除后加减
+
+2. 比较运算符顺序：小于等于 ( `<=` ) 、全等 ( `===` )、或 ( `||` )、三元 ( `?:` ) 、赋值 ( `=` )
+
+   ```javascript
+   var x = 1;
+   var arr = [];
+   var y = arr.length <= 0 || arr[0] === undefined ? x : arr[0];
+   console.log(y); // 1
+   
+   // 等同于
+   var y = ((arr.length <= 0) || (arr[0] === undefined)) ? x : arr[0];
+   ```
+
+3. 括号 ( `()` ) 的优先级最高，用于提升优先级
+
+   > - 括号不是运算符，不具有求值作用，只能改变优先级
+   > - 将整个表达式放入括号中，没有任何意义
+   > - 如果括号放在函数后面，则表示调用函数
+   > - 语句不能放在括号中
+
+   ```javascript
+   var x = 1;
+   (x) = 2; // 括号不具有求值作用, 这句话表示 1 = 2, 没有意义
+   
+   // 将表达式放在括号中, 没有意义
+   var a = 1;
+   var b = 2;
+   sum = (a + b);
+   console.log(sum); // 3
+   
+   // 放在函数后面, 表示调用
+   function f() {
+       return 1;
+   }
+   f(); // 1
+   
+   // 函数放在括号中, 返回函数本身
+   (f); // function f(){return 1;}
+   
+   // 将语句放在括号中会报错
+   (var a = 1) // SyntaxError: Unexpected token var
+   ```
+
+## 左结合、右结合
+
+**左结合**：如果两个运算符具有相同优先级，按从左到右运算
+
+**右结合**：如果两个运算符具有相同优先级，按从右到左运算
+
+>>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 # 字符串
 
 零个或多个字符，存放在单引号和双引号之中
@@ -1751,6 +1884,7 @@ function normalize(arr) {
 }
 ```
 
+<<<<<<< HEAD
 ## 高阶函数
 
 高阶函数除了将函数作为参数外，还可以将函数作为返回值
@@ -2199,6 +2333,221 @@ console.log(s === 'str'); // false
   ```
 
   > **注意**：`Date.parse()` 传入月份时实际是 `01`-`12`，转换成 Date 对象后，`getMonth()` 获取月份时要用 `0`-`11`
+=======
+## filter
+
+将 Array 中的元素过滤掉，返回剩下的元素
+
+`filter()` 将传入的函数作用于每个元素，根据返回值是 `true` 或 `false`，决定是否保留
+
+`filter()` 和 `map()` 一样回调函数可以接收三个参数：
+
+- `element`：元素
+- `index`：索引
+- `self`：数组本身
+
+```javascript
+// 删掉偶数, 保留奇数
+let arr = [1, 2, 4, 5, 6, 9, 10, 15];
+let res = arr.filter((x) => {
+    return x % 2 !== 0;
+});
+console.log(res); // (4) [1, 5, 9, 15]
+```
+
+数组去重
+
+```javascript
+let arr = [1, 2, 3, 4, 1, 5, 5, 2];
+let res = arr.filter((element, index, self) => {
+    return self.indexOf(element) === index; // indexOf()只返回首次出现索引的位置
+});
+console.log(res); // (5) [1, 2, 3, 4, 5]
+```
+
+筛选素数
+
+```javascript
+function get_primes(arr) {
+    function isPrime(num) {
+        if (num <= 1) {
+            return false;
+        }
+        for (let i = 2; i <= Math.sqrt(num); i++) {
+            if (num % i === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return arr.filter(isPrime);
+}
+```
+
+如果 `num <= 1` ，返回 `false`，因为 `1`、负数、`0` 不是素数
+
+`Math.sqrt(num)`：`num` 的一个因数大于平方根，另一个因数必定小于平方根。如：当 `num` 为 `15`，`i = 3`，`15 % 3 === 0`，返回 `false`，表示 `15` 不是素数
+
+## sort
+
+排序的核心是比较两个元素的大小。
+
+如果是数字，就直接比较
+
+Array 中的排序：
+
+1. 如果是字符串，按字符串的 ASCII 码大小排序
+2. 如果是数字，Array 的 `sort()` 默认将所有元素转 `String`。例如：`'10' < '2'`，因为 `1` 比 `2` 小
+
+如果传入 `x`、`y` 两个参数，如果 `x < y`，返回负数；如果 `x > y` ，返回正数；如果 `x = y`，返回 `0`
+
+```javascript
+// 升序
+arr.sort((x, y) => {
+    return x - y;
+});
+
+// 降序
+arr.sort((x, y) => {
+    return y - x;
+});
+```
+
+对于字符串，通常忽略大小写进行比较，只需将字符串转换为大写(或小写)，再比较即可
+
+```javascript
+let arr = ['Go', 'apple', 'MyGo'];
+arr.sort((s1, s2) => {
+    let x = s1.toUpperCase();
+    let y = s2.toUpperCase();
+    if (x < y) {
+        return -1;
+    } else if (x > y) {
+        return 1;
+    } else {
+        return 0
+    }
+});
+console.log(arr); // (3) ['apple', 'Go', 'MyGo']
+```
+
+> **注意**：`sort()` 会直接对 Array 进行修改
+
+## every
+
+判断元素是否满足指定测试条件
+
+```javascript
+let arr = ['Go', 'apple', 'MyGo'];
+// 判断长度是否都大于0
+arr.every((s) => {
+    return s.length > 0;
+}); // true
+// 判断每个元素是否都小写
+arr.every((s) => {
+    return s.toLowerCase() === s;
+}); //false
+```
+
+## find
+
+查找符合条件的第一个元素，找到则返回该元素，否则返回 `undefined`
+
+```javascript
+let arr = ['Apple', 'pear', 'orange'];
+// 找到第一个全小写的元素
+arr.find((s) => {
+    return s.toLowerCase() === s;
+}); // pear
+// 找到第一个全大写的元素
+arr.find((s) => {
+    return s.toUpperCase() === s;
+}); // undefined
+```
+
+## findIndex
+
+查找符合条件的第一个元素，返回这个元素的索引；没有找到返回 `-1`
+
+```javascript
+let arr = ['Apple', 'pear', 'orange'];
+// 找到第一个全小写的元素
+arr.findIndex((s) => {
+    return s.toLowerCase() === s;
+}); // 1
+// 找到第一个全大写的元素
+arr.findIndex((s) => {
+    return s.toUpperCase() === s;
+}); // -1
+```
+
+## forEach
+
+和 `map()` 类似，将每个元素依次作用于传入的函数，但不返回新的数组；通常用于遍历数组
+
+```javascript
+let arr = ['Apple', 'pear', 'orange'];
+arr.forEach(x => console.log(x));
+```
+
+# 闭包
+
+# RegExp
+
+正则用于判断字符串是否匹配。设计思想用一种描述性的语言给字符串定义一个规则，不符合规则的字符串就是不合法的
+
+`/RegExp/修饰符`
+
+- 修饰符(可选)
+
+  - `i`：大小写不敏感
+  - `g`：全局匹配(查找所有的匹配而非第一个匹配后停止)
+  - `m`：多行匹配
+
+- `[]`：查找某个范围内的字符
+
+  - `[0-9a-zA-Z]`：匹配一个方括号范围内数字、字母
+  - `(x|y)`：可以匹配 `x` 或 `y`
+
+- 元字符
+
+  - `\d`：匹配一个数字
+
+  - `\w`：匹配一个字母或数字
+
+  - `\s`：匹配一个空格(包括 Tab和空白等)
+  - `\b`：匹配单词边界
+  - `\u`：匹配 Unicode 字符
+  - `\`：使用 `\` 表示转义特殊字符
+
+- 量词
+
+  - `.`：任意单个字符
+
+  - `*`：任意长度的字符( 包括 0 个 )
+
+  - `+`：至少一个字符
+
+  - `?`：0个或1个字符
+
+  - `{n}`：匹配 `n` 个序列内的字符
+
+  - `{n,m}`：匹配 `n`-`m` 个序列内的字符
+
+  - `^n`：匹配以 `n` 开头的字符串
+  - `n$`：匹配以 `n` 结尾的字符串
+
+创建正则表达式
+
+1. `/RegExp/修饰符`
+2. `new RegExp('RegExp')`
+
+> 注意：通过对象的形式创建时， `\` 表示转义字符
+
+# JSON 和 正则鸽了
+
+
+>>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 
 
 
@@ -2238,6 +2587,7 @@ console.log(s === 'str'); // false
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -2386,6 +2736,8 @@ console.log(value); // Hello true
 
 **右结合**：如果两个运算符具有相同优先级，按从右到左运算
 
+=======
+>>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 # window
 
 window 对象不仅充当全局作用域，而且表示浏览器窗口
@@ -3048,6 +3400,40 @@ function checkForm() {
 
 值得注意的是，`id` 为 `input-password` 的 `<input>` 没有 `name` 属性，没有 `name` 属性的 `<input>` 不会被提交
 
+<<<<<<< HEAD
+=======
+### 操作文件
+
+当 `input type="file"` 时，表单的 `enctype` 必须指定为 `multipart/form-data` ，`method` 必须指定为 `post`，浏览器才能正确编码并以 `multipart/form-data` 格式发送数据
+
+```html
+<form action="/upload" method="post" enctype="multipart/form-data">  
+    <label for="file">Choose a file:</label>  
+    <input type="file" id="file" name="file">  
+    <input type="submit" value="Upload">  
+</form>
+```
+
+出于安全考虑，js 对 `file` 的 `value` 属性的赋值没有任何效果。因此，js 也同样无法获取到文件的真实路径
+
+`endsWith('.xxx')`：提交表单时做文件扩展名检查
+
+```javascript
+let f = document.getElementById('test-file-upload');
+let filename = f.value;
+if(!filename || !(filename.endsWith('.jpg') || filename.endsWith('.png') || filename.endsWith('.gif'))) {
+    console.log('Can only upload image file');
+    return false;
+}
+```
+
+File API
+
+H5 新增 File API 允许 js 读取文件内容
+
+File 和 FileReader 两个对象，获取文件信息，读取文件
+
+>>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 
 
 
