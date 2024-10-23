@@ -6,9 +6,16 @@
 6. `git commit`：将工作区文件添加到版本库
 7. `git push -u origin main`：将本地库的所有内容推送到远程库
 
-如果云端修改了文件，本地需要先 `git add` 再 `git commit `
+> Github 上的修改，`pull` 回本地
+>
+> 1. 先 `git add` 再 `git commit `
+>
+> 2. 使用 `git pull origin main`
 
-最后使用 `git pull origin main`
+>  本地的修改上传 Github
+>
+> 1. 先 `git add` 再 `git commit `
+> 2. 使用 `git push -u origin main`
 
 # Git
 
