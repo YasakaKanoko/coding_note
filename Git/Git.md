@@ -1,3 +1,15 @@
+1. 本地创建目录，使用 `git init` 初始化
+2. 初始化分支名称为 `main`：`git branch -M main`
+3. 添加远程库：`git remote add origin git@github.com:YasakaKanoko/learngit.git`
+4. 新增文件
+5. `git add .`：将新增文件添加到工作区
+6. `git commit`：将工作区文件添加到版本库
+7. `git push -u origin main`：将本地库的所有内容推送到远程库
+
+如果云端修改了文件，本地需要先 `git add` 再 `git commit `
+
+最后使用 `git pull origin main`
+
 # Git
 
 安装
@@ -179,7 +191,7 @@ $ git checkout -- test.txt
 2. 根据提示，在本地仓库中运行命令
 
    ```sh
-   $git remote add origin git@github.com:michaelliao/learngit.git
+   $ git remote add origin git@github.com:michaelliao/learngit.git
    ```
 
    
