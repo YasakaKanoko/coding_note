@@ -420,8 +420,6 @@ Number.MIN_VALUE; // 5e-324
    
       
 
-<<<<<<< HEAD
-=======
 #  Operator
 
 ## void
@@ -552,7 +550,6 @@ console.log(value); // Hello true
 
 **右结合**：如果两个运算符具有相同优先级，按从右到左运算
 
->>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 # 字符串
 
 零个或多个字符，存放在单引号和双引号之中
@@ -1884,7 +1881,6 @@ function normalize(arr) {
 }
 ```
 
-<<<<<<< HEAD
 ## 高阶函数
 
 高阶函数除了将函数作为参数外，还可以将函数作为返回值
@@ -2547,7 +2543,6 @@ arr.forEach(x => console.log(x));
 # JSON 和 正则鸽了
 
 
->>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 
 
 
@@ -2570,24 +2565,6 @@ arr.forEach(x => console.log(x));
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
 
 
 
@@ -2736,8 +2713,6 @@ console.log(value); // Hello true
 
 **右结合**：如果两个运算符具有相同优先级，按从右到左运算
 
-=======
->>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 # window
 
 window 对象不仅充当全局作用域，而且表示浏览器窗口
@@ -3400,8 +3375,6 @@ function checkForm() {
 
 值得注意的是，`id` 为 `input-password` 的 `<input>` 没有 `name` 属性，没有 `name` 属性的 `<input>` 不会被提交
 
-<<<<<<< HEAD
-=======
 ### 操作文件
 
 当 `input type="file"` 时，表单的 `enctype` 必须指定为 `multipart/form-data` ，`method` 必须指定为 `post`，浏览器才能正确编码并以 `multipart/form-data` 格式发送数据
@@ -3433,7 +3406,6 @@ H5 新增 File API 允许 js 读取文件内容
 
 File 和 FileReader 两个对象，获取文件信息，读取文件
 
->>>>>>> a9f7ab335e2b2aa004118c055251a0106610fb0e
 
 
 
