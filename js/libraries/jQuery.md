@@ -115,17 +115,20 @@ $('ul.lang li:nth-child(odd)'); // 选出序号为奇数的元素
 
 ## 查找和过滤
 
-- `find()`：某个节点的所有子节点查找，接收任意一个选择器。
+- 对于不同层级节点
 
-  ```javascript
-  ul.find('#swift');
-  ```
+  - `find()`：某个节点的所有子节点查找，接收任意一个选择器。
 
-- `parent()`：从当前节点向上查找
+    ```javascript
+    ul.find('#swift');
+    ```
 
-  ```javascript
-  swf.parent('.red');
-  ```
+  - `parent()`：从当前节点**向上查找**
+
+    ```javascript
+    swf.parent('.red');
+    ```
+
 
 - 对于同层级的节点
 
@@ -137,4 +140,6 @@ $('ul.lang li:nth-child(odd)'); // 选出序号为奇数的元素
   swift.prev();
   ```
 
-- `filter()`：
+- `filter()`：过滤不符合选择器条件的节点
+
+  
