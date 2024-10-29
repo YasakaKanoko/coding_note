@@ -507,7 +507,7 @@ console.log(value); // Hello true
    var y = ((arr.length <= 0) || (arr[0] === undefined)) ? x : arr[0];
    ```
 
-3. 括号 ( `()` ) 的优先级最高，用于提升优先级
+3. 括号 `()` 的优先级最高，用于提升优先级
 
    > - 括号不是运算符，不具有求值作用，只能改变优先级
    > - 将整个表达式放入括号中，没有任何意义
@@ -636,24 +636,28 @@ console.log(` ${name} ,${age} years old`);
 - `indexOf(value, fromIndex)`：返回指定字符串首次出现的位置。未找到返回 `-1`
 
   - `value`：从字符串中要被查找的子串
-  - `fromIndex`：可选值。表示索引位置，默认为 `0` 。如果索引值大于字符串长度，返回` -1`；如果索引值为负数，会将其视为 `0`
+  - `fromIndex`：可选值。表示索引位置，默认为 `0` 。如果索引值大于字符串长度，返回` -1`；如果索引值为负数，会将其视为 `0`。
+ 
+    
+    ```javascript
+    let s = 'hello';
+  
+    // 1. 默认情况。不带可选值
+    console.log('h'); // 0
+  
+    // 2. 返回首次出现的位置
+    console.log(s.indexOf('l')); // 2
+  
+    // 3. 未找到
+    console.log(s.indexOf('world')); // -1
+  
+    // 4. fromIndex 为负数
+    console.log(s.indexOf('o', -1)); // 4
+    ```
+ 
 
-  ```javascript
-  let s = 'hello';
-  
-  // 1. 默认情况。不带可选值
-  console.log('h'); // 0
-  
-  // 2. 返回首次出现的位置
-  console.log(s.indexOf('l')); // 2
-  
-  // 3. 未找到
-  console.log(s.indexOf('world')); // -1
-  
-  // 4. fromIndex 为负数
-  console.log(s.indexOf('o', -1)); // 4
-  ```
 
+  
 - `substring(start, end)`：返回指定索引区间的子串 ( 左闭右开 )
   ```javascript
   let s = 'hello, world!';
@@ -680,6 +684,7 @@ console.log(` ${name} ,${age} years old`);
 ## 属性
 
 - `length`：获取 Array 的长度。如果 `length` 赋一个新值，会直接改变 Array 的大小
+  
   1. `length` 的最大值： 2^32 - 1 位
   2. 如果人为设置的 `length` 一个小于当前成员个数的值，成员数量将自动减少至 `length` 设置的值
   3. 如果设置的 `length` 大于当前成员个数，成员数量会增加至设置的值，新增的位置会返回 `undefined`
