@@ -63,10 +63,10 @@ Windows 自带的记事本在每个文件的开头添加了 `0xefbbbf` 的字符
 - `git commit`：提交到仓库
 
   - `-m 'xxx'`：添加说明
-
-  ```bash
-  $ git commit -m "wrote a readme file"
-  ```
+    
+    ```bash
+    $ git commit -m "wrote a readme file"
+    ```
 
 > 注意：
 >
@@ -95,11 +95,11 @@ Windows 自带的记事本在每个文件的开头添加了 `0xefbbbf` 的字符
     - `HEAD^`：上一个版本
     - `HEAD^^`：上上个版本
     - `HEAD~100`：往上 100 个版本
-
-    ```bash
-    # 回退指定版本, 写版本号的前几位
-    $ git reset --hard 1094a
-    ```
+      
+      ```bash
+      # 回退指定版本, 写版本号的前几位
+      $ git reset --hard 1094a
+      ```
 
   - `--mixed`：将撤回的代码，存放到工作区，保留本地未提交内容
 
