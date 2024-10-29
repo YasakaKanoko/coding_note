@@ -158,7 +158,7 @@ console.log(res);
      - `type`
      - `interface`
 
-> **注意**：JavaScript 中的内置构造函数：`Number`、`String`、`Boolean` ，用于创建对应的包装对象，对内存不太友好，有很少使用。
+> **注意**：JavaScript 中的内置构造函数：`Number`、`String`、`Boolean` ，用于创建对应的包装对象，对内存不太友好，很少使用。
 >
 > 因此，在使用 TypeSript 时尽量使用小写的 `number`、`string`、`boolean`
 

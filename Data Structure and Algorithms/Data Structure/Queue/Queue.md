@@ -28,7 +28,7 @@ queue.shift();
 const size = queue.length;
 
 // 判断是否为空
-const is_empty = queue.l
+const is_empty = size 
 ```
 
 
