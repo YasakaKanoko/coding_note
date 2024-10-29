@@ -686,7 +686,7 @@ console.log(` ${name} ,${age} years old`);
   4. 清空数组：将 `length` 属性值设置为 `0`
   5. 如果 `length` 属性值为不合法值 ( 负数、字符串、大于等于 2^32  ) ，报错 `RangeError: Invalid array length`
   6. 如果数组键名超出范围，该键名会自动转字符串
-     
+ 
   ```javascript
   let arr = ['a', 'b', 'c'];
   arr.length = 6;
