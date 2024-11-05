@@ -1,11 +1,13 @@
 const LinkedList = require('./LinkedList');
 
 const linkedList = new LinkedList();
+
 // 测试 append 方法
 linkedList.append("A");
 linkedList.append("B");
 linkedList.append("C");
 console.log(linkedList.toString()); // A->B->C->null
+
 // 测试 insert 方法
 linkedList.insert(0, "123");
 linkedList.insert(2, "456");
