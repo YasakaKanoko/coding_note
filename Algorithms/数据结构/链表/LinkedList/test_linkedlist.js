@@ -1,39 +1,39 @@
-const LinkedList = require('./LinkedList');
+const { LinkedList } = require('./LinkedList');
 
 const linkedList = new LinkedList();
 
 // 测试 append 方法
-linkedList.append("A");
-linkedList.append("B");
-linkedList.append("C");
-console.log(linkedList.toString()); // A->B->C->null
+linkedList.append("1");
+linkedList.append("2");
+linkedList.append("3");
+console.log(linkedList.toString()); // 1 -> 2 -> 3 -> null
 
 // 测试 insert 方法
-linkedList.insert(0, "123");
-linkedList.insert(2, "456");
-console.log(linkedList.toString()); // 123->A->456->B->C->null
+linkedList.insert(0, "0");
+linkedList.insert(4, "4");
+console.log(linkedList.toString()); // 0 -> 1 -> 2 -> 3 -> 4 -> null
 
 // 测试 getData 方法
-console.log(linkedList.getData(0)); // 123
-console.log(linkedList.getData(1)); // A
+console.log(linkedList.getData(0)); // 0
+console.log(linkedList.getData(1)); // 1
 
 // 测试 indexOf 方法
-console.log(linkedList.indexOf("A")); // 1
-console.log(linkedList.indexOf("ABC")); // -1
+console.log(linkedList.indexOf("1")); // 1
+console.log(linkedList.indexOf("A")); // -1
 
 // 测试 update 方法
-linkedList.update(0, "12345");
-console.log(linkedList.toString()); // 12345->A->456->B->C->null
-linkedList.update(1, "54321");
-console.log(linkedList.toString()); // 12345->54321->456->B->C->null
+linkedList.update(0, "A");
+console.log(linkedList.toString()); // A -> 1 -> 2 -> 3 -> 4 -> null
+linkedList.update(1, "B");
+console.log(linkedList.toString()); // A -> B -> 2 -> 3 -> 4 -> null
 
 // 测试 removeAt 方法
 linkedList.removeAt(3);
-console.log(linkedList.toString()); // 12345->54321->456->C->null
+console.log(linkedList.toString()); // A -> B -> 2 -> 4 -> null
 
 // 测试 remove 方法
-linkedList.remove("C");
-console.log(linkedList.toString()); // 12345->54321->456->null
+linkedList.remove("A");
+console.log(linkedList.toString()); // B -> 2 -> 4 -> null
 
 // 测试 isEmpty 方法
 console.log(linkedList.isEmpty()); // false

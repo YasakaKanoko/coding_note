@@ -1,21 +1,20 @@
+class Node {
+    constructor(data, next) {
+        this.data = (data === undefined ? 0 : data);
+        this.next = (next === undefined ? null : next);
+    };
+}
 class LinkedList {
+
     // 初始链表长度为0
     length = 0;
     // 初始head为null, head指向第一个节点
     head = null;
 
-    // 内部类Node
-    Node = class {
-        constructor(data, next) {
-            this.data = (data === undefined ? 0 : data);
-            this.next = (next === undefined ? null : next);
-        }
-    };
-
     // append(element): 向尾部添加元素
     append(element) {
         // 1. 创建新节点
-        const newNode = new this.Node(element);
+        const newNode = new Node(element);
         // 2. 判断: 如果链表长度为0, 只有head时, 直接追加新节点
         if (this.length === 0) {
             this.head = newNode;
@@ -31,14 +30,14 @@ class LinkedList {
         this.length++;
     }
 
-    // insert(): 在指定位置插入节点
+    // insert():在指定位置插入节点
     insert(position, data) {
         // position: 插入节点的位置
         // position = 0: 插入后是第一个节点
         // 1. 对position进行越界判断, 不能小于0或大于链表长度
         if (position < 0 || position > this.length) return false;
         // 2. 创建新节点
-        const newNode = new this.Node(data);
+        const newNode = new Node(data);
         // 3. 插入节点
         if (position === 0) {
             // position = 0时, next指向原来第一个节点
@@ -70,7 +69,6 @@ class LinkedList {
         // 2. 获取指定position的data
         let currentNode = this.head;
         let currentIndex = 0;
-
         while (currentIndex < position) {
             currentNode = currentNode.next;
             currentIndex++;
@@ -145,21 +143,25 @@ class LinkedList {
         return this.length === 0;
     }
 
-    // size(): 返回元素个数
+    // size(): 获取链表长度
     get size() {
         return this.length;
     }
+
 
     // toString(): 遍历所有节点拼接字符串，直到 null，输出元素值
     toString() {
         let currentNode = this.head;
         let result = '';
         while (currentNode) {
-            result += currentNode.data + '->';
+            result += currentNode.data + ' -> ';
             currentNode = currentNode.next;
         }
         return result + 'null';
     }
-
 }
-module.exports = LinkedList;
+
+module.exports = {
+    Node,
+    LinkedList
+};
