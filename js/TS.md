@@ -1,50 +1,23 @@
 # TypeScript
 
+- [编译](#编译)
+- [类型声明](#类型声明)
+- [类型](#类型)
+  - [any](#any)
+  - [unknown](#unknown)
+  - [never](#never)
+  - [void](#void)
+  - [object](#object)
+  - [tuple](#tuple)
+  - [enum](#enum)
+
 # 简介
 
 1. TypeScript 是 JavaScript 的 **超集**
 2. 新增 **静态类型检查**、**接口**、**泛型**等
 3. TypeScript 需要先**编译**为 JavaScript ，再运行
 
-# JavaScript 的缺陷
-
-1. **不清楚的数据类型**
-
-   ```javascript
-   let welcome = 'hello';
-   welcome(); // 报错: TypeError: welcome is not a function
-   ```
-
-2. **逻辑漏洞**
-
-   ```javascript
-   const str = Date.now() % 2 ? '奇数' : '偶数';
-   
-   if (str !== '奇数') {
-       console.log('hello'); // 永远不会进入 else
-   } else if (str === '偶数') {
-       console.log('world');
-   }
-   ```
-
-3. **不存在的属性**
-
-   ```javascript
-   const obj = {
-       width: 10,
-       height: 15
-   };
-   const area = obj.width * obj.heigth; // 单词拼写错误不会报错, 会将不存在的属性访问 返回 NaN
-   ```
-
-4. **拼写错误**
-
-   ```javascript
-   const message = 'hello, world';
-   message.toUperCase(); // TypeError: message.toUperCase is not a function
-   ```
-
-**静态类型检查**：运行时的代码错误前置
+> **静态类型检查**：运行时的代码错误前置
 
 # 编译
 
