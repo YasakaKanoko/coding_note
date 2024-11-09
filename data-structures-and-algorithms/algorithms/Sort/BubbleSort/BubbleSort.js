@@ -1,4 +1,4 @@
-function BubbleSort(array) {
+function bubbleSort(array) {
     // 边界检查: 是否为数组或是否长度大于1
     if (!Array.isArray(array) || array.length <= 1) return array;
 
