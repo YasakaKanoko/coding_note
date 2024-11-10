@@ -343,11 +343,275 @@ console.log(b); // 9
 
 ### object
 
+> `object` 和 `Object` 实际中使用较少，因为范围太大
 
+- `object`：**非原始类型**，可存储对象、函数、数组等，**限制范围广泛**，**实际中使用较少** 
+
+  ```typescript
+  let a: object;
+  
+  // 对象
+  a = {};
+  // 数组
+  a = [1, 2, 3, 4, 5];
+  // 函数
+  a = function () { };
+  // 包装类对象
+  a = new String('123');
+  // 类
+  class Person { };
+  a = new Person();
+  
+  // object不能存储【原始类型】, 以下会【警告】
+  a = 1; // 不能将类型“number”分配给类型“object”。
+  a = true; // 不能将类型“boolean”分配给类型“object”。
+  a = 'hello'; // 不能将类型“string”分配给类型“object”。
+  a = null; // 不能将类型“null”分配给类型“object”。
+  a = undefined; // 不能将类型“undefined”分配给类型“object”。
+  ```
+
+- `Object`：所有可以调用 `Object` 方法的类型，如：`toString()`。简单来说，除了 `undefined` 和 `null` 以外任何值
+
+  ```typescript
+  let a: Object;
+  
+  // 对象
+  a = {};
+  // 数组
+  a = [1, 2, 3, 4, 5];
+  // 函数
+  a = function () { };
+  // 包装类对象
+  a = new String('123');
+  // 类
+  class Person { };
+  a = new Person();
+  // number
+  a = 1; 
+  // boolean
+  a = true; 
+  // string
+  a = 'hello';
+  
+  // Object不能存储【null】和【undefined】, 以下会【警告】
+  a = null; // 不能将类型“null”分配给类型“object”。
+  a = undefined; // 不能将类型“undefined”分配给类型“object”。
+  ```
+
+**声明对象类型**
+
+1. **限制对象类型**
+
+   - 在 `{}` 限制属性的类型
+
+   ```typescript
+   let person: { name: string, age: number }
+   ```
+
+   - 属性名称后加上 `?` 表示可选属性
+
+   ```typescript
+   let person: { name: string, age?: number }
+   ```
+
+   - 可以使用**逗号** ( `,` )、**分号** ( `;` )、**换行**作为分隔
+
+   ```typescript
+   // 逗号
+   let person: { name: string, age?: number }
+   
+   // 分号
+   let person: { name: string; age?: number }
+   
+   // 换行
+   let person: {
+       name: string
+       age?: number
+   }
+   ```
+
+   - 不能给对象中没有的属性赋值
+
+   ```typescript
+   // 【警告】对象字面量只能指定已知属性，并且“gender”不在类型“{ name: string; age?: number | undefined; }”中。
+   person = { name: 'Jack', gender: 'male' };
+   ```
+
+2. **索引签名**：允许对象定义**任意数量的属性**，**键**和**类型**是**可变的**，用于：**描述不确定的属性(具有动态属性的对象)**
+
+   `[key: string]: any`
+
+   ```typescript
+   let person: {
+       name: string
+       age?: number
+       [key: string]: any // 索引签名, 单词可以使用index、key等其他单词
+   }
+   person = {
+       name: 'Jack',
+       age: 18,
+       gender: 'male'
+   }
+   ```
+
+**声明函数类型**
+
+TS 中使用
+
+1.  `=>` 在声明函数表达式时，表示**函数类型**，描述**参数类型**和**返回类型**
+2. `=>` 在定义箭头函数表达式，表示箭头函数
+
+```typescript
+let count: (x: number, y: number) => number;
+count = (x, y) => {
+    return x + y;
+}
+
+// 等价于【箭头函数】
+let count = (x: number, y: number) => x + y;
+```
+
+**声明数组类型**
+
+1. 数组字面量：`类型[]`
+2. 数组类 + 泛型：`Array<类型>`
+
+```typescript
+let arr1: string[];
+let arr2: Array<string>;
+arr1 = ['a', 'b', 'c'];
+```
 
 ### tuple
 
+元组 ( `tuple` )：一种特殊的**数组类型**，存储**固定数量**的元素，每个元素的**类型是已知的且可以不同**
+
+- `?`：表示可选元素
+- `rest` 参数：表示任意数量的某种类型的元素
+
+```typescript
+// 表示第一个参数必须是string类型, 第二个参数必须是number类型
+let arr1: [string, number]
+arr1 = ['hello', 1];
+
+// 表示第一个参数必须是string类型, 第二个参数是可选的【如果存在, 则必须是boolean类型】
+let arr2: [string, boolean?]
+arr2 = ['hello', true];
+
+// 第一个参数必须是number类型, 后面参数是任意数量的string类型
+let arr3: [number, ...string[]];
+arr3 = [1, 'a', 'b', 'c'];
+```
+
 ### enum
+
+枚举 ( `enum` ) ：定义**一组命名常量**，增强代码可读性和可维护性，提供类型安全
+
+1. **数字枚举**：枚举成员的默认值从 0 开始自动递增，也可以手动指定成员的值
+
+   **反向映射**：可以**通过值来获取成员名称**
+
+   ```typescript
+   enum Color {
+       Red, // 0
+       Green, // 1
+       Yellow // 2
+   }
+   ```
+
+   手动指定值
+
+   ```typescript
+   enum Color {
+       Red = 1, // 1
+       Green, // 默认值为2
+       Yellow = 5 // 5
+   }
+   ```
+
+2. **字符串枚举**：枚举成员值必须是字符串字面量
+
+   ```typescript
+   enum Color {
+       Red = 'red',
+       Green = 'green',
+       Yellow = 'yello'
+   }
+   let myColor: Color = Color.Green;
+   console.log(myColor); // green
+   ```
+
+3. **常量枚举**：特殊的枚举类型，使用 `const` 关键字定义，**编译时内联**，即枚举**成员引用**替换为**实际值**，而不生成额外的枚举对象。减少代码量，提升性能
+
+   ```typescript
+   const enum Color {
+       Red,
+       Green,
+       Blue
+   }
+   console.log(Color.Red);
+   ```
+
+   编译生成的 `.js` 文件
+
+   ```javascript
+   "use strict";
+   console.log(0 /* Color.Red */);
+   ```
+
+### type
+
+`type` 可以为任意类型创建别名，增加可读性，方便类型复用和扩展
+
+- **创建类型别名**
+
+  ```typescript
+  type StringArray = string[];
+  let myArray = ['Hello', 'World'];
+  ```
+
+- **联合类型 ( Union Types )**：一个值可以是几个类型的一种。用 `|` 表示
+
+  ```typescript
+  type stringOrNumber = string | number;
+  let myVal: stringOrNumber = 'Hello World';
+  myVal = 123;
+  
+  type Gender = 'Male' | 'Female';
+  function logGender(str: Gender) {
+      console.log(str);
+  }
+  logGender('Male'); // Male
+  ```
+
+- **交叉类型 ( Interface Types )**：一个值必须同时满足多种类型，通常用于对象类型。用 `&` 表示
+
+  ```typescript
+  type Area = {
+      width: number,
+      height: number
+  };
+  type Address = {
+      address: string,
+      cell: number,
+      tel: number,
+  };
+  
+  type House = Area & Address;
+  const house: House = {
+      width: 75,
+      height: 100,
+      address: 'Kangawa',
+      cell: 7,
+      tel: 110
+  }
+  ```
+
+  
+
+ 
+
+
 
 
 
