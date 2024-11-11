@@ -407,38 +407,38 @@ console.log(b); // 9
 
    - 在 `{}` 限制属性的类型
 
-   ```typescript
-   let person: { name: string, age: number }
-   ```
+     ```typescript
+     let person: { name: string, age: number }
+     ```
 
    - 属性名称后加上 `?` 表示可选属性
 
-   ```typescript
-   let person: { name: string, age?: number }
-   ```
+     ```typescript
+     let person: { name: string, age?: number }
+     ```
 
    - 可以使用**逗号** ( `,` )、**分号** ( `;` )、**换行**作为分隔
 
-   ```typescript
-   // 逗号
-   let person: { name: string, age?: number }
-   
-   // 分号
-   let person: { name: string; age?: number }
-   
-   // 换行
-   let person: {
-       name: string
-       age?: number
-   }
-   ```
+     ```typescript
+     // 逗号
+     let person: { name: string, age?: number }
+     
+     // 分号
+     let person: { name: string; age?: number }
+     
+     // 换行
+     let person: {
+         name: string
+         age?: number
+     }
+     ```
 
    - 不能给对象中没有的属性赋值
 
-   ```typescript
-   // 【警告】对象字面量只能指定已知属性，并且“gender”不在类型“{ name: string; age?: number | undefined; }”中。
-   person = { name: 'Jack', gender: 'male' };
-   ```
+     ```typescript
+     // 【警告】对象字面量只能指定已知属性，并且“gender”不在类型“{ name: string; age?: number | undefined; }”中。
+     person = { name: 'Jack', gender: 'male' };
+     ```
 
 2. **索引签名**：允许对象定义**任意数量的属性**，**键**和**类型**是**可变的**，用于：**描述不确定的属性(具有动态属性的对象)**
 
