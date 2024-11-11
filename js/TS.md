@@ -34,13 +34,13 @@
 2. 全局安装 TypeScript
 
    ```bash
-   $ npm i typescript -g
+   npm i typescript -g
    ```
 
 3. 使用命令编译 `.ts` 文件
 
    ```bash
-   $ tsc demo.ts
+   tsc demo.ts
    ```
 
 **自动化编译**
@@ -48,7 +48,7 @@
 1. 创建 TypeScript 编译控制文件
 
    ```bash
-   $ tsc --init
+   tsc --init
    ```
 
    1. 生成一个 `tsconfig.json` 配置文件，包含很多编译时的配置
@@ -68,13 +68,13 @@
 2. 监视 `.ts` 文件变化
 
    ```bash
-   $ tsc --watch # tsc -w
+   tsc --watch # tsc -w
    ```
 
 3. 优化：当编译出错时不生成 `.js` 文件
 
    ```bash
-   $ tsc --noEmitOnError --watch
+   tsc --noEmitOnError --watch
    ```
 
    > 修改配置文件 `tsconfig.json` 的   `"noEmitOnError": true`
