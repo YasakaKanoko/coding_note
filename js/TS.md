@@ -11,6 +11,11 @@
   - [tuple](#tuple)
   - [enum](#enum)
   - [type](#type)
+  - [abstract class](#抽象类)
+  - [属性修饰符](#属性修饰符)
+    - [public](#public)
+    - [protected](#protected)
+    - [private](#private)
 
 # 简介
 
@@ -49,10 +54,18 @@
    1. 生成一个 `tsconfig.json` 配置文件，包含很多编译时的配置
    2. 可以手动更改编译的 js 版本，默认 `ES7`
 
+   > **注意**：如果运行 `tsc --init` 遇到错误提示 " 无法加载文件 C:\Users\20681\AppData\Roaming\npm\tsc.pc1 "，这是由于 PowerShell 执行策略设置导致的。
+   >
+   > 1. **检查当前执行策略**：`Get-ExecutionPolicy`，如果执行策略是 `AllSigned` 或 `Restricted`，更改策略为 `RemoteSigned` 或 `Unrestricted`
+   > 2. **更改执行策略**：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+   >    - `RemoteSigned`：允许本地脚本运行，但需要从互联网下载的脚本进行签名。
+   >    - `Unrestricted`：允许所有脚本运行，但会提示确认。
+   > 3. 确认策略更改后，输入 `Get-ExecutionPolicy` 检查策略是否更改
+
 2. 监视 `.ts` 文件变化
 
    ```bash
-   $ tsc --watch
+   $ tsc --watch # tsc -w
    ```
 
 3. 优化：当编译出错时不生成 `.js` 文件
@@ -611,8 +624,164 @@ arr3 = [1, 'a', 'b', 'c'];
   ```
 
   > **注意**：交叉类型对于**原始类型**，会被推断为 `never`
+  
+  **特殊的** `type`：当**类型声明**的函数返回值为 `void`，TypeScript **不会严格要求函数返回值为空** ( 原返回值应为 `undefined` 或 `void` )
+  
+  ```typescript
+  type LogFunc = () => void;
+  
+  // 【允许返回非空值】
+  const f1: LogFunc = function () {
+      return 1;
+  }
+  const f2: LogFunc = () => 1;
+  ```
+  
+  > **原因**：`Array.prototype.push` 的返回值是一个数字，而 `Array.prototype.forEach()` 期望回调函数的返回类型是 `void`
+  >
+  > 换而言之，`forEach()` 回调函数的返回值是 `undefined`，当箭头函数简写时回调函数函数体 `push` 的返回值是一个数字 
+  >
+  > ```typescript
+  > const src = [1, 2, 3];
+  > const dst = [0];
+  > 
+  > src.forEach((el) => dst.push(el));
+  > ```
 
- 
+### 抽象类
+
+**类**
+
+```typescript
+class Person {
+    // 属性声明
+    name: string
+    age: number
+
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    speak() {
+        console.log(`我叫${this.name}, 今年${this.age}岁`);
+    }
+}
+```
+
+> **属性声明**：类的成员变量声明，表示类所具有的属性及类型
+>
+> **构造函数参数声明**：用于接收外部传入的值及执行时的类的属性
+
+```typescript
+class Person {
+    constructor(public name: string, public age: number) { }
+    
+    speak() {
+        console.log(`我叫${this.name}, 今年${this.age}岁`);
+    }
+}
+
+const p1 = new Person('Jolyne', 18);
+console.log(p1); // Person {name: 'Jolyne', age: 18}
+p1.speak(); // 我叫Jolyne, 今年18岁
+```
+
+> **属性修饰符**：`public` 不仅**声明参数**，**并自动将参数作为类的属性**，**不必在类中单独声明属性**
+
+**类的继承**
+
+```typescript
+class Student extends Person {
+    constructor(name: string, age: number, public grade: string) {
+        super(name, age);
+    }
+    
+    // 重写speak()
+    override speak() {
+        console.log(`我叫${this.name}, ${this.age}岁, 今年${this.grade}`);
+    }
+}
+
+const s1 = new Student('Kim', 20, 'High School');
+console.log(s1); // Student {name: 'Kim', age: 20, grade: 'High School'}
+s1.speak(); // 我叫Kim, 20岁, 今年High School
+```
+
+#### 属性修饰符
+
+| 修饰符      | 含义     | 规则                                          |
+| ----------- | -------- | --------------------------------------------- |
+| `public`    | 公开的   | **类内部**、**子类**、**类外部**访问 ( 默认 ) |
+| `protected` | 受保护的 | **类内部**、**子类**访问                      |
+| `private`   | 私有的   | **类内部**访问                                |
+| `readonly`  | 只读属性 | 属性无法修改                                  |
+
+##### public
+
+`public` 修饰符表示属性可以在类的内部和外部访问。默认情况下，类的属性都是 `public`。
+
+```typescript
+class Person {
+    constructor(public name: string) { }
+    public greet(): void {
+        // 在【类内部】访问public修饰的属性
+        console.log(`Hello, my name is ${this.name}.`);
+    }
+}
+
+class Student extends Person {
+    study() {
+        // 在【子类】访问public修饰的属性
+        console.log(`Person的 ${this.name} 被子类Student访问`);
+    }
+}
+
+const p1 = new Person("Alice");
+// 在【类外部】访问public修饰的属性
+console.log(p1.name);
+p1.greet(); 
+```
+
+##### protected
+
+`protected` 修饰符表示属性可以在类的内部和子类中访问，但外部无法访问。
+
+```typescript
+class Person {
+    constructor(
+        protected name: string,
+        protected age: number
+    ) { }
+
+    protected getDetails() {
+        // 【protected属性】在【类内部】被访问
+        return `我叫${this.name}, ${this.age}岁`
+    }
+}
+
+const p1 = new Person('Alice', 18);
+// 【protected属性】不能在【类外部】被访问
+p1.name; // 【警告】: 属性“name”受保护，只能在类“Person”及其子类中访问。ts(2445)
+// 【protected方法】不能在【类外部】被访问
+p1.getDetails(); // 【警告】: 属性“getDetails”受保护，只能在类“Person”及其子类中访问。ts(2445)
+
+class Student extends Person {
+    study() {
+        // 【protected方法】可以在子类中被访问
+        this.getDetails(); // 我叫Alice, 18岁
+        // 【protected属性】可以在子类中被访问
+        console.log(`${this.name}在子类被访问`);
+    }
+}
+
+const s1 = new Student('Alice', 18);
+s1.study(); // Alice在子类被访问
+```
+
+##### private
+
+`private` 修饰符表示属性只能在类的内部访问，外部无法访问。
 
 
 
