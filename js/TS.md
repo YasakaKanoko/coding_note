@@ -54,13 +54,16 @@
    1. 生成一个 `tsconfig.json` 配置文件，包含很多编译时的配置
    2. 可以手动更改编译的 js 版本，默认 `ES7`
 
-   > **注意**：如果运行 `tsc --init` 遇到错误提示 " 无法加载文件 C:\Users\20681\AppData\Roaming\npm\tsc.pc1 "，这是由于 PowerShell 执行策略设置导致的。
-   >
-   > 1. **检查当前执行策略**：`Get-ExecutionPolicy`，如果执行策略是 `AllSigned` 或 `Restricted`，更改策略为 `RemoteSigned` 或 `Unrestricted`
-   > 2. **更改执行策略**：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-   >    - `RemoteSigned`：允许本地脚本运行，但需要从互联网下载的脚本进行签名。
-   >    - `Unrestricted`：允许所有脚本运行，但会提示确认。
-   > 3. 确认策略更改后，输入 `Get-ExecutionPolicy` 检查策略是否更改
+       > **注意**：如果运行 `tsc --init` 遇到错误提示 " 无法加载文件 C:\Users\20681\AppData\Roaming\npm\tsc.pc1 "，这是由于 PowerShell 执行策略设置导致的。
+       >
+       > 1. **检查当前执行策略**：`Get-ExecutionPolicy`，如果执行策略是 `AllSigned` 或 `Restricted`，更改策略为 `RemoteSigned` 或 `Unrestricted`
+       > 2. **更改执行策略**：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+       > 
+       >    - `RemoteSigned`：允许本地脚本运行，但需要从互联网下载的脚本进行签名。
+       > 
+       >    - `Unrestricted`：允许所有脚本运行，但会提示确认。
+       > 
+       > 4. 确认策略更改后，输入 `Get-ExecutionPolicy` 检查策略是否更改
 
 2. 监视 `.ts` 文件变化
 
