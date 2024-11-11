@@ -10,6 +10,7 @@
   - [object](#object)
   - [tuple](#tuple)
   - [enum](#enum)
+  - [type](#type)
 
 # 简介
 
@@ -131,7 +132,9 @@ console.log(res);
      - `type`
      - `interface`
 
-> **注意**：JavaScript 中的内置构造函数：`Number`、`String`、`Boolean` ，用于创建对应的包装对象，对内存不太友好，很少使用。
+> **注意**：
+>
+> JavaScript 中的内置构造函数：`Number`、`String`、`Boolean` ，用于创建对应的包装对象，对内存不太友好，很少使用。
 >
 > 因此，在使用 TypeSript 时尽量使用小写的 `number`、`string`、`boolean`
 
@@ -594,7 +597,7 @@ arr3 = [1, 'a', 'b', 'c'];
   type Address = {
       address: string,
       cell: number,
-      tel: number,
+      tel: number
   };
   
   type House = Area & Address;
@@ -607,7 +610,7 @@ arr3 = [1, 'a', 'b', 'c'];
   }
   ```
 
-  
+  > 注意：交叉类型对于**原始类型**，会被推断为 `never`
 
  
 
