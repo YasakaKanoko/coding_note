@@ -2,6 +2,11 @@
 
 - [编译](#编译)
 - [类型声明](#类型声明)
+- [类型推断](#类型推断)
+- [类型断言](#类型断言)
+  - [双重断言](#双重断言)
+  - [as const](#as-const)
+
 - [类型](#类型)
   - [any](#any)
   - [unknown](#unknown)
@@ -11,11 +16,16 @@
   - [tuple](#tuple)
   - [enum](#enum)
   - [type](#type)
-  - [abstract class](#抽象类)
+  - [interface](#interface)
+- [class](#类)
   - [属性修饰符](#属性修饰符)
     - [public](#public)
     - [protected](#protected)
     - [private](#private)
+    - [readonly](#readonly)
+  - [abstract class](#抽象类)
+- [泛型](#泛型)
+- [类型声明文件](#类型声明文件)
 
 # 简介
 
@@ -185,7 +195,9 @@ console.log(res);
 
 值的实际类型和断言的类型必须满足：实际值可以断言为其父类型，也可以断言为其子类型
 
-断言成一个无关的类型：两次断言，第一次断言为 `unknown`
+## 双重断言
+
+断言成一个无关的类型：双重断言，第一次断言为 `unknown`
 
 ```typescript
 const n = 1;
@@ -195,7 +207,43 @@ const m: string = n as unknown as string;
 
 ## as const
 
+`as const` ：告诉编辑器将表达式视为字面量类型，而不是提升为更通用的类型，主要用于创建只读对象和元组
 
+- **阻止类型提升 ( Type Widening )**：阻止字面量推断类型。
+
+  ```typescript
+  const str = 'hello'; // 类型推断为: string
+  const strConst = 'hello' as const; // 类型推断为'hello'
+  ```
+
+- **创建只读对象 ( Readonly Objects )**：整个**对象**属性变为**只读属性**，无法修改属性值。也可**断言对象的单个属性**
+
+  ```typescript
+  const obj = { name: 'John', age: 30 }; // 类型推断为: { name: string; age: number; }
+  const objConst = { name: 'John', age: 30 } as const; // 类型推断为: { readonly name: "John"; readonly age: 30; }
+  obj.age = 31; // 可以修改
+  
+  objConst.age = 31; // 【警告】: 无法为“age”赋值，因为它是只读属性。ts(2540)
+  ```
+
+- **创建只读元组 ( Readonly Tuples )**：数组字面量变为只读元组，无法修改元组元素，也不能添加或修改。
+
+  ```typescript
+  const arr = [1, 2, 3]; // 类型推断为: const arr: number[]
+  const arrConst = [1, 2, 3] as const; // 类型推断为: const arrConst: readonly [1, 2, 3]
+  
+  arr.push(4); // 可以修改
+  arrConst.push(4); // 【警告】: 类型“readonly [1, 2, 3]”上不存在属性“push”。ts(2339)
+  
+  arr[0] = 0; // 可以修改
+  arrConst[0] = 0; // 【警告】: 无法为“0”赋值，因为它是只读属性。ts(2540)
+  ```
+
+> **注意**：
+>
+> 1. `as const` 只能应用于字面量，**不能应用于变量**。
+> 2. `as const` **不能应用于表达式**
+> 3. `expr as const` 前置形式：`<const>expr`
 
 # 类型
 
@@ -735,40 +783,117 @@ arr3 = [1, 'a', 'b', 'c'];
 
 ### interface
 
-接口 ( `interface` )， 用于定义对象的结构、属性、方法类型，提高可读性和可维护性，并提供类型检查
+接口 ( `interface` )：**定义结构**。作用于**类**、**对象**、**函数**，确保类型安全
 
-**概念**：对类的部分行为抽象
+> **注意**：`interface` **只能定义格式，不包含任何实现**
 
-- 对「对象的形状 ( Shape ) 」进行描述
+- **定义类**
 
   ```typescript
-  interface Person {
+  interface PersonInterface {
       name: string,
-      age: number
+      age: number,
+      speak(n: number): void
   }
-  let tom: Person = {
-      name: 'Tom',
-      age: 18
+  class Person implements PersonInterface {
+      constructor(
+          public name: string,
+          public age: number
+      ) { }
+      speak(n: number) {
+          for (let i = 0; i < n; i++) {
+              console.log(`我叫${this.name}, ${this.age}岁`);
+          }
+      }
+  }
+  const p1 = new Person('Tom', 18);
+  p1.speak(3); // 打印三次: 我叫Tom, 18岁
+  ```
+
+- **定义对象**
+
+  ```typescript
+  interface User {
+      name: string,
+      // 只读属性
+      readonly gender: string,
+      // 可选属性
+      age?: number,
+      run: (n: number) => void
+  }
+  const user: User = {
+      name: 'Jack',
+      gender: 'male',
+      age: 18,
+      run(n) {
+          console.log(`跑了${n}m`);
+      }
   }
   ```
 
-  > **赋值时，变量的形状必须和接口形状一致**。即属性不能多，也不能少
+  > `readonly`：只读属性
+  >
+  > `?`：可选属性
 
-- **可选属性**：表示不需要完全匹配接口属性。使用 `?` 表示
+- **定义函数**
 
   ```typescript
-  interface Person {
-      name: string,
-      age?: number
+  interface CountInterface {
+      (a: number, b: number): number
   }
-  let tom: Person = {
-      name: 'Tom',
+  const count: CountInterface = (x, y) => {
+      return x + y;
   }
   ```
 
-  > 可选属性表示该属性可以不存在，但**仍不允许添加接口中未定义的属性**
+- **接口继承**：接口之间可以继承，实现代码复用
 
-### 类
+  ```typescript
+  interface PersonInterface {
+      name: string,
+      age: number,
+  }
+  interface StudentInterface extends PersonInterface {
+      gender: string
+  }
+  const stu: StudentInterface = {
+      name: 'Jack',
+      age: 18,
+      gender: 'Male'
+  }
+  ```
+
+- **接口自动合并 ( 可重复定义 )**
+
+  ```typescript
+  interface PersonInterface {
+      name: string,
+      age: number,
+  }
+  interface PersonInterface {
+      gender: string
+  }
+  const person: PersonInterface = {
+      name: 'Jack',
+      age: 18,
+      gender: 'Male'
+  }
+  ```
+
+  **总结**：
+
+  1. **定义对象格式**：描述数据模型、API 响应格式、配置对象......
+  2. **类的契约**：规定一个类实现的属性和方法
+  3. **自动合并**：用于第三方库，大型项目中使用
+
+> `interface` 与 `type`：
+>
+> - **相同点**：两者都可以用于定义**对象结构**，许多场景中可以相互替换
+> - **不同点**：
+>   - `interface`：更专注定义**对象**和**类**的结构，支持**继承**、**合并**
+>   - `type`：定义**类型别名**、**联合类型**、**交叉类型**，不支持继承、合并 
+
+# 类
 
 ```typescript
 class Person {
@@ -942,48 +1067,154 @@ nums.push(4); // 【警告】: 类型“readonly number[]”上不存在属性�
 
 **抽象类** 是一种**无法被实例化**的类，通常用于定义类的**基础结构和行为**，类中可以写**抽象方法**，也可以写**具体实现**，主要为其派生类提供一个**基础结构**，要求其派生类**必须实现**其中的抽象方法
 
-**简化**：抽象类**不能被实例化**，其意义是**可以被继承**，抽象类可以有**普通方法**，也可以有**抽象方法**
+**简化**：抽象类**不能被实例化**，其意义是**类的模板**，其**抽象方法**必须被子类**重写**
 
+```typescript
+abstract class Package {
+    // 构造函数
+    constructor(public weight: number) { }
+    // 抽象方法
+    abstract calculate(): number;
+    // 具体方法
+    printPackage() {
+        console.log(`包裹重量: ${this.weight}kg, 运费: ${this.calculate()}元`);
+    }
+}
 
+class StandardPackage extends Package {
+    constructor(
+        weight: number,
+        public unitPrice: number
+    ) { super(weight) }
+    calculate(): number {
+        return this.weight * this.unitPrice;
+    }
+}
 
+const s1 = new StandardPackage(10, 5);
+s1.printPackage(); // 包裹重量: 10kg, 运费: 50元
+```
 
+**总结**：
 
+1. **定义通用接口**：为一组相关类定义通用行为 ( 方法或属性 )
+2. **提供基础实现**：为抽象类中的某些方法或为其提供基础实现，派生类可以继承这些实现
+3. **确保关键行为**：强制派生类实现一些关键行为
+4. **共享代码逻辑**：当多个类需要共享部分代码时，避免代码重复
 
+> `interface` 与 **抽象类**：
+>
+> - **相同点**：都可以定义**类的格式**
+> - **不同点**：
+>   - **接口**：**只能描述结构，不能有任何实现方法，一个类可以实现多个接口**
+>   - **抽象类**：既可以包含**抽象方法**，也可以包含**具体方法**，一个类**只能继承一个**抽象类
 
+# 泛型
 
+泛型允许定义函数、类或接口时，使用类型参数表示**未指定类型**，这些参数在**使用时**才被指定为**具体类型**
 
-## 数组
+泛型可以让同一段代码适用于多种类型，同时仍保持类型安全性。
 
-- **泛型**：数组参数在数组定义时进行类型限制。方法的参数也会被限制
-
-  - 「类型 + 方括号」
-
-  - `Array<elemType>`
-
-    ```typescript
-    let fibonacci: number[] = [1, 1, 2, 3, 5];
-    
-    // Array Generic
-    let fibonacci: Array<number> = [1, 1, 2, 3, 5];
-    
-    fibonacci.push('8');
-    // Argument of type '"8"' is not assignable to parameter of type 'number'.
-    ```
-
-- **接口数组**
+- **泛型函数**：使用 `<T>` 表示泛型 ( 字母自定义 )，设置泛型后可以在调用时指定类型
 
   ```typescript
-  interface NumberArray {
-      [index: number]: number;
+  function logData<T>(data: T) {
+      console.log(data);
   }
-  let fibonacci: NumberArray = [1, 1, 2, 3, 5];
+  logData<number>(100);
+  logData<string>('Hello world!');
+
+- **泛型可以有多个**
+
+  ```typescript
+  function logData<T, U>(data1: T, data2: U): T | U {
+      return Date.now() % 2 ? data1 : data2;
+  }
+  logData<number, string>(100, 'Hello world!');
+  logData<string, boolean>('Hello world!', true);
   ```
 
-- 类数组
+- **泛型接口**
 
-- any
+  ```typescript
+  interface PersonInterface<T> {
+      name: string,
+      age: number,
+      extraInfo: T
+  }
+  type JobInfo = {
+      title: string
+  }
+  let p: PersonInterface<JobInfo> = {
+      name: 'Tom',
+      age: 18,
+      extraInfo: {
+          title: 'Auth'
+      }
+  }
+  ```
 
+- **泛型约束**
 
+  ```typescript
+  interface PersonInterface {
+      name: string,
+      age: number,
+  }
+  function logPerson<T extends PersonInterface>(info: T): void {
+      console.log(`我叫${info.name}, ${info.age}岁`);
+  }
+  logPerson({ name: 'Jack', age: 20 });
+  ```
 
+- **泛型类**
 
+  ```typescript
+  class Person<T> {
+      constructor(
+          public name: string,
+          public age: number,
+          public extraInfo: T
+      ) { }
+      speak() {
+          console.log(`我叫${this.name}, ${this.age}岁`);
+          console.log(this.extraInfo);
+      }
+  }
+  const p1 = new Person<number>('Tom', 30, 20);
+  ```
 
+# 类型声明文件
+
+类型声明文件是 TS 中的特殊文件，以 `.d.ts` 作为扩展名，作用是为现有的 JS 文件**提供类型信息**，使 TS 能在访问 JS 库或模块时进行**类型检查**和**提示**
+
+实际开发中，类型声明文件通常存放在 `@types` 文件目录中，在 https://www.npmjs.com/ 中下载
+
+- `demo.js`
+
+  ```typescript
+  import { add, mul } from './demo.js'
+  console.log(add(3, 4));
+  console.log(mul(4, 5));
+  ```
+
+- `demo.d.ts`
+
+  ```typescript
+  declare function add(a: number, b: number): number;
+  declare function mul(a: number, b: number): number;
+  export { add, mul };
+  ```
+
+- `index.html`
+
+  ```html
+  <script type="module" src="./TS/index.js"></script>
+  ```
+
+> **注意**：
+>
+> - `script` 标签导入时，`type` 必须指定为 `module`，表示指定为 ES 模块，在模块作用域运行，可以使用 `import` 或 `export`导入或导出；`type` 指定为 `text/javascript` 或省略 `type` 属性，表示指定全局作用域运行，不具有导入/导出机制
+> - 在浏览器中导入脚本时， `tsconfig.json` 中的 `module` 必须指定浏览器环境，即 `ES6`；而非 Node 环境的 `commonjs`，且环境 `module` 需要与 `target` 兼容。
+
+[↑回到顶部](#)
