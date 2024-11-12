@@ -79,6 +79,31 @@
 
    > 修改配置文件 `tsconfig.json` 的   `"noEmitOnError": true`
 
+`tsc` **参数**：
+
+- `--outFile`：将多个 TS 脚本编译成一个 JS 脚本
+- `--ourDir`：指定保存的目录
+- `--target`：指定编译的 ES 版本
+
+- `--noEmitOnError`：报错停止编译，不生成文件
+- `--noEmit`：只检查类型是否正确
+
+```json
+{
+    "compilerOptions": {
+        "outFile": "./dist/bundle.js", // 所有文件都被编译到一个文件中
+        "outDir": "./dist", // 所有文件编译到dist目录
+        "target": "es2015", // 指定ES版本
+        "noEmitOnError": true, // 编译出错不生成文件
+        "noEmit":false // true不生成文件, false生成文件(默认)
+    }
+}
+```
+
+> `outFile` 的优先级大于 `outDir`，如果设置了 `outFile` 会忽略 `outDir`
+>
+> `noEmit` 的优先级大于 `noEmitOnError`，如果设置了 `noEmit` 会忽略 `noEmitOnError`
+
 # 类型声明
 
 `:` 对 **变量** 或 **形参** 进行类型声明
@@ -114,6 +139,63 @@ function count(a: number, b: number) {
 let res = count(1, 2);
 console.log(res); 
 ```
+
+# 类型断言
+
+类型断言 ( Type Assertion )：手动指定一个值的类型。覆盖类型检查
+
+- `value as Type`
+- `<Type>value`
+
+> tsx 语法 React 的 jsx 语法的 ts 版中必须使用 `value as Type`
+
+**场景**：
+
+1. 对象的严格字面量检查，存在额外属性报错
+
+   ```typescript
+   // 【警告】: 对象字面量只能指定已知属性，并且“y”不在类型“{ x: number; }”中。
+   const p: { x: number } = { x: 0, y: 0 };
+   
+   // 修改
+   const p: { x: number } =
+       { x: 0, y: 0 } as { x: number };
+   const p: { x: number } =
+       { x: 0, y: 0 } as { x: number, y: number };
+   ```
+
+2. 类型断言可以**让错误的代码通过编译**。对象没有数组的方法，可以通过类型断言为数组，使用数组的方法。如：`length`
+
+   ```typescript
+   const data: object = {
+       a: 1, b: 2, c: 3
+   };
+   console.log((data as Array<string>).length); // undefined
+   ```
+
+3.  `any` 和 `unknown` 的类型断言为其他类型，使其可以赋值
+
+   ```typescript
+   const value:unknown = 'Hello World';
+   const s2:string = value; // 【警告】
+   const s2:string = value as string;
+   ```
+
+**断言条件**：
+
+值的实际类型和断言的类型必须满足：实际值可以断言为其父类型，也可以断言为其子类型
+
+断言成一个无关的类型：两次断言，第一次断言为 `unknown`
+
+```typescript
+const n = 1;
+// <Type><unknown>expr 或 as unknown as type
+const m: string = n as unknown as string;
+```
+
+## as const
+
+
 
 # 类型
 
@@ -651,9 +733,42 @@ arr3 = [1, 'a', 'b', 'c'];
   > src.forEach((el) => dst.push(el));
   > ```
 
-### 抽象类
+### interface
 
-**类**
+接口 ( `interface` )， 用于定义对象的结构、属性、方法类型，提高可读性和可维护性，并提供类型检查
+
+**概念**：对类的部分行为抽象
+
+- 对「对象的形状 ( Shape ) 」进行描述
+
+  ```typescript
+  interface Person {
+      name: string,
+      age: number
+  }
+  let tom: Person = {
+      name: 'Tom',
+      age: 18
+  }
+  ```
+
+  > **赋值时，变量的形状必须和接口形状一致**。即属性不能多，也不能少
+
+- **可选属性**：表示不需要完全匹配接口属性。使用 `?` 表示
+
+  ```typescript
+  interface Person {
+      name: string,
+      age?: number
+  }
+  let tom: Person = {
+      name: 'Tom',
+  }
+  ```
+
+  > 可选属性表示该属性可以不存在，但**仍不允许添加接口中未定义的属性**
+
+### 类
 
 ```typescript
 class Person {
@@ -711,7 +826,7 @@ console.log(s1); // Student {name: 'Kim', age: 20, grade: 'High School'}
 s1.speak(); // 我叫Kim, 20岁, 今年High School
 ```
 
-#### 属性修饰符
+### 属性修饰符
 
 | 修饰符      | 含义     | 规则                                          |
 | ----------- | -------- | --------------------------------------------- |
@@ -720,7 +835,7 @@ s1.speak(); // 我叫Kim, 20岁, 今年High School
 | `private`   | 私有的   | **类内部**访问                                |
 | `readonly`  | 只读属性 | 属性无法修改                                  |
 
-##### public
+#### public
 
 `public` 修饰符表示属性可以在类的内部和外部访问。默认情况下，类的属性都是 `public`。
 
@@ -746,7 +861,7 @@ console.log(p1.name);
 p1.greet(); 
 ```
 
-##### protected
+#### protected
 
 `protected` 修饰符表示属性可以在类的内部和子类中访问，但外部无法访问。
 
@@ -782,13 +897,91 @@ const s1 = new Student('Alice', 18);
 s1.study(); // Alice在子类被访问
 ```
 
-##### private
+#### private
 
 `private` 修饰符表示属性只能在类的内部访问，外部无法访问。
 
+在公共方法中无法访问
+
+```typescript
+class Person {
+    constructor(private age: number) {
+    }
+
+    private getAge(): number {
+        return this.age; // 可以在类内部访问
+    }
+}
+
+const p = new Person(30);
+// 【警告】: 属性“getAge”为私有属性，只能在类“Person”中访问。ts(2341)
+p.age;
+p.getAge();
+```
+
+#### readonly
+
+`readonly` 定义只读属性，一旦属性被初始化，就不能再修改，可用于**类的属性**、**接口属性**、**数组属性**
+
+```typescript
+class Person {
+    constructor(
+        public readonly name: string,
+        public readonly age: number) {
+    }
+}
+const p1 = new Person('Alice', 30);
+p1.name = 'Jack'; // 【警告】: 无法为“name”赋值，因为它是只读属性。ts(2540)
+
+// 数组
+const nums: readonly number[] = [1, 2, 3];
+nums.push(4); // 【警告】: 类型“readonly number[]”上不存在属性“push”。ts(2339)
+```
+
+### 抽象类
+
+**抽象类** 是一种**无法被实例化**的类，通常用于定义类的**基础结构和行为**，类中可以写**抽象方法**，也可以写**具体实现**，主要为其派生类提供一个**基础结构**，要求其派生类**必须实现**其中的抽象方法
+
+**简化**：抽象类**不能被实例化**，其意义是**可以被继承**，抽象类可以有**普通方法**，也可以有**抽象方法**
 
 
 
+
+
+
+
+
+
+## 数组
+
+- **泛型**：数组参数在数组定义时进行类型限制。方法的参数也会被限制
+
+  - 「类型 + 方括号」
+
+  - `Array<elemType>`
+
+    ```typescript
+    let fibonacci: number[] = [1, 1, 2, 3, 5];
+    
+    // Array Generic
+    let fibonacci: Array<number> = [1, 1, 2, 3, 5];
+    
+    fibonacci.push('8');
+    // Argument of type '"8"' is not assignable to parameter of type 'number'.
+    ```
+
+- **接口数组**
+
+  ```typescript
+  interface NumberArray {
+      [index: number]: number;
+  }
+  let fibonacci: NumberArray = [1, 1, 2, 3, 5];
+  ```
+
+- 类数组
+
+- any
 
 
 
