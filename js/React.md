@@ -55,23 +55,23 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
     - `class` 属性要使用 `className` 设置
     - 设置事件时，属性名需要使用驼峰命名法。如： `onclick()` 必须改成 `onClick()`
   - `...children`：元素的子节点、内容
-
-  ```react
-  // 1. 创建一个React元素
-  const button = React.createElement('button', {
+    
+    ```javascript
+      // 1. 创建一个React元素
+      const button = React.createElement('button', {
       id: 'btn',
       type: 'button',
       className: 'hello',
       onClick: () => {
           return console.log('Hello world!');
       }
-  }, 'Hello world');
+      }, 'Hello world');
   
-  // 2. 获取根元素对应的React元素
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  // 3. 将div渲染到根元素
-  root.render(button);
-  ```
+      // 2. 获取根元素对应的React元素
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      // 3. 将div渲染到根元素
+      root.render(button);
+      ```
 
   > **注意**：
   >
@@ -86,7 +86,7 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
 
 - `ReactDOM.createRoot(domNode, [options])`：用来创建 React 的根容器，根容器用来放置 React 元素
 
-```react
+```javascript
 // React 17的render(), 每次渲染都需要从新获取一次Id
 ReactDOM.render(div, document.getElementById('root'));
 
@@ -99,15 +99,9 @@ root.render(div);
 
 ## JSX
 
-
-
-
-
-
-
 - **命令式**
 
-  ```react
+  ```javascript
   // 1. 创建一个React元素
   const button = React.createElement('button', {
       onClick: () => {
@@ -134,7 +128,7 @@ root.render(div);
 
   - JSX 实际上是 `createElement()` 的语法糖，JSX 执行前都会被 babel 转换为 js 代码
 
-    ```react
+    ```javascript
     const div = <div>
         一个div
         <button>按钮</button>
