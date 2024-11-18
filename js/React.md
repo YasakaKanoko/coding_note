@@ -2,6 +2,8 @@
 
 **目录**：
 
+[JSX](#jsx)
+
 
 
 **Hello World**
@@ -66,12 +68,12 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
           return console.log('Hello world!');
       }
       }, 'Hello world');
-  
+    
       // 2. 获取根元素对应的React元素
       const root = ReactDOM.createRoot(document.getElementById('root'));
       // 3. 将div渲染到根元素
       root.render(button);
-      ```
+    ```
 
   > **注意**：
   >
@@ -137,9 +139,50 @@ root.render(div);
     root.render(div);
     ```
 
-    
 
-  
+**注意事项**：
 
-  
+1. JSX 不是字符串，不需要加上引号
+
+2. JSX 的标签语法规范：html 标签用小写开头、React 组件用大写开头
+
+3. JSX 有且只有一个根标签
+
+   ```javascript
+   // 根标签内部可以嵌入多个标签, 但根标签只能有一个
+   const div = <div>
+       一个div
+       <button>按钮</button>
+   </div>;
+   const root = ReactDOM.createRoot(document.getElementById('root'));
+   ```
+
+4. JSX 标签必须正确闭合 ( 自结束标签必须加上 `/` )
+
+   ```html
+   <input type="text" />
+   ```
+
+5. 在 JSX 中可以使用 `{}` 嵌入表达式
+
+   ```javascript
+   const name = 'Jack';
+   const div = <div>
+       <div>
+           {name}
+       </div>
+   </div>;
+   ```
+
+6. 如果表达式返回值是空值、布尔值、`undefined` ，将不显示
+
+7. 属性的 `class` 属性要写成 `className`，内联样式需要使用 `{}` 包裹
+
+   ```jsx
+   <div style={{ color: 'blue', fontSize: '16px' }}></div>
+   ```
+
+
+
+
 
