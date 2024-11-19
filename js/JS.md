@@ -2,6 +2,9 @@
 
 **目录**
 
+- [变量](#变量)
+- [标识符](#标识符)
+
 - [number](#数值)
 - [bigInt](#bigint)
 - [string](#字符串)
@@ -25,10 +28,18 @@
 - [循环语句](#循环语句)
 - [对象](#对象)
 - [原型](#原型)
+- [旧类](#旧类)
+- [类](#类)
+- [new 运算符](#new)
 - [函数](#函数)
+- [数组](#数组)
+- [数组遍历](#数组遍历)
+- [数组方法](#数组方法)
+- [rest 参数](#rest-参数)
+- [箭头函数](#箭头函数的-this)
 - [作用域](#scope)
 - [window 对象](#window)
-- [类](#类)
+- [严格模式](#严格模式)
 
 **HelloWorld**
 
@@ -612,7 +623,511 @@ obj.sayHello(); // hello, Jack
 
 #### 修改原型
 
+1. 在原型中添加方法，修改后同类实例都可以访问该方法
 
+   ```javascript
+   class Person {
+       constructor(name, age) {
+           this.name = name;
+           this.age = age;
+       }
+   }
+   const p1 = new Person('Alice');
+   const p2 = new Person('Jack');
+   p1.__proto__.run = () => {
+       console.log('keep running');
+   }
+   p2.run(); // keep running
+   ```
+
+   > 注意：不要通过实例去修改原型
+   >
+   > 1. 一个对象会影响其他同类对象，危险
+   >
+   > 2. 修改原型都需要创造实例，麻烦
+   >
+   > 3. 对象直接赋值新的原型，相当于把它的指针指向了一个新的原型，这样做没有意义
+   >
+   >    ```javascript
+   >    const p = new Person();
+   >    p.__proto__ = new Animal(); // 原型从Object变为了Animal
+   >    ```
+
+2. 最好通过类的 `prototype` 属性访问实例的原型
+
+   ```javascript
+   Person.prototype.run = () => {
+       console.log('Keep running!');
+   }
+   ```
+
+   **优点**：无需创建实例即可完成对类的修改
+
+   注意：
+
+   1. 不要手动修改原型
+   2. 不要通过实例对象修改，要通过类修改
+   3. 通过 `类.prototype` 属性修改
+   4. 不要给 `prototype` 属性赋值
+
+#### `instanceof`
+
+`instanceof`：检查一个对象是否是另一个对象的实例
+
+> - `instanceof` 检查的是该原型链上是否有该类的实例，如果存在，就返回 `true`
+>
+> - `Object` 是所有对象的原型，任何对象和 `Object` 进行 `instanceof` 运算都会返回 `true`
+
+```javascript
+class Animal { }
+class Dog extends Animal { }
+const d = new Dog();
+
+console.log(d instanceof Dog); // true
+console.log(d instanceof Animal); // true
+console.log(d instanceof Object); // true
+```
+
+```pseudocode
+dog -> Animal -> Object
+```
+
+#### `in` 、 `hasOwnProperty()` 和 `hasOwn()`
+
+- `in`：使用 `in` 运算符检查对象或原型链中是否具有指定的属性
+
+- `hasOwnProperty()`：检查对象本身是否具有指定的属性，不检查原型链
+
+```javascript
+let obj = { a: 1 };
+console.log('a' in obj); // true
+console.log('toString' in obj); // true
+
+console.log(obj.hasOwnProperty('a')); // true
+console.log(obj.hasOwnProperty('toString')); // false
+```
+
+`Object.hasOwn(obj, prop)`：建议用此方法替代 `hasOwnProperty()`，检查对象自身是否包含某个属性
+
+```javascript
+console.log(Object.hasOwn(obj, 'a')); // true
+console.log(Object.hasOwn(obj, 'toString')); // false
+```
+
+## 面向对象
+
+OOP ：面向对象，一切皆为对象，所有的操作都通过对象来完成
+
+特点：**封装**、**继承**和**多态**
+
+### 旧类
+
+早期 JS 中，直接使用函数定义类
+
+- 直接调用 `xxx()` 是一个普通函数
+- 通过 `new xxx()` 调用函数，是一个构造函数
+
+```javascript
+function Person(name, age) {
+    // 构造函数, this 表示新建对象
+    this.name = name;
+    this.age = age;
+
+    // 方法、静态属性、静态方法 建议写在原型中
+    // this.sayHello = () => {
+    //     console.log(`hello ${this.name}`);
+
+    // }
+}
+const p = new Person('Jolyne', 18);
+console.log(p); // Person {name: 'Jolyne', age: 18}
+
+
+// 方法
+// 这里的方法不能使用箭头函数, this会指向window对象
+Person.prototype.sayHello = function () {
+    console.log(`hello ${this.name}`);
+}
+p.sayHello(); // Hello Jolyne
+
+// 静态属性
+Person.staticProperty = ''
+
+// 静态方法
+Person.staticMethod = function () { }
+```
+
+代码太过分散，通常使用立即执行函数定义类
+
+```javascript
+var Person = (function () {
+    function Person(name, age) {
+        // 构造函数
+        this.name = name;
+        this.age = age;
+    }
+
+    // 方法
+    Person.prototype.sayHello = function () {
+        console.log(`hello ${this.name}`);
+    }
+
+    // 静态属性
+    Person.staticProperty = ''
+
+    // 静态方法
+    Person.staticMethod = function () { }
+
+    return Person;
+})();
+
+const p = new Person('Jolyne', 18);
+console.log(p); // Person {name: 'Jolyne', age: 18}
+
+p.sayHello(); // Hello Jolyne
+```
+
+**继承**
+
+继承，只需要对象的父类赋值给对象的原型
+
+```javascript
+var Animal = (function () {
+    function Animal() { }
+    return Animal;
+}
+)();
+var Cat = (function () {
+    function Cat() {
+
+    }
+    // 继承, 就是将父类赋值给对象的原型
+    Cat.prototype = new Animal();
+    return Cat;
+}
+)();
+
+var cat = new Cat();
+console.log(cat); /* Cat -> Animal -> Object */
+```
+
+### 类
+
+`class`：类是对象的模板，对象的属性和方法可以直接定义在类中
+
+- 使用同一个类创建的对象就是同类对象，通过 `instanceof` 检查对象是否是同一个类创建的
+
+- 如果一个对象是某个类创建的实例，那这个对象就是这个类的实例
+
+**类名**：大驼峰命名法
+
+- `class 类名 {}`
+- `const 类名 = class {}`
+
+`constructor()` 初始化对象
+
+**实例化**：`new 类名()`，会自动调用 `constructor()` 方法
+
+```javascript
+class Person {
+    constructor(name) {
+        this.name = name;
+    }
+    // 类方法
+    sayHello() {
+        console.log(`hello, ${this.name}`);
+    }
+}
+const p = new Person('Jack');
+p.sayHello(); // hello, Jack
+```
+
+#### 属性
+
+`static` 用来声明静态属性和静态方法，**实例不能访问**静态属性和静态方法，只有**类本身**可以访问
+
+```javascript
+class Person {
+    static staticProp = '静态属性';
+    static staticMethod() {
+        return '静态方法';
+    }
+    constructor() {
+
+    }
+}
+const p = new Person();
+console.log(p.staticProp); // undefined
+console.log(p.staticMethod); // undefined
+
+console.log(Person.staticProp); // 静态属性
+console.log(Person.staticMethod()); // 静态方法
+```
+
+`this` 的指向:
+
+- `static` 创建的静态方法，this 指向当前类
+- 实例方法指向当前实例
+
+```javascript
+class Person {
+    static staticMethod() {
+        return this;
+
+    }
+    constructor() {
+
+    }
+    sayHello() {
+        return this;
+    }
+
+}
+console.log(Person.staticMethod()); // 返回构造函数
+
+const p = new Person();
+console.log(p.sayHello()); // 返回实例对象p
+```
+
+#### 封装
+
+- **私有化数据**。将需要保护的数据私有化，只在内部使用，确保数据安全。
+- 提供 `setter` 和 `getter` 方法。控制属性的读写权限，对方法中的属性值进行验证
+
+**私有属性**：用下划线 ( `_` ) 表示；ES2019 中用 `#` 表示。表示该属性不能从外部直接访问或修改
+
+ ```javascript
+class Person {
+
+    constructor(name) {
+        this.name = name;
+    }
+
+    get name() {
+        return this._name;
+    }
+
+    set name(value) {
+        this._name = value;
+    }
+
+}
+
+let p = new Person("John");
+console.log(p.name); // John
+p.name = 'Alice';
+console.log(p.name); // Alice
+
+// ES2019
+class Person {
+    #name
+    constructor(name) {
+        this.#name = name;
+    }
+
+    get name() {
+        return this.#name;
+    }
+
+    set name(value) {
+        this.#name = value;
+    }
+
+}
+
+let p = new Person("John");
+console.log(p.name); // John
+p.name = 'Alice';
+console.log(p.name); // Alice
+ ```
+
+#### 多态
+
+通过相同接口或方法进行不同操作，多态通常是继承和接口
+
+- **方法重写**：重写父类的方法，提供特定的实现，将根据对象类型执行相应实现
+- **方法重载**：JavaScript 不支持方法重载，但可以通过检查参数数量或类型来表现在单个方法内部实现不同的行为
+- **鸭子类型**：如果对象拥有相同的属性和方法，那么就被认为是相同的类型，而不管实际构造函数是什么
+- **抽象类和接口**：JavaScript 中没有抽象类和接口机制，TypeScript 中有。尽管如此，可以创建抽象方法 ( 即没有实现的方法 ) 的类去模拟，让子类实现。
+
+- **混合 ( Mixins )**：混合就是将一个类组合到另一个类。通过复制方法，如：`Object.assign()` 实现
+
+```javascript
+class Animal {
+    speak() {
+        console.log('Animal make a sound.');
+    }
+}
+
+class Dog extends Animal {
+    // 重写
+    speak() {
+        console.log('Dog barks');
+    }
+}
+
+class Cat extends Animal {
+    speak() {
+        console.log('Cat meows');
+    }
+}
+// 多态: 通过相同接口调用不同的实现
+const animals = [new Dog(), new Cat(), new Animal()];
+animals.forEach((animal) => { animal.speak() });
+/* 
+Dog barks
+Cat meows
+Animal make a sound. */
+```
+
+#### 继承
+
+继承就是通过 `extends` 关键字通过一个类扩展到另一个类，可以在现有功能中添加新的功能
+
+```javascript
+class Animal {
+    constructor(name) {
+        this.speed = 0;
+        this.name = name;
+    }
+    run(speed) {
+        this.speed = speed;
+        console.log(`${this.name} runs with speed ${this.speed}`);
+    }
+}
+class Rabbit extends Animal {
+    hide() {
+        console.log(`${this.name} hides`);
+    }
+}
+let r = new Rabbit('White');
+r.run(5);
+r.hide();
+/* 
+White runs with speed 5
+White hides */
+```
+
+查找 `r.run` 方法
+
+1. 查找对象 `r` 自身 ( 没有 `run` )
+2. 查找它的原型，`Rabbit.prototype` ( 有 `hide` 没有 `run` )
+3. 查找它原型的原型，即 `extends` 继承的 `Animal.prototype`，找到了 `run`
+
+**方法重写**：允许子类调用父类的构造函数、方法或属性，重用父类的功能，同时添加或修改自身的行为
+
+1. **调用构造函数**：使用 `super()` 调用父类的构造函数，并传递必要的参数
+2. **调用父类方法**：使用 `super.methodName()` 调用父类的同名方法，重用的基础添加或修改行为
+
+```javascript
+class Animal {
+    constructor(name) {
+        this.speed = 0;
+        this.name = name;
+    }
+    run(speed) {
+        this.speed = speed;
+        console.log(`${this.name} runs with speed ${this.speed}`);
+    }
+}
+class Rabbit extends Animal {
+    constructor(name, speed, age) {
+        super(name, speed);
+        this.age = age;
+    }
+    hide() {
+        console.log(`${this.name} hides`);
+    }
+    // 重写父类方法: 并不希望完全替换父类方法, 想要在父类的方法基础之上调整或扩展功能
+    run(speed) {
+        super.run(speed);
+        this.hide();
+    }
+}
+let r = new Rabbit('White');
+r.run(5);
+/* 
+White runs with speed 5
+White hides */
+```
+
+### `new`
+
+`new`：创建对象时使用的标识符
+
+`new` 运算符的步骤：
+
+1. 当使用 `new` 运算符调用一个函数时，会将这个函数作为构造函数使用
+
+   创建一个普通的 js 对象 ( Object {} )，称其为新对象 ( `newInstance` )
+
+   ```javascript
+   function MyClass() {
+       var newInstance = {};
+   }
+   ```
+
+2. 将构造函数的 `prototype` 属性设置为新对象的原型
+
+   ```javascript
+   function MyClass() {
+       var newInstance = {};
+       newInstance.__proto__ = MyClass.prototype;
+   }
+   ```
+
+3. 使用实参执行构造函数，并将新对象设置为函数的 `this`
+
+   ```javascript
+   function MyClass() {
+       var newInstance = {};
+       newInstance.__proto__ = MyClass.prototype;
+   }
+   var mc = new MyClass();
+   ```
+
+4. 如果构造函数返回的是一个非原始值，那么该值就将作为 `new` 运算符的返回值返回;
+
+   如果构造函数返回的是一个原始值或没有指定返回值，那么就返回新对象
+
+   ```javascript
+   function MyClass() {
+       var newInstance = {};
+       newInstance.__proto__ = MyClass.prototype;
+       return 1;
+   }
+   
+   var mc = new MyClass();
+   console.log(mc); // MyClass {}
+   ```
+
+在构造函数中执行步骤也是如此
+
+```javascript
+class MyClass {
+    constructor() {
+
+    }
+}
+const p = new MyClass();
+// 1. 创建一个新对象
+// 2. 将Person的prototype属性设置为新对象的原型
+// 3. 执行constructor, 将新对象设置为constructor的this
+// 4. 查看返回值, 如果没有设置返回值, 就返回新对象; 如果设置了返回值, 这个类就废了
+```
+
+### 总结
+
+1. 面向对象的本质就是，所有操作都是通过对象进行
+2. 面向对象编程：找对象、搞对象
+
+3. 明确对象的作用：如何获取对象、如何使用对象的属性和方法
+
+**对象的方法**：
+
+- **内建对象**：由 ES 标准定义的对象，如：`Object`、`Function`、`String`、`Number` ...
+- **宿主对象**：浏览器提供的对象，如：`BOM`、`DOM`
+- **自定义对象**：开发人员自定义的对象
 
 ## 函数
 
@@ -827,7 +1342,7 @@ greet('JavaScript', (msg) => {
   obj.method();
   ```
 
-## Scope
+### Scope
 
 **全局作用域**
 
@@ -849,6 +1364,233 @@ greet('JavaScript', (msg) => {
 
 - 使用变量时，会在当前作用域中寻找，没有找到再往上一层的作用域中寻找
 - 最终到全局作用域中寻找，如果全局作用域中不存在，则返回 `xxx is not defined`
+
+## 数组
+
+数组 ( *Array* ) ：是一种复合数据类型，数组中可以存储多个不同类型的数据
+
+> 数组中存储的是有序的数据，数组中的每个数据都有一个唯一的 索引 ( *index* )，通过索引访问数据
+
+**创建数组**
+
+- 构造函数：`new Array()`
+
+  ```javascript
+  const arr = new Array(5).fill(0);
+  console.log(arr); // [ 0, 0, 0, 0, 0 ]
+
+- 数组字面量：`[]`
+
+  ```javascript
+  const arr = [1, 2, 3, 4, 5];
+  ```
+
+- `Array.from()` 方法
+
+  ```javascript
+  const set = new Set([1, 2, 3]);
+  const arr = Array.from(set);
+  console.log(arr); // [ 1, 2, 3 ]
+  ```
+
+**添加元素**
+
+- `arr[index] = newVal;`
+
+  ```javascript
+  const arr = [1, 2, 3, 4, 5];
+  arr[5] = 6;
+  console.log(arr); // [ 1, 2, 3, 4, 5, 6 ]
+  ```
+
+- `arr[arr.length] = newVal`：数组末尾添加数据
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  arr[arr.length] = 6;
+  console.log(arr); // [ 1, 2, 3, 4, 5, 6 ]
+  ```
+
+- `concat(newVal)`：合并数组，不会改变原数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  arr = arr.concat(6);
+  console.log(arr); // [ 1, 2, 3, 4, 5, 6 ]
+  ```
+
+**读取元素**：`arr[index]`
+
+`length` 属性：
+
+- 获取数组的长度
+- 获取的**实际长度**为  **最大索引值+1**
+- `length` 属性可以更改，新增数组的属性变为 `undefined`，为避免非连续数组，导致性能问题，慎用
+
+> **注意**：任何类型的元素都可以成为数组的元素，因此创建时尽量确保元素类型一致
+
+### 数组遍历
+
+- `for` 循环
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  for (let i = 0; i < arr.length; i++) {
+      console.log(arr[i]);
+  }
+  ```
+
+  eg：打印类中的实例
+
+  ```javascript
+  class Person {
+      constructor(name, age) {
+          this.name = name;
+          this.age = age;
+      }
+  }
+  const arr = [
+      new Person('Jack', 18),
+      new Person('Jolyne', 20),
+      new Person('Alice', 38)
+  ];
+  for (let i = 0; i < arr.length; i++) {
+      if (arr[i].age < 20) {
+          console.log(arr[i].name); // Jack
+      }
+  }
+  ```
+
+- `for-of`
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  for (let item of arr) {
+      console.log(item);
+  }
+  ```
+
+- `for-in`
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  for (let key in arr) {
+      console.log(arr[key]);
+  }
+  ```
+
+### 数组方法
+
+- `Array.isArray()`：检查对象是否是一个数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  console.log(Array.isArray(arr)); // true
+  ```
+
+- `at()`：根据索引获取数组中的指定元素，支持负索引 
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  // 等价于arr[arr.length - 2]
+  console.log(arr.at(-2)); // 4
+  ```
+
+- `concat()`：连接两个或多个数组。不会改变原数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  let arr2 = [6, 7, 8];
+  let arr3 = [9, 10, 11];
+  let arr4 = arr.concat(arr2, arr3);
+  console.log(arr4); // // (11) [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  ```
+
+- `indexOf()`：返回数组元素第一次出现的位置
+
+- `lastIndexOf()`：返回数组元素最后一次出现的位置
+
+  ```javascript
+  let arr = [1, 2, 3, 1];
+  console.log(arr.indexOf(1)); // 0
+  console.log(arr.lastIndexOf(1)); // 3
+  ```
+
+- `join()`：指定一个参数符号作为每个元素之间的分隔符，并将所有元素拼接成一个字符串。不会改变原数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4];
+  console.log(arr.join('-')); // 1-2-3-4
+
+- `slice(startIndex, [endIndex])`：截取数组。不会改变原数组。
+
+  - `startIndex`：起始位置。包含该位置
+
+  - `endIndex`：( 可选 ) 结束位置。不包含该位置。可以为负数，省略则直接截取至末尾
+
+    ```javascript
+    let arr = [1, 2, 3, 4, 5, 6];
+    // 从索引为1截取到索引为4
+    console.log(arr.slice(1, 5)); // [ 2, 3, 4, 5 ]
+    // 索引为负值, 等价于slice(1, 5)
+    console.log(arr.slice(1, -1)); // [ 2, 3, 4, 5 ]
+    // 从索引为1截取至末尾
+    console.log(arr.slice(1)); // [ 2, 3, 4, 5 ]
+    ```
+
+    > **注意**：
+    >
+    > 数组本质上是对象，直接赋值是将另一个数组的指针指向上一个数组，上一数组发生变化，也会跟着变化
+    >
+    > ```javascript
+    > let arr1 = [1, 2, 3, 4, 5, 6];
+    > let arr2 = arr1;
+    > console.log(arr1 === arr2); // true
+    > ```
+    >
+    > 使用 `slice()` 对元素进行切片处理，将数组元素的指针指向同一个指针；因为 JavaScript 中的原始值只会在内存中存在一个，节省空间，使用索引改变数组元素时，只是开辟了一个新的原始值，并将数组元素的指针指向它
+    >
+    > ```javascript
+    > arr2 = arr1.slice();
+    > console.log(arr1 === arr2); // false
+    > console.log(arr1[0] === arr2[0]); // true
+    > ```
+
+**浅复制 ( shallow copy )**：对象的浅复制只是对浅层进行复制，并不复制内部的属性 ( 或元素 )
+
+**深复制 (deep copy)**：深复制不仅复制对象本身，还复制其内部的属性和元素，性能问题，不常使用深复制
+
+### rest 参数
+
+`...`：展开运算符。浅复制
+
+```javascript
+let arr1 = [1, 2, 3];
+let arr2 = [...arr1];
+console.log(arr1[0] === arr2[0]); // true
+```
+
+### `Object.assign()`
+
+`Object.assign(targetObj, copyObj)`：复制对象。浅复制
+
+```javascript
+let obj1 = { a: 1, b: 2 };
+let obj2 = { c: 3, d: 4 };
+Object.assign(obj1, obj2);
+console.log(obj1); // { a: 1, b: 2, c: 3, d: 4 }
+console.log(obj1.c === obj2.c); // true
+```
+
+使用 *rest* 参数
+
+```javascript
+let obj1 = { c: 3, d: 4 };
+let obj2 = { a: 1, b: 2, ...obj1, e: 5 };
+console.log(obj1.c === obj2.c); // true
+```
+
+
 
 ## window
 
@@ -889,251 +1631,5 @@ greet('JavaScript', (msg) => {
 "use strict";
 
 // 代码以现代模式工作
-```
-
-## 面向对象
-
-OOP ：面向对象，一切皆为对象，所有的操作都通过对象来完成
-
-特点：**封装**、**继承**和**多态**
-
-### 类
-
-`class`：类是对象的模板，对象的属性和方法可以直接定义在类中
-
-- 使用同一个类创建的对象就是同类对象，通过 `instanceof` 检查对象是否是同一个类创建的
-
-- 如果一个对象是某个类创建的实例，那这个对象就是这个类的实例
-
-**类名**：大驼峰命名法
-
-- `class 类名 {}`
-- `const 类名 = class {}`
-
-`constructor()` 初始化对象
-
-**实例化**：`new 类名()`，会自动调用 `constructor()` 方法
-
-```javascript
-class Person {
-    constructor(name) {
-        this.name = name;
-    }
-    // 类方法
-    sayHello() {
-        console.log(`hello, ${this.name}`);
-    }
-}
-const p = new Person('Jack');
-p.sayHello(); // hello, Jack
-```
-
-#### 属性
-
-`static` 用来声明静态属性和静态方法，**实例不能访问**静态属性和静态方法，只有**类本身**可以访问
-
-```javascript
-class Person {
-    static staticProp = '静态属性';
-    static staticMethod() {
-        return '静态方法';
-    }
-    constructor() {
-
-    }
-}
-const p = new Person();
-console.log(p.staticProp); // undefined
-console.log(p.staticMethod); // undefined
-
-console.log(Person.staticProp); // 静态属性
-console.log(Person.staticMethod()); // 静态方法
-```
-
-`this` 的指向:
-
-- `static` 创建的静态方法，this 指向当前类
-- 实例方法指向当前实例
-
-```javascript
-class Person {
-    static staticMethod() {
-        return this;
-
-    }
-    constructor() {
-
-    }
-    sayHello() {
-        return this;
-    }
-
-}
-console.log(Person.staticMethod()); // 返回构造函数
-
-const p = new Person();
-console.log(p.sayHello()); // 返回实例对象p
-```
-
-#### 封装
-
-- **私有化数据**。将需要保护的数据私有化，只在内部使用，确保数据安全。
-- 提供 `setter` 和 `getter` 方法。控制属性的读写权限，对方法中的属性值进行验证
-
-**私有属性**：用下划线 ( `_` ) 表示；ES2019 中用 `#` 表示。表示该属性不能从外部直接访问或修改
-
- ```javascript
- class Person {
- 
-     constructor(name) {
-         this.name = name;
-     }
- 
-     get name() {
-         return this._name;
-     }
- 
-     set name(value) {
-         this._name = value;
-     }
- 
- }
- 
- let p = new Person("John");
- console.log(p.name); // John
- p.name = 'Alice';
- console.log(p.name); // Alice
- 
- // ES2019
- class Person {
-     #name
-     constructor(name) {
-         this.#name = name;
-     }
- 
-     get name() {
-         return this.#name;
-     }
- 
-     set name(value) {
-         this.#name = value;
-     }
- 
- }
- 
- let p = new Person("John");
- console.log(p.name); // John
- p.name = 'Alice';
- console.log(p.name); // Alice
- ```
-
-#### 多态
-
-通过相同接口或方法进行不同操作，多态通常是继承和接口
-
-- **方法重写**：重写父类的方法，提供特定的实现，将根据对象类型执行相应实现
-- **方法重载**：JavaScript 不支持方法重载，但可以通过检查参数数量或类型来表现在单个方法内部实现不同的行为
-- **鸭子类型**：如果对象拥有相同的属性和方法，那么就被认为是相同的类型，而不管实际构造函数是什么
-- **抽象类和接口**：JavaScript 中没有抽象类和接口机制，TypeScript 中有。尽管如此，可以创建抽象方法 ( 即没有实现的方法 ) 的类去模拟，让子类实现。
-
-- **混合 ( Mixins )**：混合就是将一个类组合到另一个类。通过复制方法，如：`Object.assign()` 实现
-
-```javascript
-class Animal {
-    speak() {
-        console.log('Animal make a sound.');
-    }
-}
-
-class Dog extends Animal {
-    // 重写
-    speak() {
-        console.log('Dog barks');
-    }
-}
-
-class Cat extends Animal {
-    speak() {
-        console.log('Cat meows');
-    }
-}
-// 多态: 通过相同接口调用不同的实现
-const animals = [new Dog(), new Cat(), new Animal()];
-animals.forEach((animal) => { animal.speak() });
-/* 
-Dog barks
-Cat meows
-Animal make a sound. */
-```
-
-#### 继承
-
-继承就是通过 `extends` 关键字通过一个类扩展到另一个类，可以在现有功能中添加新的功能
-
-```javascript
-class Animal {
-    constructor(name) {
-        this.speed = 0;
-        this.name = name;
-    }
-    run(speed) {
-        this.speed = speed;
-        console.log(`${this.name} runs with speed ${this.speed}`);
-    }
-}
-class Rabbit extends Animal {
-    hide() {
-        console.log(`${this.name} hides`);
-    }
-}
-let r = new Rabbit('White');
-r.run(5);
-r.hide();
-/* 
-White runs with speed 5
-White hides */
-```
-
-查找 `r.run` 方法
-
-1. 查找对象 `r` 自身 ( 没有 `run` )
-2. 查找它的原型，`Rabbit.prototype` ( 有 `hide` 没有 `run` )
-3. 查找它原型的原型，即 `extends` 继承的 `Animal.prototype`，找到了 `run`
-
-**方法重写**：允许子类调用父类的构造函数、方法或属性，重用父类的功能，同时添加或修改自身的行为
-
-1. **调用构造函数**：使用 `super()` 调用父类的构造函数，并传递必要的参数
-2. **调用父类方法**：使用 `super.methodName()` 调用父类的同名方法，重用的基础添加或修改行为
-
-```javascript
-class Animal {
-    constructor(name) {
-        this.speed = 0;
-        this.name = name;
-    }
-    run(speed) {
-        this.speed = speed;
-        console.log(`${this.name} runs with speed ${this.speed}`);
-    }
-}
-class Rabbit extends Animal {
-    constructor(name, speed, age) {
-        super(name, speed);
-        this.age = age;
-    }
-    hide() {
-        console.log(`${this.name} hides`);
-    }
-    // 重写父类方法: 并不希望完全替换父类方法, 想要在父类的方法基础之上调整或扩展功能
-    run(speed) {
-        super.run(speed);
-        this.hide();
-    }
-}
-let r = new Rabbit('White');
-r.run(5);
-/* 
-White runs with speed 5
-White hides */
 ```
 
