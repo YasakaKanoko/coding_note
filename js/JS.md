@@ -1556,9 +1556,108 @@ greet('JavaScript', (msg) => {
     > console.log(arr1[0] === arr2[0]); // true
     > ```
 
+- `push()`：向数组末尾添加一个或多个元素，并返回新的数组长度
+
+  ```javascript
+  let arr = [1, 2, 3];
+  arr.push(4, 5);
+  console.log(arr); // [ 1, 2, 3, 4, 5 ]
+  ```
+
+- `pop()`：删除并返回数组最后一个元素
+
+  ```javascript
+  arr.pop();
+  console.log(arr); // [ 1, 2, 3, 4 ]
+  ```
+
+- `unshift()`：向数组开头添加一个或多个元素，并返回新的数组长度
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  arr.unshift(0);
+  console.log(arr); // [ 0, 1, 2, 3, 4, 5 ]
+  ```
+
+- `shift()`：删除并返回数组第一个元素
+
+  ```javascript
+  arr.shift();
+  console.log(arr); // [ 1, 2, 3, 4, 5 ]
+  ```
+
+- `splice()`：**删除**、**插入**、**替换**、**添加**等操作
+
+  - 参数 1：删除元素的起始索引位置
+  - 参数 2：删除的数量
+  - 参数 3：插入的新元素
+
+
+- `reverse()`：反转数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  arr.reverse();
+  console.log(arr); // [ 5, 4, 3, 2, 1 ]
+  ```
+
 **浅复制 ( shallow copy )**：对象的浅复制只是对浅层进行复制，并不复制内部的属性 ( 或元素 )
 
 **深复制 (deep copy)**：深复制不仅复制对象本身，还复制其内部的属性和元素，性能问题，不常使用深复制
+
+### 数组去重
+
+`for` 循环
+
+```javascript
+let arr = [1, 2, 1, 3, 2, 2, 4, 5, 5, 6, 7];
+// 1. 获取数组中的元素
+for (let i = 0; i < arr.length; i++) {
+    // 2. 获取当前值的后面一位
+    for (let j = i + 1; j < arr.length; j++) {
+        // 3. 判断两个数组是否相等
+        if (arr[i] === arr[j]) {
+            // 4. 出现重复元素, 删除后边元素
+            arr.splice(j, 1);
+            /* 
+            当arr[i]和arr[j]相同时, 会删除arr[j]的位置, j+1变成j的位置, 由于j的位置被比较过了, 不会重复比较
+            解决方法: 删除该位置元素, 将该位置的元素再比较一遍
+            */
+            j--;
+        }
+    }
+}
+console.log(arr); // (7) [1, 2, 3, 4, 5, 6, 7]
+```
+
+`indexOf(ele, [findIndex])`：第一个参数表示要查找的元素，第二个参数是开始搜索的下标	
+
+```javascript
+let arr = [1, 2, 1, 3, 2, 2, 4, 5, 5, 6, 7];
+for (let i = 0; i < arr.length; i++) {
+    const index = arr.indexOf(arr[i], i + 1);
+    if (index !== -1) {
+        arr.splice(index, 1);
+        i--;
+    }
+}
+console.log(arr); // (7) [1, 2, 3, 4, 5, 6, 7]
+```
+
+`for-of`
+
+```javascript
+let arr = [1, 2, 1, 3, 2, 2, 4, 5, 5, 6, 7];
+const newArr = [];
+for (let ele of arr) {
+    if (newArr.indexOf(ele) === -1) {
+        newArr.push(ele);
+    }
+}
+console.log(newArr); // (7) [1, 2, 3, 4, 5, 6, 7]
+```
+
+
 
 ### rest 参数
 
