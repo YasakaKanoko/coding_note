@@ -870,7 +870,7 @@ console.log(Person.staticMethod()); // 静态方法
 
 `this` 的指向:
 
-- `static` 创建的静态方法，this 指向当前类
+- `static` 创建的静态方法，`this` 指向当前类
 - 实例方法指向当前实例
 
 ```javascript
