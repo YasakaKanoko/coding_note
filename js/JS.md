@@ -4,7 +4,6 @@
 
 - [变量](#变量)
 - [标识符](#标识符)
-
 - [number](#数值)
 - [bigInt](#bigint)
 - [string](#字符串)
@@ -32,9 +31,14 @@
 - [类](#类)
 - [new 运算符](#new)
 - [函数](#函数)
+- [箭头函数](#箭头函数的-this)
+- [高阶函数](#高阶函数)
+- [闭包](#闭包)
 - [数组](#数组)
 - [数组遍历](#数组遍历)
 - [数组方法](#数组方法)
+- [数组去重](#数组去重)
+- [排序](#冒泡排序)
 - [rest 参数](#rest-参数)
 - [箭头函数](#箭头函数的-this)
 - [作用域](#scope)
@@ -1365,6 +1369,103 @@ greet('JavaScript', (msg) => {
 - 使用变量时，会在当前作用域中寻找，没有找到再往上一层的作用域中寻找
 - 最终到全局作用域中寻找，如果全局作用域中不存在，则返回 `xxx is not defined`
 
+### 高阶函数
+
+- `map()`：传入一个函数依次作用于数组中的每个元素，并返回一个新数组
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  let result = arr.map((x) => x ** 2);
+  console.log(result); // (5) [1, 4, 9, 16, 25]
+  
+  // 传入包装对象String, 对数组的元素进行字符串转换的操作
+  let arr = [1, 2, 3, 4, 5];
+  let result = arr.map(String);
+  console.log(result); // (5) ['1', '2', '3', '4', '5']
+  ```
+
+- `filter()`：传入一个函数依次作用于数组中的每个元素，符合条件的元素返回一个新数组
+
+  ```javascript
+  let arr = [1, 5, 10, 15, 20];
+  let result = arr.filter((x) => x > 10);
+  console.log(result); // (2) [15, 20]
+  ```
+
+- `reduce()`：数组归约，将结果汇总为单个返回值。可以传入第二个参数作为它的初始值
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  // 求和
+  let result = arr.reduce((x, y) => x + y, 0);
+  console.log(result); // 15
+  
+  // 求积
+  let result = arr.reduce((x, y) => x * y);
+  console.log(result); // 120
+  
+  // 数组转整数
+  let result = arr.reduce((x, y) => x * 10 + y);
+  console.log(result); // 12345
+  ```
+
+- `sort()`
+
+  ```javascript
+  let arr = [1, 3, 2, 5, 4];
+  // 升序
+  arr.sort((a, b) => a - b);
+  console.log(arr); // (5) [1, 2, 3, 4, 5]
+  
+  // 降序
+  arr.sort((a, b) => b - a);
+  console.log(arr); // (5) [5, 4, 3, 2, 1]
+  ```
+
+- `every()`：测试数组的每个元素是否满足条件
+
+  ```javascript
+  let arr = [1, 2, 3, 4, 5];
+  let result = arr.every((x) => x > 0);
+  console.log(result); // true
+  ```
+
+- `find()`：返回第一个满足条件的元素
+
+  ```javascript
+  let arr = [1, 5, 10, 15, 20];
+  let result = arr.find((x) => x > 18);
+  console.log(result); // 20
+  ```
+
+- `findIndex()`：返回第一个满足条件的元素索引
+
+  ```javascript
+  let arr = [1, 5, 10, 15, 20];
+  let result = arr.findIndex((x) => x > 18);
+  console.log(result); // 4
+  ```
+
+- `forEach()`：遍历数组。
+
+  > **注意**：这个函数没有返回值，每次都会返回 `undefined`
+
+  ```javascript
+  let arr = [1, 5, 10, 15, 20];
+  let result = arr.forEach((x) => console.log(x));
+  console.log(result);
+  /* 
+  1
+  5
+  10
+  15
+  20
+  undefined 
+  */
+  ```
+
+### 闭包
+
 ## 数组
 
 数组 ( *Array* ) ：是一种复合数据类型，数组中可以存储多个不同类型的数据
@@ -1601,6 +1702,24 @@ greet('JavaScript', (msg) => {
   console.log(arr); // [ 5, 4, 3, 2, 1 ]
   ```
 
+- `filter()`：筛选出符合条件的元素
+
+  ```javascript
+  class Person {
+      constructor(name, age) {
+          this.name = name;
+          this.age = age;
+      }
+  }
+  const personArr = [
+      new Person('Jack', 18),
+      new Person('Jolyne', 20),
+      new Person('Alice', 38)
+  ];
+  let result = personArr.filter((item) => item.age > 18);
+  console.log(result); // Jolyne, Alice
+  ```
+
 **浅复制 ( shallow copy )**：对象的浅复制只是对浅层进行复制，并不复制内部的属性 ( 或元素 )
 
 **深复制 (deep copy)**：深复制不仅复制对象本身，还复制其内部的属性和元素，性能问题，不常使用深复制
@@ -1657,7 +1776,37 @@ for (let ele of arr) {
 console.log(newArr); // (7) [1, 2, 3, 4, 5, 6, 7]
 ```
 
+### 冒泡排序
 
+```javascript
+let arr = [9, 1, 3, 2, 8, 0, 5, 7, 6, 4];
+for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length; j++) {
+        if (arr[j] > arr[j + 1]) {
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        }
+    }
+}
+console.log(arr); // (10) [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+### 选择排序
+
+```javascript
+let arr = [9, 1, 3, 2, 8, 0, 5, 7, 6, 4];
+for (let i = 0; i < arr.length; i++) {
+    let minIndex = i;
+    for (let j = i + 1; j < arr.length; j++) {
+        if (arr[j] < arr[minIndex]) {
+            minIndex = j;
+        }
+    }
+    if (minIndex !== i) {
+        [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+    }
+}
+console.log(arr); // (10) [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
 
 ### rest 参数
 
@@ -1688,8 +1837,6 @@ let obj1 = { c: 3, d: 4 };
 let obj2 = { a: 1, b: 2, ...obj1, e: 5 };
 console.log(obj1.c === obj2.c); // true
 ```
-
-
 
 ## window
 
