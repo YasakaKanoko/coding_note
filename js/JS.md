@@ -2541,4 +2541,278 @@ console.log(map); // Map(2) {size: 2, name => Jolyne, age => 18}
   }
   ```
 
+
+### Set
+
+`Set` 用来创建一个集合，和数组类似。它不能存储重复数据
+
+初始化集合
+
+```javascript
+const set = new Set();
+```
+
+- `add(data)`：添加数据
+
+  ```javascript
+  set.add(1);
+  set.add(2);
+  console.log(set); // Set(2) {1, 2}
+  ```
+
+- `has(date)`：检查集合中是否包含某个数据
+
+  ```javascript
+  console.log(set.has(1)); // true  
+  ```
+
+- `delete(data)`：删除元素
+
+  ```javascript
+  set.delete(2);
+  console.log(set); // Set(1) {1}
+  ```
+
+- 遍历
+
+  ```javascript
+  for (item of set) {
+      console.log(item); // Set(2) {1, 2}
+  }
+  ```
+
+- 集合转数组
+
+  ```javascript
+  let arr = [...set];
+  console.log(arr); // (2) [1, 2]
   
+  let arr = Array.from(set);
+  console.log(arr); // (2) [1, 2]
+
+- 数组去重
+
+  ```javascript
+  let arr = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
+  const set = new Set(arr);
+  arr = Array.from(set);
+  console.log(arr); // (5) [1, 2, 3, 4, 5]
+  ```
+
+### Math
+
+`Math` 是一个工具类，提供数学运算中的常量和方法
+
+- `Math.PI`：圆周率
+
+- `Math.abs(x)`：绝对值
+
+- `Math.min()`：最小值
+
+- `Math.max()`：最大值
+
+- `Math.pow(x, y)`：求 x 的 y 次幂
+
+- `Math.sqrt(x)`：求一个数的平方根
+
+- `Math.floor()`：向下取整
+
+- `Math.ceil()`：向上取整
+
+- `Math.round()`：四舍五入
+
+- `Math.trunc()`：去除小数位。与 `Math.floor()` 区别在于小数
+
+- `Math.random()`：生成 0-1 之间的伪随机数 ( 包括0 但不包括 1 的浮点数 )、
+
+  > 生成 0 - x 范围的随机数：
+  >
+  > - `Math.round(Math.random() * x)`
+  >
+  > - `Math.floor(Math.random() * (x + 1))`
+  >
+  > 生成 x - y 范围的随机数：
+  >
+  > - `Math.round(Math.random() * (y - x) + x)`
+  >
+  > - `Math.floor(Math.random() * (y - x + 1) + x)`
+  >
+  > 
+
+### Date
+
+和时间有关的数据用 Date 对象表示
+
+```javascript
+// 创建对象时的时间
+let d = new Date();
+// 每次刷新的时间都不同
+console.log(d); // Sun Nov 24 2024 20:46:17 GMT+0800 (中国标准时间)
+```
+
+- 指定表示时间的字符串，创建特定时间
+
+  字符串格式：`月/日/年 时:分:秒` 或 `年-月-日T时:分:秒`
+
+  ```javascript
+  let d = new Date('10/20/2001');
+  console.log(d); // Sat Oct 20 2001 00:00:00 GMT+0800 (中国标准时间)
+  ```
+
+  数字格式：`new Date(年, 月, 日, 时, 分, 秒, 毫秒)` 注意：月的范围是 0-11
+
+  ```javascript
+  let d = new Date(2024, 9, 20, 10, 20, 35, 33);
+  console.log(d); // Sun Oct 20 2024 10:20:35 GMT+0800 (中国标准时间)
+  ```
+
+- `getFullYear()`：获取 4 位年份
+
+  ```javascript
+  let d = new Date();
+  console.log(d.getFullYear()); // 2024
+  ```
+
+- `getMonth()`：返回月份的索引 ( 0-11 )
+
+  ```javascript
+  let d = new Date();
+  // 获取当前月份需要+1
+  console.log(d.getMonth() + 1); // 11
+  ```
+
+- `getDate()`：返回当前日
+
+  ```javascript
+  let d = new Date();
+  console.log(d.getDate()); // 24
+  ```
+
+- `getDay()`：返回当前的周 ( 0-6 ) ，0 表示周日
+
+  ```javascript
+  let d = new Date();
+  console.log(d.getDay()); // 0
+  ```
+
+- `getTime()`：返回当前日期对象的时间戳
+
+  > 时间戳：从 1970年1月1日0时0分0秒到当前时间的毫秒数
+
+  ```javascript
+  let d = new Date();
+  console.log(d.getTime()); // 1732452747169
+  ```
+
+  > 注意：时间戳根据格林威治时间，东八区比标准时间快 8 小时
+  >
+  > ```javascript
+  > let d = new Date(2016);
+  > // 2ms 实际上是 8h2ms
+  > console.log(d); // Thu Jan 01 1970 08:00:02 GMT+0800 (中国标准时间)
+  > ```
+
+- `Date.now()`：获取当前时间的时间戳
+
+#### 格式化
+
+- `d.toLocaleDateString()`：将日期转换为适合本地习惯的字符串
+
+  ```javascript
+  let d = new Date();
+  console.log(d.toLocaleDateString()); // 2024/11/24
+  ```
+
+- `d.toLocaleTimeString()`：将时间转换为适合本地习惯的字符串
+
+  ```javascript
+  let d = new Date();
+  console.log(d.toLocaleTimeString()); // 20:59:56
+  ```
+
+- `d.toLocaleString()`：将日期和时间转换为适合当地习惯的字符串，
+
+  - 参数
+
+    - 地区：如：`zh-HK`、`en-US`
+
+      ```javascript
+      let d = new Date();
+      console.log(d.toLocaleString()); // 2024/11/24 21:01:08
+      console.log(d.toLocaleString('zh-HK')); // 24/11/2024 下午9:02:53
+      console.log(d.toLocaleString('zh-TW')); // 2024/11/24 下午9:03:08
+      console.log(d.toLocaleString('en-US')); // 11/24/2024, 9:03:42 PM
+      ```
+
+    - 对象：
+
+      - 对日期 `dateStyle` 和时间 `timeStyle` 格式化
+
+        - `full`
+        - `long`
+        - `medium`
+        - `short`
+
+      - `hour12: true`：12 小时制
+
+      - `weekday`：只显示星期
+
+        - `long`：长的
+        - `short`：短的
+        - `narrow`：最短的
+
+      - `year`
+
+        - `numeric`：完整的
+        - `2-digit`：2 位数的
+
+        ```javascript
+        let d = new Date();
+        console.log(d.toLocaleString('en-US', { year: "numeric", month: 'long', day: '2-digit', weekday: 'short' })); // Sun, November 24, 2024
+        ```
+
+### 包装类
+
+除了直接创建原始值的对象
+
+- `new String()`：创建 String 类型的对象
+
+- `new Number()`：创建 Number 类型的对象
+- `new Boolean()`：创建 Boolean 类型的对象
+
+以上 3 中包装类不要使用，没有意义
+
+包装类：一共 5 个，String、Number、BigInt、Boolean、Symbol
+
+通过包装类可以将原始值包装成一个对象，当原始值调用一个方法或属性时，js 解释器会将原始值包装为对应对象
+
+字符串的方法：字符串的本质就是一个字符数组
+
+- `str.length`：获取字符串长度
+- `str[index]`：获取指定位置的字符
+- `str.at()`：根据索引获取字符，可以接收负索引 
+- `str.charAt()`：根据字符获取索引
+- `str.concat()`：拼接两个或多个字符串
+- `str.includes()`：检查字符串中是否包含某个内容
+- `str.indexOf()`：返回第一次出现的索引，没有返回 `-1`
+- `str.lastIndexOf()`：返回最后一次出现的索引，没有返回 `-1`
+
+- `str.startsWith()`：检查一个字符串是否以指定内容开头
+- `str.endsWith()`：检查一个字符串是否以指定内容结尾
+- `str.padStart()`：通过开头添加指定内容，使得字符串长度对齐
+- `str.padEnd()`：通过末尾添加指定内容，使得字符串长度对齐
+
+- `str.replace()`：使用一个新字符串替换一个指定内容
+- `str.replaceAll()`：使用一个新字符串替换所有指定内容
+
+- `str.slice()`：字符串切片
+- `str.substring()`：截取字符串
+- `str.split()`：将一个字符串拆分为一个数组
+- `str.toLowerCase()`：将一个字符串转为小写
+- `str.toUpperCase()`：将一个字符串转为大写
+- `str.trim()`：去除字符串首尾空格
+- `str.trimStart()`：去除字符串开始空格
+- `str.trimEnd()`：去除字符串末尾空格
+
+### 正则表达式
+
