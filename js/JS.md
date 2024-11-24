@@ -1411,6 +1411,10 @@ greet('JavaScript', (msg) => {
 
 - `sort()`
 
+  > **注意**：`sort()` 默认按照 Unicode 编码进行排序，如果直接对数字进行排序可能不正确
+  >
+  > 如：`10` 会小于 `2` ，按位比较
+
   ```javascript
   let arr = [1, 3, 2, 5, 4];
   // 升序
@@ -1464,6 +1468,129 @@ greet('JavaScript', (msg) => {
   */
   ```
 
+### Rest 参数
+
+`arguments`
+
+- `arguments` 是函数中的一个隐含参数
+
+- `arguments` 是一个**类数组对象**
+
+  > 可以直接通过索引读取元素，也可以直接遍历。但**不能使用数组方法**
+
+  ```javascript
+  function fn() {
+      console.log(arguments[0]); // 1
+  }
+  fn(1, 2, 3);
+  // 【不能使用 forEach】
+  ```
+
+- `arguments` 可以存储函数的实参，无论用户是否定义，实参都会存储到 arguments 对象中，可以直接访问
+
+  ```javascript
+  function fn() {
+      for (let v of arguments) {
+          console.log(v);
+      }
+  }
+  ```
+
+> **注意**：**箭头函数**没有 `arguments`
+
+**Rest**：在定义函数时，定义形参为可变参数时，意味着可以接收任意数量的实参
+
+作用与 `arguments` 一致，不同点：
+
+- Rest 参数的名字可以自己指定
+- Rest 参数本身就是一个数组，可以直接使用数组方法
+- Rest 参数可以搭配其他参数一起使用
+
+```javascript
+// arguments
+function sum() {
+    let result = 0;
+    for (let num of arguments) {
+        result += num;
+    }
+    return result;
+}
+
+console.log(sum(1, 2));
+
+// Rest
+function sum(...num) {
+    return num.reduce((a, b) => a + b);
+}
+console.log(sum(1, 2, 3)); // 6
+```
+
+### `call()` 和 `apply()`
+
+`this`：
+
+- 函数形式调用，`this` 指向 `window`
+- 方法形式调用，`this` 指向该方法的对象
+- 构造函数中，`this` 指向新建对象
+- 箭头函数没有自己的 `this` ，由上下文决定
+
+动态指定 `this`：`call()` 和 `apply()` 的第一个参数，将会成为该函数的 `this`
+
+```javascript
+function fn() {
+    console.log(this);
+
+}
+let obj = {
+    fn
+}
+fn(); // window
+obj.fn(); // obj
+fn.call(obj); // obj 
+```
+
+`call()` 和 `apply()` 的区别：`apply()` 方法中的**实参**需要用**数组传递**
+
+```javascript
+function sum(a, b) {
+    return a + b;
+
+}
+let obj = {
+    sum
+}
+console.log(sum.call(obj, 1, 2)); // 3
+console.log(sum.apply(obj, [1, 2])); // 3
+```
+
+### `bind()`
+
+- 为新函数绑定 `this` ，`this` 一旦绑定，无法通过 `call()` 和 `apply()` 修改
+
+  ```javascript
+  function fn() {
+      console.log(this);
+  }
+  const obj = {};
+  const newFn = fn.bind(obj);
+  newFn(); // obj
+  ```
+
+- 为新函数绑定参数，参数一旦绑定，无法修改
+
+  ```javascript
+  let fn = function (a, b) {
+      return a + b;
+  }
+  const obj = {};
+  let newFn = fn.bind(obj, 1, 2);
+  console.log(newFn(3, 4)); // 3
+  ```
+
+> **注意**：箭头函数没有自己的 `this`，因此无法通过 `call()`、`apply()`、`bind()`  指定
+
+
+
 ### 闭包
 
 **闭包**：就是能访问到外部函数作用域中的变量的函数
@@ -1503,7 +1630,123 @@ console.log(fn()); // 3
 >
 >    `var` 虽然没有块级作用域，但有**函数作用域**和**全局作用域** ( **仅限声明在函数外部** )
 
-**闭包**就是**函数作用域** ( 词法作用域 )，在函数创建时已经确定，和调用的位置无关
+**闭包的原理**：**闭包**就是**函数作用域** ( 词法作用域 )，在函数创建时已经确定，和调用的位置无关
+
+**生命周期**：
+
+1. 闭包在外部函数调用时产生，外部函数每次调用都会产生一个全新的闭包；**闭包之间都是独立的**
+
+   ```javascript
+   function outer() {
+       let num = 0;
+       return () => {
+           num++;
+           return num;
+       }
+   }
+   
+   let fn1 = outer(); // 独立闭包
+   let fn2 = outer(); // 独立闭包
+   console.log(fn1()); // 1
+   console.log(fn2()); // 1
+   ```
+
+2. 除非内部函数被修改，闭包才会销毁 ( 当内部函数被垃圾回收了，闭包销毁 )
+
+   ```javascript
+   fn1 = null;
+   ```
+
+> 注意事项：
+>
+> 1. 闭包主要是用来隐藏不希望被外部访问的内容
+>
+> 2. 闭包需要占用一定的内存空间，容易产生空间浪费
+>
+>    相较于类来说，类的原型中不会产生相同数据，即类可以使用原型，闭包不能使用原型。
+>
+> 3. 需要执行次数较少时，使用闭包；需要使用执行次数较多时，使用类
+
+### 递归
+
+**递归**：调用自身的函数称为递归函数
+
+```javascript
+function fn() {
+    fn();
+}
+```
+
+**阶乘问题**：
+
+递归的**核心思想**：把大问题拆分成一个一个的小问题
+
+编写递归函数的条件：
+
+1. 基线条件：递归**终止条件**
+2. 递归条件：问题的**解决方式**
+
+```javascript
+function factorial(num) {
+    let result = 1;
+    for (let i = 2; i <= num; i++) {
+        result *= i;
+    }
+    if (num < 1) {
+        return num;
+    } else {
+        return result;
+    }
+}
+```
+
+递归解决阶乘问题：
+
+```javascript
+function factorial(num) {
+    // 基线条件
+    if (num === 1) {
+        return 1;
+    }
+    // 递归条件
+    return factorial(num - 1) * num;
+}
+console.log(factorial(4)); // 24
+```
+
+```pseudocode
+// 执行步骤: 
+	// 1. return 3! * 4
+	// 2. return 2! * 3
+	// 3. return 1! * 2
+	// 4. return 1
+```
+
+递归与循环是一致的，不同之处：
+
+1. 递归的思路清晰，循环的性能较好
+2. 尽量多用循环，少用递归，只在循环比较麻烦的场景中，才使用递归
+
+**递归的练习**：
+
+**斐波那契数列**：1 对兔子出生后的两个月后，每个月都能生一对小兔子，求第 n 个月的兔子的数量。
+
+当前数等于前两个数之和
+
+```javascript
+// 1  2  3  4  5  6  7   8   9  10   11   12
+// 1  1  2  3  5  8  13  21  34  ...
+function fib(n) {
+    if (n < 3) {
+        return 1;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+let result = fib(6);
+console.log(result); // 8
+```
+
+
 
 
 
@@ -1922,3 +2165,380 @@ console.log(obj1.c === obj2.c); // true
 // 代码以现代模式工作
 ```
 
+## 内建对象
+
+### 解构赋值
+
+**数组的解构赋值**
+
+```javascript
+// 1. 声明时解构
+let [a, b, c] = [1, 2, 3];
+
+// 2. 先声明, 后解构
+let arr = [1, 2, 3];
+let [a, b, c] = arr;
+console.log(a, b, c); // 1 2 3
+```
+
+1. 如果解构的部分没有值，就返回 `undefined`
+
+   ```javascript
+   let [a, b, c] = [1, 2];
+   console.log(a, b, c); // 1 2 undefined
+   ```
+
+2. 如果解构部分设置了默认值，传递参数时有值就覆盖，如果没有就使用默认值
+
+   ```javascript
+   let [a, b, c = 3] = [1, 2];
+   console.log(a, b, c); // 1 2 3
+   
+   let [a, b, c = 3] = [1, 2, 4];
+   console.log(a, b, c); // 1 2 4
+   ```
+
+3. 如果原来存在默认值，将默认值设置为自身；如果没有解构赋值就使用原值，否则覆盖
+
+   ```javascript
+   let [a, b, c] = [1, 2, 3];
+   [a, b, c = c] = [4, 5];
+   console.log(a, b, c); // 4 5 3
+   
+   let [a, b, c] = [1, 2, 3];
+   [a, b, c = c] = [4, 5, 6];
+   console.log(a, b, c); // 4 5 6
+   ```
+
+4. 解构数组时，如果使用 Rest 参数，多余部分的参数返回一个数组
+
+   ```javascript
+   let [a, b, ...c] = [1, 2, 3, 4];
+   console.log(a, b, c); // 1 2 (2) [3, 4]
+   ```
+
+用法：
+
+1. 解构函数的返回值
+
+   ```javascript
+   function fn() {
+       return [1, 2];
+   }
+   
+   let [num1, num2] = fn();
+   console.log(num1, num2); // 1 2
+   ```
+
+2. 交换变量
+
+   ```javascript
+   let a = 1, b = 2;
+   [a, b] = [b, a];
+   console.log(a, b); // 2 1
+   ```
+
+3. 解构二维数组
+
+   ```javascript
+   let arr = [['Jolyne', 18], ['Lucy', 20]];
+   let [[name, age]] = arr;
+   console.log(name, age); // Jolyne 18
+   ```
+
+**对象的解构赋值**
+
+1. 声明时解构
+
+   > 先声明后解构需要加上括号。
+
+   ```javascript
+   // 1. 声明时解构
+   let obj = {
+       name: 'Jolyne',
+       age: 18
+   };
+   let { name, age } = obj;
+   console.log(name, age); // Jolyne 18
+   
+   // 2. 先声明, 后解构
+   let obj = {
+       name: 'Jolyne',
+       age: 18
+   };
+   let name, age;
+   ({ name, age } = obj);
+   console.log(name, age); // Jolyne 18
+   ```
+
+2. 解构不存在的属性就返回 `undefined`
+
+   ```javascript
+   let {address} = obj;
+   ```
+
+3. 对象解构赋值时，解构时的名称需与对象属性名一致。否则需要使用 `:` 设置别名
+
+   ```javascript
+   let obj = {
+       name: 'Jolyne',
+       age: 18
+   };
+   let { name: a, age: b } = obj;
+   console.log(a, b); // Jolyne 18
+   ```
+
+4. 设置默认值
+
+   ```javascript
+   let obj = {
+       name: 'Jolyne',
+       age: 18
+   };
+   // 设置默认值同时设置别名
+   let { name: a, age: b, gender: c = 'female' } = obj;
+   console.log(a, b, c); // Jolyne 18 female
+   ```
+
+### JSON
+
+**序列化**：将一个对象转换为字符串，对象序列化后，字符串可以在不同语言之间传递，甚至进行读写操作
+
+进行序列化：JSON ( JavaScript Object Notation ) JS 对象表示法
+
+- `JSON.stringify(obj)`：将对象转换为 JSON 字符串
+
+  ```javascript
+  let obj = {
+      name: 'Jolyne',
+      age: 18
+  };
+  // 静态方法, 不能通过类调用
+  const str = JSON.stringify(obj);
+  console.log(str); // {"name":"Jolyne","age":18}
+  console.log(typeof str); // string
+  ```
+
+- `JSON.parse(str)`：将 JSON 格式字符串转换为 JS 对象
+
+  ```javascript
+  let str = '{ "name": "Jolyne", "age": 18 }';
+  let obj = JSON.parse(str);
+  console.log(obj); // {name: 'Jolyne', age: 18}
+  ```
+
+手动编写 JSON 字符串：
+
+1. 类型：最外层只能是数组 `[]` 或对象 `{}`
+
+2. JSON 属性名必须使用双引号
+
+3. 属性值：
+
+   - 数字：`Number`
+
+   - 字符串：`string`
+
+   - 布尔值：`boolean`
+
+   - 空值：`Null`
+
+   - 对象：`Object {}`
+
+   - 数组：`Array []`
+
+4. JSON 格式基本上和 js 对象一致
+
+   > **注意**：JSON 字符串如果属性是最后一个，则末尾不能加 `,`
+
+#### 使用 JSON 深拷贝
+
+- 浅复制：`Object.assign()`
+
+  ```javascript
+  let obj1 = {
+      name: 'Jolyne',
+      age: 18,
+      friend: {
+          name: 'Alice'
+      }
+  };
+  let obj2 = Object.assign({}, obj1);
+  
+  console.log(obj1 === obj2); // false
+  console.log(obj1.friend === obj2.friend); // true
+  ```
+
+- 深复制
+
+  - `structuredClone()`
+
+    ```javascript
+    let obj1 = {
+        name: 'Jolyne',
+        age: 18,
+        friend: {
+            name: 'Alice'
+        }
+    };
+    
+    let obj2 = structuredClone(obj1);
+    
+    console.log(obj1 === obj2); // false
+    console.log(obj1.friend === obj2.friend); // false
+    ```
+
+  - JSON
+
+    ```javascript
+    let obj1 = {
+        name: 'Jolyne',
+        age: 18,
+        friend: {
+            name: 'Alice'
+        }
+    };
+    
+    let obj2 = JSON.parse(JSON.stringify(obj1));
+    
+    console.log(obj1 === obj2); // false
+    console.log(obj1.friend === obj2.friend); // false
+    ```
+
+### Map
+
+Map：用来存储键值对结构的数据 ( Key-Value )
+
+```javascript
+// 初始化
+let map = new Map();
+```
+
+- 添加属性：`set(key, value)`
+
+  ```javascript
+  map.set('name', 'Jolyne');
+  map.set('age', 18);
+  ```
+
+- 获取属性：`get(key)`
+
+  ```javascript
+  console.log(map.get('name')); // Jolyne
+  ```
+
+- 获取键值对的数量：`size`
+
+  ```javascript
+  console.log(map.size); // 2
+  ```
+
+- 删除指定键值对：`delete(key)`
+
+  ```javascript
+  map.delete('age');
+  console.log(map); // Map(1) {size: 1, name => Jolyne}
+  ```
+
+- 清空键值对：`clear()`
+
+  ```javascript
+  map.clear();
+  console.log(map); // Map(0) {size: 0}
+  ```
+
+`Map` 和 `Object` 的区别：
+
+- `Object` 的属性名只能是字符串或符号，如果属性名是其他类型，js 解释器将其自动转换为字符串
+
+  ```javascript
+  let obj1 = {}
+  let obj2 = {
+      [obj1]: 'hello'
+  };
+  
+  console.log(obj2[obj1]); // hello
+  // obj1被转为字符串[object Object]和{}是等价的
+  console.log(obj2[{}]); // hello
+  ```
+
+- `Map` 的 `key` 可以是任何类型的值
+
+  ```javascript
+  let map = new Map();
+  map.set('name', 'Jolyne');
+  map.set('age', 18);
+  map.set({}, 20);
+  map.set(NaN, 10);
+  
+  // key 可以是任何类型
+  console.log(map); // Map(4) {size: 4, name => Jolyne, age => 18, {} => 20, NaN => 10}
+  ```
+
+Map 转换为二维数组
+
+- `Array.from()`
+
+  ```javascript
+  let map = new Map();
+  map.set('name', 'Jolyne');
+  map.set('age', 18);
+  
+  let arr = Array.from(map);
+  console.log(arr); // (2) [Array(2), Array(2)]
+  ```
+
+- `[...map]`
+
+  ```javascript
+  let map = new Map();
+  map.set('name', 'Jolyne');
+  map.set('age', 18);]
+  
+  let arr = [...map];
+  console.log(arr); // (2) [Array(2), Array(2)]
+  ```
+
+初始化 Map 时，可以传入二维数组作为参数转换为 Map
+
+```javascript
+let map = new Map([['name', 'Jolyne'], ['age', 18]]);
+console.log(map); // Map(2) {size: 2, name => Jolyne, age => 18}
+```
+
+遍历 Map
+
+- `for-of`
+
+  ```javascript
+  let map = new Map([['name', 'Jolyne'], ['age', 18]]);
+  map.forEach((v, k) => {
+      console.log(k, v);
+  });
+  ```
+
+- `forEach()`
+
+  ```javascript
+  map.forEach((v, k) => {
+      console.log(k, v);
+  });
+  ```
+
+- `map.keys()`：只获取所有 `key`
+
+  `map.values()`：只获取所有 `value`
+
+  ```javascript
+  // 只获取所有的key
+  for (let k of map.keys()) {
+      console.log(k);
+  }
+  
+  // 只获取所有的value
+  for (let v of map.values()) {
+      console.log(v);
+  }
+  ```
+
+  
