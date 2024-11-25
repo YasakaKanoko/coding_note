@@ -306,7 +306,8 @@ React 提供 `react-scripts` 包，包中包含项目开发中的大部分依赖
   		- index.js // src/index.js 是js入口文件
   ```
 
-- 进入项目所在目录，执行初始化命令
+  - 进入项目所在目录，执行初始化命令
+
 
   ```bash
   # yarn init -y

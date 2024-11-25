@@ -2764,12 +2764,16 @@ console.log(d); // Sun Nov 24 2024 20:46:17 GMT+0800 (中国标准时间)
       - `year`
 
         - `numeric`：完整的
+        
         - `2-digit`：2 位数的
-
-        ```javascript
-        let d = new Date();
-        console.log(d.toLocaleString('en-US', { year: "numeric", month: 'long', day: '2-digit', weekday: 'short' })); // Sun, November 24, 2024
-        ```
+        
+          ```javascript
+          let d = new Date();
+          console.log(d.toLocaleString('en-US', { year: "numeric", month: 'long', day: '2-digit', weekday: 'short' })); // Sun, November 24, 2024
+          ```
+        
+          
+        
 
 ### 包装类
 
