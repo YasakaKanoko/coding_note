@@ -63,7 +63,7 @@ MVVM：Model-View-View-Model
 >
 > - 组件之间是独立的，组件是可以复用的
 
-### `data`
+#### `data`
 
 在组件对象中，可以添加一个 `data` 属性
 
@@ -82,7 +82,7 @@ const Root = {
 Vue.createApp(Root).mount('#root');
 ```
 
-### `button`
+#### `button`
 
 > `data` 中的数据会自动和视图绑定，数据发生变化，视图会自动刷新
 
@@ -98,7 +98,7 @@ const Root = {
 Vue.createApp(Root).mount('#root');
 ```
 
-### `template`
+#### `template`
 
 `template`：模板，决定组件的最终样式
 
@@ -242,7 +242,7 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
   createApp(App).mount('#app');
   ```
 
-**子组件**：
+#### 子组件
 
 1. 在 `src` **新建子组件并导出**。( 新建 `MyButton.js` 自定义的 `MyButton` 组件 )
 
@@ -318,4 +318,159 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
    >    	"my-button": MyButton
    >    }
    >    ```
+
+#### 单文件组件
+
+```javascript
+template: `
+	<h1>Hello world!</h1>
+	<my-button></my-button>
+`
+```
+
+`template` 使用字符串形式编写模板带来的问题：
+
+1. 字符串串在项目运行时，在浏览器中会被编译为 js 函数，性能不好
+2. 在字符串中编写，不友好
+
+解决：单文件组件 ( SFC )
+
+- 单文件组件格式：`.vue`
+- 配合插件使用：`Vue - Official`
+
+**单文件组件**
+
+- 在 `script` 标签内编写组件代码
+
+- 在 `template` 标签中编写模板
+
+  ```vue
+  // App.vue
+  <script>
+  // 编写组件代码
+  export default {
+      data() {
+          return {
+              msg: 'Hello vue!'
+          }
+      }
+  };
+  </script>
+  <template>
+      <h1>{{ msg }}</h1>
+  </template>
+  ```
+
+- vue 文件编写的单文件本身无法被浏览器识别，必须要被构建工具打包后才可使用
+
+- vue 文件在打包时，构建工具直接将 `template` 转换为函数，无需在浏览器中再次编译，提升性能
+
+  需要安装 `@vitejs/plugin-vue` 插件
+
+  ```shell
+  npm install @vitejs/plugin-vue --save-dev
+  ```
+
+  根目录新建 `vite.config.js`
+
+  ```javascript
+  import vue from "@vitejs/plugin-vue"
+  
+  export default {
+      plugins: [vue()]
+  }
+  ```
+
+  安装插件后，无需引入 `import { createApp } from "vue/dist/vue.esm-bundler.js"` ，可以直接引入 vue
+
+  ```javascript
+  import { createApp } from 'vue';
+  ```
+
+单文件子组件：
+
+- 编写子组件并导出
+
+  ```vue
+  <script>
+  export default {
+      data() {
+          return {
+              count: 0
+          }
+      }
+  }
+  </script>
+  
+  <template>
+      <button @click="count++">增加{{ count }}次</button>
+  </template>
+  ```
+
+- 根组件中引入并注册
+
+  ```vue
+  <script>
+  import MyButton from "./components/MyButton.vue"
+  // 编写组件代码
+  export default {
+      data() {
+          return {
+              msg: 'Hello vue!'
+          }
+      },
+      components: {
+          "my-button": MyButton
+      }
+  };
+  </script>
+  <template>
+      <h1>{{ msg }}</h1>
+      <my-button></my-button>
+      <my-button></my-button>
+      <my-button></my-button>
+  </template>
+  ```
+
+- 入口文件导入并挂载
+
+  ```javascript
+  import { createApp } from 'vue';
+  import App from './App.vue'
+  const vm = createApp(App).mount('#app');
+  ```
+
+### 自动创建项目
+
+- 全局安装 `create-vue`
+
+  ```shell
+  npm install -g create-vue
+  ```
+
+- `npm create vue@latest <项目名称>` 或 `npm init vue@latest`
+
+  ```shell
+  npm init vue@latest
+  ```
+
+- 执行 `npm i` 安装依赖
+
+- 运行项目：``npm run dev`
+
+`App.vue`：根组件
+
+- `createApp(App)`：将根组件 App 关联到应用上，返回一个应用实例
+
+  ```javascript
+  const app = createApp(App);
+  ```
+
+- `app.mount('#app')`：将应用挂载到页面中，返回一个根组件实例，通常命名为 `vm`
+
+  ```javascript
+  const vm = app.mount('#app');
+  ```
+
+  
 
