@@ -469,6 +469,8 @@ template: `
 
 - 运行项目：`npm run dev`
 
+#### 代码分析
+
 `App.vue`：根组件
 
 - `createApp(App)`：将根组件 App 关联到应用上，返回一个应用实例
@@ -483,5 +485,224 @@ template: `
   const vm = app.mount('#app');
   ```
 
+组件：一个组件可以创建多个组件实例
 
-组件实例：组件实例是一个 `Proxy` 对象 ( 代理对象 )
+组件实例：组件实例 `vm` 是一个 `Proxy` 对象 ( 代理对象 )
+
+- 在 `data` 中的 `this` 指向当前组件实例 `vm`
+
+- 如果使用箭头函数，则无法通过 `this` 访问组件实例
+
+  解决方式 1：`data` 用普通函数
+
+  解决方式 2：当使用箭头函数时，将组件实例作为参数传入箭头函数中
+
+  ```javascript
+  data: vm => {
+      return {
+          msg: 'Hello vue!'
+      }
+  }
+  ```
+
+  > 在 vue 中，减少使用箭头函数的次数
+
+#### 代理
+
+`data` 的返回值：返回一个对象
+
+- vue 会对该对象进行代理，转换为响应式数据，响应式数据可以直接被组件实例访问
+- 直接向 `data` 中添加的数据不会被 vue 代理，不是响应式数据
+
+通过 Object 模拟代理：
+
+1. 创建一个对象
+
+   ```javascript
+   const obj = {
+       name: 'Jolyne',
+       age: 18
+   };
+   ```
+
+2. 如果直接修改对象属性，并没有对数据进行渲染
+
+   `handler`：指定代理的行为
+
+   - `get(target, prop, receiver)`：`target` - 被代理对象、`prop` - 读取的对象属性、`receiver` - 代理对象
+   - `set(target, prop, value, receiver)`：`value` - 被修改的属性
+
+   ```javascript
+   const handler = {
+       get(target, prop, receiver) {
+           return target[prop];
+       },
+       set(target, prop, value, receiver) {
+           target[prop] = value;
+           return true;
+       }
+   };
+   ```
+
+3. 创建代理
+
+   ```javascript
+   const proxy = new Proxy(obj, handler);
+   ```
+
+4. 修改代理的属性
+
+   ```javascript
+   proxy.age = 28;
+   console.log(obj.age); // 28
+   ```
+
+在 vue 中的代理
+
+- `track()`：`data()` 返回的对象会被 vue 所代理，通过代理去读取属性值，返回值之前，会先进行跟踪，对应 `get()`
+- `trigger()`：触发所有使用该值位置的更新，对应于 `set()`
+
+- 设置代理时，不会对原数据产生影响，只有修改时才会
+
+#### `data`
+
+`vm.$data`：实际代理对象。可以直接通过 `vm` 访问 `$data` 中的属性，甚至通过 `vm.$data` 动态的向组件中添加响应式数据
+
+```javascript
+// vm.$data.msg等价于vm.msg
+vm.msg = "Alice";
+```
+
+**深层响应式对象**：构建响应式对象时，会将对象中的属性做成响应式属性
+
+```javascript
+data() {
+    return {
+        msg: "Hello vue3!",
+        stu: {
+            name:"Jolyne",
+            friend: {
+                name: "Alice"
+            }
+        }
+    }
+}
+```
+
+**浅层响应式对象**：`shallowReactive()` 只有根级别的属性是响应式的，谨慎使用
+
+```javascript
+data() {
+    return shallowReactive({
+        msg: "Hello vue3!",
+        stu: {
+            name:"Jolyne",
+            friend: {
+                name: "Alice"
+            }
+        }
+    })
+}
+```
+
+> **注意**
+>
+> - 动态添加响应数据：`this.$data.xxx = "xxx"`，不建议这么做
+>
+> - 建议将暂时没有使用的属性，添加到 `data` 返回对象中，值设置为 `null`
+
+#### `methods`
+
+`methods`：实例对象中的方法，保存在对象中。
+
+- 这些方法最终挂载到组件实例上，通过组件实例调用
+
+- 所有组件实例上的方法都可以在模板中访问
+
+  ```vue
+  <script>
+  export default {
+      methods: {
+          test() {
+              console.log("Hello world!");
+          }
+      }
+  }
+  </script>
+  <template>
+      <span>{{ test() }}</span>
+  </template>   
+  ```
+
+- `methods` 中的函数的 `this` 会自动绑定为 组件实例
+
+#### `computed`
+
+##### `getter`
+
+`computed`：计算属性，只在其依赖数据发生变化时，才会重新调用
+
+```vue
+<script>
+export default {
+    data() {
+        return {
+            stu: {
+                name: 'Alice',
+                age: 18
+            }
+        }
+    },
+    methods: {
+        addAge() {
+            this.stu.age++;
+        },
+        delAge() {
+            this.stu.age--;
+        }
+    },
+    computed: {
+        info() {
+            if (this.stu.age < 18 ) {
+                return "未成年"
+            } else {
+                return "成年"
+            }
+        }
+    }
+}
+</script>
+<template>
+    <h1>{{ stu.name }} - {{ stu.age }}</h1>
+    <!-- <h2>{{ stu.age >= 18 ? "成年" : "未成年" }}</h2> -->
+    <h2>{{ info }}</h2>
+    <button @click="addAge">增加</button>
+    <button @click="delAge">减少</button>
+</template>
+```
+
+`computed` 和 `methods` 的区别：
+
+- `computed` 计算属性只在其依赖数据发生变化时，才会重新执行；即**会对数据进行缓存**
+- `methods` 中的方法每次组件重新渲染都会调用
+- `computed` 计算属性是 `getter` 方法，调用时不用加括号 ( `()` )
+
+##### `setter`
+
+如果 `computed` 计算属性中的方法不指定 `setter`，那计算属性永远都是只读的，开发中不建议使得计算属性可写
+
+```javascript
+computed: {
+    name: {
+        get() {
+            // ...
+        },
+        set() {
+            // ...
+        }
+    }
+}
+```
+
+
+
