@@ -12,9 +12,9 @@ Vue 是一个声明式、组件化编程模型，渐进式 JavaScript 框架
 
 MVVM：Model-View-View-Model
 
-- Vue 负责 vm 视图模型的工作，将视图与模型关联
-  - 当模型发生变化，视图自动更新
-  - 也可以直接通过视图操作模型
+Vue 负责 `vm` 视图模型的工作，将视图与模型关联
+- 当模型发生变化，视图自动更新
+- 也可以直接通过视图操作模型
 
 ## Hello world
 
@@ -59,16 +59,17 @@ MVVM：Model-View-View-Model
    > Vue.createApp(Root).mount('#root');
    > ```
 
-> **为什么要创建组件实例 ( vm ) ？**
->
-> - 组件之间是独立的，组件是可以复用的
+**为什么要创建组件实例 ( vm ) ？**
+
+> 组件之间是独立的，组件是可以复用的
 
 #### `data`
 
 在组件对象中，可以添加一个 `data` 属性
 
-- `data` 是一个函数，需要一个对象作为返回值，对象中的属性会自动添加到组件实例中
-- `{{属性名}}`：在模板中直接访问组件实例中的属性
+`data` 是一个函数，需要一个对象作为返回值，对象中的属性会自动添加到组件实例中
+
+`{{属性名}}`：在模板中直接访问组件实例中的属性
 
 ```javascript
 const Root = {
@@ -82,9 +83,9 @@ const Root = {
 Vue.createApp(Root).mount('#root');
 ```
 
-#### `button`
-
 > `data` 中的数据会自动和视图绑定，数据发生变化，视图会自动刷新
+
+#### `button`
 
 ```javascript
 const Root = {
@@ -136,14 +137,18 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
 
 - **文件结构**：
 
-  ```json
+  ```pseudocode
   - 根目录
-  	- ./node_modules
-  	- ./src
+  	- node_modules
+  	- public
+  	- src
+  		- components
+  		- App.vue
   		- index.js (main.js)
   	- index.html
   	- package-lock.json
   	- package.json
+  	- vite.
   ```
 
 - **初始化**
@@ -207,13 +212,17 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
   > **注意**：使用 Vite 构建工具构建不支持 `template` 和网页中直接挂载
   >
   > `[Vue warn]: Component provided template option but runtime compilation is not supported in this build of Vue. Configure your bundler to alias "vue" to "vue/dist/vue.esm-bundler.js". 
-  >   at <App>`
+  > at <App>`
   >
-  > 解决：将 ` import { createApp } from 'vue'` 改为
+  > 解决：
   >
-  > ```javascript
-  > import { createApp } from "vue/dist/vue.esm-bundler.js"
-  > ```
+  > 1. 将 ` import { createApp } from 'vue'` 改为
+  >
+  >    ```javascript
+  >    import { createApp } from "vue/dist/vue.esm-bundler.js"
+  >    ```
+  >
+  > 2. 安装 `@vitejs/plugin-vue` 插件：[单文件组件](#单文件组件)
 
 ### 组件化
 
