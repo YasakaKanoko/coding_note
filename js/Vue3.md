@@ -454,9 +454,11 @@ template: `
   npm init vue@latest
   ```
 
+- `cd ./vue_project`
+
 - 执行 `npm i` 安装依赖
 
-- 运行项目：``npm run dev`
+- 运行项目：`npm run dev`
 
 `App.vue`：根组件
 
@@ -472,5 +474,5 @@ template: `
   const vm = app.mount('#app');
   ```
 
-  
 
+组件实例：组件实例是一个 `Proxy` 对象 ( 代理对象 )

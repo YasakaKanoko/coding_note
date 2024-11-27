@@ -91,16 +91,16 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
 
 - `ReactDOM.createRoot(domNode, [options])`：用来创建 React 的根容器，根容器用来放置 React 元素
 
-```javascript
-// React 17的render(), 每次渲染都需要从新获取一次Id
-ReactDOM.render(div, document.getElementById('root'));
-
-// React 18
-// 1. 先获取根元素, 根元素就是React要插入的位置
-const root = ReactDOM.createRoot(document.getElementById('root'));
-// 2. 将元素通过render()渲染
-root.render(div);
-```
+  ```javascript
+  // React 17的render(), 每次渲染都需要从新获取一次Id
+  ReactDOM.render(div, document.getElementById('root'));
+  
+  // React 18
+  // 1. 先获取根元素, 根元素就是React要插入的位置
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  // 2. 将元素通过render()渲染
+  root.render(div);
+  ```
 
 ## JSX
 
@@ -133,7 +133,7 @@ root.render(div);
 
   - JSX 实际上是 `createElement()` 的语法糖，JSX 执行前都会被 babel 转换为 js 代码
 
-    ```javascript
+    ```jsx
     const div = <div>
         一个div
         <button>按钮</button>
@@ -151,7 +151,7 @@ root.render(div);
    const div = <div>这是一个div</div>; // 不需要加引号
    ```
 
-2. JSX 的标签语法规范：html 标签用小写开头、React 组件用大写开头
+2. JSX 的标签语法规范：html 标签用小写开头；React 组件用大写开头
 
    ```jsx
    // html标签
@@ -162,7 +162,7 @@ root.render(div);
 
 3. JSX 有且只有一个根标签
 
-   ```javascript
+   ```jsx
    // 根标签内部可以嵌入多个标签, 但根标签只能有一个
    const div = <div>
        一个div
@@ -180,7 +180,7 @@ root.render(div);
 
 5. 在 JSX 中可以使用 `{}` 嵌入表达式 ( 表达式就是有返回值的语句 )
 
-   ```javascript
+   ```jsx
    const name = 'Jack';
    const div = <div>
        <div>
@@ -306,24 +306,23 @@ React 提供 `react-scripts` 包，包中包含项目开发中的大部分依赖
   		- index.js // src/index.js 是js入口文件
   ```
 
-  - 进入项目所在目录，执行初始化命令
+- 进入项目所在目录，执行初始化命令
 
-
-  ```bash
+  ```shell
   # yarn init -y
   npm init -y
   ```
 
 - 安装项目依赖
 
-  ```bash
+  ```shell
   # yarn add react react-dom react-scripts
   npm install react react-dom react-scripts
   ```
 
 - 启动项目
 
-  ```bash
+  ```shell
   # 首次启动时, 需要按y确认
   npx react-scripts start
   
@@ -374,7 +373,7 @@ React 提供 `react-scripts` 包，包中包含项目开发中的大部分依赖
 
 - 启动项目
 
-  ```bash
+  ```shell
   npm run start
   ```
 
