@@ -663,11 +663,7 @@ export default {
     },
     computed: {
         info() {
-            if (this.stu.age < 18 ) {
-                return "未成年"
-            } else {
-                return "成年"
-            }
+            return this.stu.age < 18 ? "未成年" : "成年";
         }
     }
 }
