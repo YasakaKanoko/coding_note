@@ -497,9 +497,9 @@ template: `
   const vm = app.mount('#app');
   ```
 
-组件：一个组件可以创建多个组件实例
+**组件**：一个组件可以创建多个组件实例
 
-组件实例：组件实例 `vm` 是一个 `Proxy` 对象 ( 代理对象 )
+**组件实例**：组件实例 `vm` 是一个 `Proxy` 对象 ( 代理对象 )
 
 - 在 `data` 中的 `this` 指向当前组件实例 `vm`
 
@@ -523,7 +523,7 @@ template: `
 
 `data` 的返回值：返回一个对象
 
-- vue 会对该对象进行代理，转换为响应式数据，响应式数据可以直接被组件实例访问
+- vue 会对该对象进行代理，转换为**响应式数据**，响应式数据可以直接被组件实例访问
 - 直接向 `data` 中添加的数据不会被 vue 代理，不是响应式数据
 
 通过 Object 模拟代理：
@@ -620,7 +620,7 @@ data() {
 
 > **注意**
 >
-> - 动态添加响应数据：`this.$data.xxx = "xxx"`，不建议这么做
+> - 动态添加响应数据：`this.$data.xxx = "yyy"`，不建议这么做
 >
 > - 建议将暂时没有使用的属性，添加到 `data` 返回对象中，值设置为 `null`
 
@@ -701,17 +701,199 @@ export default {
 如果 `computed` 计算属性中的方法不指定 `setter`，那计算属性永远都是只读的，开发中不建议使计算属性可写
 
 ```javascript
-computed: {
-    name: {
-        get() {
-            // ...
-        },
-        set() {
-            // ...
+export default {
+    data() {
+        return {
+            lastName: 'Dio',
+            firstName: 'Brando'
+        }
+    },
+    computed: {
+        name: {
+            get() {
+                return this.lastName + this.firstName;
+            },
+            set(value) {
+                this.lastName = value[0];
+                this.firstName = value.slice(1);
+            }
         }
     }
 }
 ```
 
+## 组合式 API
 
+**选项式**：传统的  vue 2 代码。通过对象指定内容 ，如： `data`、`methods`、`computed` 等
 
+**组合式**：简化 vue 的配置
+
+### `setup`
+
+- `setup()`：钩子函数。钩子函数向外部暴露组件的配置，通过 `return` 暴露的内容，才能被模板使用
+
+  ```vue
+  <script>
+  export default {
+      setup() {
+          let msg = 'Hello vue3!';
+          return {
+              // 通过return暴露模板需要的内容
+              msg
+          }
+      }
+  }
+  </script>
+  <template>
+      <h1>{{msg}}</h1>
+  </template>
+  ```
+
+  > `setup()` 的特点：
+  >
+  > - **声明的数据不是响应式数据，只是一个普通变量**
+  >
+  >   需要通过 `reactive()` 创建响应式数据
+  >
+  >   ```vue
+  >   <script>
+  >   import { reactive } from 'vue';
+  >   
+  >   export default {
+  >       setup() {
+  >           const obj = reactive({
+  >               name: 'Jolyne',
+  >               age: 18
+  >           });
+  >           function updateAge() {
+  >               obj.age = 44;
+  >           } 
+  >           return {
+  >               obj,
+  >               updateAge
+  >           }
+  >       }
+  >   }
+  >   </script>
+  >   <template>
+  >       <button @click="updateAge">修改年龄</button>
+  >       <span>{{obj.age}}岁</span>
+  >   </template>
+  >   ```
+  >
+  > - 闭包，具有函数作用域
+
+- 可以直接将 `setup` 定义在 `script` 标签内，不再需要 `return`  暴露和 `export` 导出。模板内容具有相同作用域
+
+  ```vue
+  <script setup>
+      let msg = 'Hello world!'
+  </script>
+  
+  <template>
+      <h1>{{ msg }}</h1>
+  </template>
+  ```
+
+### 响应式代理
+
+- `reactive()`：**返回一个深层响应式对象**
+
+- `shallowReactive()`：**返回一个浅层响应式对象**。只有**根级别的属性式响应式的**
+
+  > **注意**：`reactive()` 只能返回对象，不能处理原始值
+
+- `ref()`：接收任意值，并返回响应式代理，但**它会将值包装成一个对象** 
+
+  因此，在访问 `ref` 对象时，必须通过 `对象.value` 访问值
+
+  ```javascript
+  let count = ref(0); // {value: 0}
+  ```
+
+  在 vue 模板中，`ref` 对象会**自动解包**
+
+  ```html
+  <template>
+  	<div>{{count}}</div>
+  </template>
+  ```
+
+### `ref` 自动解包
+
+- ~~`$ref()` 语法糖 ( vue3 已废弃 )~~
+
+- `ref` 对象在模板中**必须是顶层对象**
+
+  - 正常映射 `ref` 对象，自动解包
+
+    > ```vue
+    > <script setup>
+    >     import { ref } from 'vue';
+    >     let obj = ref({
+    >         name: 'Jolyne',
+    >         age: 18
+    >     });
+    > </script>
+    > <template>
+    >     <div>{{obj.name}}</div>
+    > </template>
+    > ```
+    >
+    > 输出：`Jolyne`
+
+  - **如果数据不是顶层对象，那么就不会自动解包**
+
+    > ```vue
+    > <script setup>
+    >     import { ref } from 'vue';
+    >     let obj = {
+    >         age: ref(1)
+    >     };
+    > </script>
+    > <template>
+    >     <div>{{obj.age + 1}}</div>
+    > </template>
+    > ```
+    >
+    > 输出：`[object Object]1`
+
+    **解决**：**解构赋值** 将底层数据对象结构成顶层对象
+
+    > ```vue
+    > <script setup>
+    >     import { ref } from 'vue';
+    >     let obj = {
+    >         age: ref(1)
+    >     };
+    >     const {age} = obj;
+    > </script>
+    > <template>
+    >     <div>{{age+1}}</div>
+    > </template>
+    > ```
+    >
+    > 输出：`2`
+
+### 计算属性
+
+**计算属性**：由于计算属性需要一个函数作为参数， `setup` 具有**函数作用域**，因此可以使用箭头函数
+
+```vue
+<script setup>
+    import { computed, ref } from 'vue';
+    let msg = ref('vue3!');
+    let logMsg = computed(() =>  {
+        return "Hello  " + msg.value; 
+    })
+</script>
+<template>
+    <div>{{logMsg}}</div>
+</template>
+```
+
+### 模板
+
+**插值**：访问组件声明的变量  - `{{xxx}}`
+
+> 除了访问组件中的变量，vue 还提供了全局变量，如：`Date`、`Math`、`RegExp` ......
