@@ -139,7 +139,7 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
 
   ```pseudocode
   - 根目录
-  	- node_modules
+      - node_modules
   	- public
   	- src
   		- components
@@ -148,7 +148,7 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
   	- index.html
   	- package-lock.json
   	- package.json
-  	- vite.
+  	- vite.config.js
   ```
 
 - **初始化**
@@ -685,7 +685,7 @@ export default {
 
 ##### `setter`
 
-如果 `computed` 计算属性中的方法不指定 `setter`，那计算属性永远都是只读的，开发中不建议使得计算属性可写
+如果 `computed` 计算属性中的方法不指定 `setter`，那计算属性永远都是只读的，开发中不建议使计算属性可写
 
 ```javascript
 computed: {
