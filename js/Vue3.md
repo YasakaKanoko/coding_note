@@ -1,12 +1,24 @@
 # Vue3
 
-Vue 是一个声明式、组件化编程模型，渐进式 JavaScript 框架
+**目录**
 
-> - 渐进式：适用于各种项目
+- [Hello vue3](#hello-vue3)
+- [组件](#组件)
+- [vite](#vite)
+- [子组件](#子组件)
+- [代理](#代理)
+- [methods](#methods)
+- [computed](#computed)
+
+
+
+Vue 是一个**声明式**、**组件化**编程模型，**渐进式** JavaScript 框架
+
+> - **渐进式**：轻量小巧的库，适用于各类项目
 >
-> - 声明式
+> - **声明式**：无需直接操作 DOM
 >
-> - 组件化
+> - **组件化**：提升代码复用率
 
 传统服务器渲染的缺陷：Model 和视图耦合 ( 单对单 )
 
@@ -16,7 +28,7 @@ Vue 负责 `vm` 视图模型的工作，将视图与模型关联
 - 当模型发生变化，视图自动更新
 - 也可以直接通过视图操作模型
 
-## Hello world
+## Hello vue3
 
 ### 组件
 
@@ -530,19 +542,20 @@ template: `
    `handler`：指定代理的行为
 
    - `get(target, prop, receiver)`：`target` - 被代理对象、`prop` - 读取的对象属性、`receiver` - 代理对象
+
    - `set(target, prop, value, receiver)`：`value` - 被修改的属性
 
-   ```javascript
-   const handler = {
-       get(target, prop, receiver) {
-           return target[prop];
-       },
-       set(target, prop, value, receiver) {
-           target[prop] = value;
-           return true;
-       }
-   };
-   ```
+     ```javascript
+     const handler = {
+         get(target, prop, receiver) {
+             return target[prop];
+         },
+         set(target, prop, value, receiver) {
+             target[prop] = value;
+             return true;
+         }
+     };
+     ```
 
 3. 创建代理
 
