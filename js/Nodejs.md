@@ -114,7 +114,7 @@ sum(1, 2, (res) => {
 });
 ```
 
-_Promise_：解决异步中的回到函数的问题，存储数据的容器，特殊存储数据的方式
+_Promise_：解决异步中的回调函数的问题，是一个存储数据的容器，具有特殊的存储数据的方式
 
 **创建 *Promise***
 
@@ -147,7 +147,7 @@ _Promise_：解决异步中的回到函数的问题，存储数据的容器，�
 
 - 通过 `resolve` 存储的数据，调用第一个回到函数
 
-- 通过 `reject` 存储的数据或出现异常时，调用第二个回调函数
+- 通过 `reject` 存储的数据或发生异常时，调用第二个回调函数
 
   ```javascript
   promise.then((result) => {
@@ -207,4 +207,285 @@ promise.finally(() => {
     console.log('没有什么可以阻止finally执行!');
 });
 ```
+
+> **注意**：
+>
+> 1. `Promise()` 对象中的 `then`、`catch`、`finally` 方法调用时返回的都是一个新的 `Promise()`
+> 2. `then` 中的代码是异步的，要比其他代码执行晚
+
+### 链式调用
+
+- Promise 对象中的方法每次调用函数返回的是上一次调用的结果
+
+  ```javascript
+  const p = new Promise((resolve, reject) => {
+      resolve('Hello world!');
+      reject('New Error');
+  });
+  ```
+
+  ```javascript
+  p
+      .then(result => {
+          console.log(result);
+          return '1st Run'
+      })
+      .then(
+          result => {
+              console.log(result);
+              return '2nd Run'
+          })
+      .then(
+          result => {
+              console.log(result);
+              return '3rd Run'
+          })
+      .then(
+          result => {
+              console.log(result);
+              return '4th Run'
+          })
+  
+  // Hello world!
+  // 1st Run
+  // 2nd Run
+  // 3rd Run
+  ```
+
+- Promise 的链式调用：`then` 和 `catch` 执行的结果不是当前所需要的结果会被直接跳过当前方法
+
+  ```javascript
+  const p = new Promise((resolve, reject) => {
+      reject('New error!');
+  });
+  p
+      .then(result => {
+          console.log(result); // 这一句直接跳过
+      })
+      .catch(result => {
+          console.log(result); // New error!会在这里打印
+      })
+  ```
+
+- 如果 Promise 出现异常，整条链上没有 `catch`，异常会直接抛出，因此只需在最后一行中设置 `catch` 即可
+
+  ```javascript
+  const p = new Promise((resolve, reject) => {
+      reject('New error!');
+  });
+  p
+      .then(result => {
+          console.log(result);
+          return '1st run'
+      })
+      .then(result => {
+          console.log(result);
+          return '2nd run'
+      })
+      .then(result => {
+          console.log(result);
+          return '3rd run'
+      })
+      .then(result => {
+          console.log(result);
+          return '4th run'
+      })
+      .catch(result => {
+          console.log(result);
+  })
+  ```
+
+### 静态方法
+
+- `Promise.resolve()`：创建一个立即完成的 Promise
+
+  ```javascript
+  Promise.resolve('Hello world!').then(res => { console.log(res); }); // Hello world!
+  ```
+
+- `Promise.reject()`：创建一个立即拒绝的 Promise
+
+  ```javascript
+  Promise.reject('New Error!').then(null, (res) => { console.log(res); }); // New Error!
+  ```
+
+- `Promise.all(iterable)`：需要一个可迭代对象作为参数，返回一个新的 Promise 对象，同时返回多个 Promise 的执行结果
+
+  如果其中有一个 Promise 报错了，返回错误信息
+
+  ```javascript
+  function sum(a, b) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              resolve(a + b);
+          }, 1000);
+      })
+  }
+  Promise.all([
+      sum(1, 2),
+      sum(3, 4),
+      sum(5, 6)
+  ]).then(res => {
+      console.log(res);
+  }); // (3) [3, 7, 11]
+  ```
+
+- `Promise.allSettled()`：需要一个可迭代对象作为参数，和 `all` 类似，返回的结果是以**对象**形式返回 ( `status` 保存状态，`value` 保存值 )
+
+  执行结果：成功或失败的数据都返回
+
+  ```javascript
+  function sum(a, b) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              resolve(a + b);
+          }, 1000);
+      })
+  }
+  Promise.allSettled([
+      sum(1, 2),
+      sum(3, 4),
+      Promise.reject('error'),
+      sum(5, 6)
+  ]).then(res => {
+      console.log(res);
+  });
+  //  (4) [{…}, {…}, {…}, {…}]
+  // > 0 = {status: 'fulfilled', value: 3}
+  // > 1 = {status: 'fulfilled', value: 7}
+  // > 2 = {status: 'rejected', reason: 'error'}
+  // > 3 = {status: 'fulfilled', value: 11}
+  ```
+
+- `Promise.race()`：需要一个可迭代对象作为参数，返回执行最快的 Promise ，
+
+  不考虑对错
+
+  ```javascript
+  Promise.race([
+      Promise.resolve('Hello world!'),
+      sum(1, 2),
+      sum(3, 4),
+      Promise.reject('error'),
+      sum(5, 6)
+  ]).then(res => {
+      console.log(res);
+  }) // Hello world! 如果reject放在第一位, catch调用时, 返回的是reject
+  ```
+
+- `Promise.any()`：需要一个可迭代对象作为参数，返回执行最快的 Promise 
+
+  只有当所有的 Promise 对象都出错时，才返回错误信息
+
+  ```javascript
+  function sum(a, b) {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              resolve(a + b);
+          }, 1000);
+      })
+  }
+  Promise.any([
+      Promise.reject('e1'),
+      Promise.reject('e2'),
+      Promise.reject('e3')
+  ]).then(res => {
+      console.log(res);
+  }).catch(res => {
+      console.log(res);
+  }) 
+  // AggregateError: All promises were rejected {stack: 'AggregateError: All promises were rejected', message: 'All promises were rejected', errors: Array(3)}
+  ```
+
+## 宏任务和微任务
+
+JS 是单线程的，运行机制基于事件循环机制 ( event loop )
+
+> **调用栈** ( Call Stack )：
+>
+> - 栈，是一种后进先出的数据结构
+> - 调用栈中，存放的是准备执行的代码
+>
+> **任务队列**：
+>
+> - 队列，是一种先进先出的数据结构
+> - 任务队列中，存放的是将要执行的代码
+>
+> 当栈中代码执行完毕，队列中的代码才会依次入栈中执行
+
+```javascript
+setTimeout(() => {
+    console.log(1);
+})
+
+Promise.resolve().then(() => {
+    console.log(2);
+})
+
+console.log(3);
+// 执行顺序: 3 -> 2 -> 1
+```
+
+**定时器**：定时器是在一段时间后，将函数放入**任务队列**中
+
+Promise 执行原理：Promise 执行时，`then` 相当于给 Promise 绑定一个回调函数，`promiseState` 的状态从 `pending` 变为 `fulfilled` ，`then` 的回调函数放入**任务队列**
+
+ **任务队列**：**宏任务**、**微任务**
+
+- 宏任务队列：大部分代码存放在宏任务
+- 微任务队列：Promise 的回调函数存放在微任务中
+
+**流程**：调用栈 -> 微任务 -> 宏任务
+
+`queueMicrotask()`：添加一个微任务
+
+```javascript
+Promise.resolve().then(() => {
+    setTimeout(() => {
+        console.log(1);
+    })
+})
+queueMicrotask(() => {
+    console.log(2);
+})
+// 执行顺序: 2 -> 1
+
+Promise.resolve().then(() => {
+    Promise.resolve().then(() => {
+        console.log(1);
+    })
+})
+queueMicrotask(() => {
+    console.log(2);
+})
+// 执行顺序: 2 -> 1
+```
+
+>  **解析**：执行顺序实际是先执行 `then` 回调函数，回调函数的作用是将函数体添加入任务队列
+
+练习：
+
+```javascript
+// 调用栈 -> 微任务 -> 宏任务
+console.log(1);
+// 1 -> 7
+// 宏: 2 -> 4 -> 6
+// 微: 3 -> 5  
+
+setTimeout(() => { console.log(2); });
+
+Promise.resolve().then(() => { console.log(3); });
+
+Promise.resolve().then(() => setTimeout(() => { console.log(4); }));
+
+Promise.resolve().then(() => { console.log(5); });
+
+setTimeout(() => { console.log(6); });
+
+console.log(7);
+
+// 1 -> 7 
+```
+
+
 
