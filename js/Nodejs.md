@@ -95,7 +95,7 @@ sum(1, 2, function (res) {
 });
 ```
 
-## *Promise*
+## Promise
 
 异步必须通过回调函数返回数据，进行复杂调用时，会出现 " 回调地狱 "
 
@@ -490,4 +490,207 @@ console.log(7);
 > - 未执行代码先入队，但 `Promise.resolve().then()` 的回调函数中的宏任务需要在微任务结束时才进入宏任务队列
 
 ## 手写 Promise
+
+```javascript
+// 定义一个常量: 表示Promise的状态
+const PROMISE_STATE = {
+    // pending: 0, fulfilled: 1, rejected: 2 
+    PENDING: 0,
+    FULFILLED: 1,
+    REJECTED: 2
+
+};
+class MyPromise {
+
+    // 创建一个变量, 用于存储Promise的结果
+    #result;
+
+    // 创建一个变量, 记录Promise的状态
+    #state = PROMISE_STATE.PENDING;
+
+    // 创建一个数组, 存储回调函数, 回调函数可能有多个
+    #callbacks = [];
+
+    constructor(executor) {
+        // 接受一个执行器作为参数
+        // 调用回调函数
+
+        // 私有方法调用时, 必须要绑定this到实例中, 否则数据存不进来
+        // 两种方式: 1. 箭头函数 2. bind(this) 
+        // executor(this.#resolve.bind(this), this.#reject.bind(this));
+    }
+
+    // #resolve(): 存储成功的数据
+    #resolve = (value) => {
+        if (this.#state !== PROMISE_STATE.PENDING) return;
+        this.#result = value;
+        this.#state = PROMISE_STATE.FULFILLED; // 数据填充成功, 状态改变
+
+        // 当resolve执行时, 数据已经存进, 需要调用then()回调函数 
+        queueMicrotask(() => {
+            // 短路与: 如果回调函数存在才执行
+            // this.#callback && this.#callback(this.#result);
+            // 调用callbacks中的所有函数
+            this.#callbacks.forEach(cb => {
+                cb();
+            })
+        });
+    }
+    // #reject(): 存储拒绝的数据
+    #reject = (reason) => {
+
+    }
+    // then(): 读取数据的方法
+    then(onFulfilled, onRejected) {
+        // then()的链式调用
+        // then()回调函数返回值会成为新Promise中的数据
+        return new MyPromise((resolve, reject) => {
+            if (this.#state === PROMISE_STATE.PENDING) { // 宏任务, 读取数据时在resolve()中进行
+                // 数据未进入Promise, 将回调函数设置为callback
+                this.#callbacks.push(() => {
+                    resolve(onFulfilled(this.#result));
+                });
+            } else if (this.#state === PROMISE_STATE.FULFILLED) { // 微任务, 直接读取
+                // onFulfilled(this.#result);
+                // then()中回调函数应该在任务队列, 而非直接调用
+                queueMicrotask(() => {
+                    resolve(onFulfilled(this.#result));
+                });
+            }
+        });
+    }
+}
+
+const mp = new MyPromise((resolve, reject) => {
+    resolve('Jack')
+});
+
+mp
+    .then(result => {
+        console.log(result);
+        return 'Alice'
+    })
+    .then(result => {
+        console.log(result);
+    })
+```
+
+```javascript
+const PROMISE_STATE = {
+    // pending: 0, fulfilled: 1, rejected: 2 
+    PENDING: 0,
+    FULFILLED: 1,
+    REJECTED: 2
+
+};
+
+class MyPromise {
+    // 成功的值
+    #result;
+    // 失败的值
+    #reason;
+    // Promise状态
+    #state = PROMISE_STATE.PENDING;
+    // onFullfilledCallbacks 成功的回调函数
+    #onFullfilledCallbacks = [];
+    // onRejectedCallbacks 失败的回调函数
+    #onRejectedCallbacks = [];
+    // 标志位
+    #isHandled = false;
+
+    constructor(executor) {
+        try {
+            executor(this.#resolve, this.#reject);
+        } catch (e) {
+            this.#reject(e);
+        }
+    }
+
+    #resolve = (result) => {
+        if (this.#state !== PROMISE_STATE.PENDING) return;
+        this.#result = result;
+        this.#state = PROMISE_STATE.FULFILLED;
+        this.#handleCallbacks();
+    }
+    #reject = (reason) => {
+        if (this.#state !== PROMISE_STATE.PENDING) return;
+        this.#reason = reason;
+        this.#state = PROMISE_STATE.REJECTED;
+        this.#handleCallbacks();
+    }
+    #handleCallbacks = () => {
+        if (this.#isHandled) return; // 避免重复处理
+        this.#isHandled = true; // 设置标志位
+        queueMicrotask(() => {
+            if (this.#state === PROMISE_STATE.FULFILLED) {
+                this.#onFullfilledCallbacks.forEach(fn => {
+                    try {
+                        const res = fn(this.#result);
+                        this.#handleCallbacks(res);
+                    } catch (e) {
+                        this.#reject(e);
+                    }
+                });
+            } else if (this.#state === PROMISE_STATE.REJECTED) {
+                this.#onRejectedCallbacks.forEach(fn => {
+                    try {
+                        const res = fn(this.#reason);
+                        this.#handleCallbacks(res);
+                    } catch (e) {
+                        this.#reject(e);
+                    }
+                });
+            }
+            this.#isHandled = false; // 重置标志位
+        });
+    }
+    then(onFulfilled, onRejected) {
+        return new MyPromise((resolve, reject) => {
+            this.#onFullfilledCallbacks.push(() => {
+                try {
+                    const res = onFulfilled ? onFulfilled(this.#result) : this.#result;
+                    resolve(res);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            this.#onRejectedCallbacks.push(() => {
+                try {
+                    const res = onRejected ? onRejected(this.#reason) : this.#reason;
+                    reject(res);
+
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            this.#handleCallbacks(); // 立即处理回调，解决pending状态下微任务嵌套宏任务的问题
+        });
+    }
+}
+const mp = new MyPromise((resolve, reject) => {
+    setTimeout(() => {
+        reject('1st reject');
+    }, 1000);
+});
+console.log(mp);
+
+mp
+    .then((result) => {
+        console.log(result);
+        return '2nd resolve';
+    }, (res) => {
+        console.log(res);
+        return '2nd reject'
+
+    })
+    .then((result) => {
+        console.log(result);
+        return '3rd resolve';
+    }, (res) => {
+        console.log(res);
+        return '2rd reject'
+    })
+```
+
+
 
