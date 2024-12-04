@@ -1,4 +1,4 @@
-# *Node.js*
+# Node.js
 
 **目录**：
 
@@ -12,6 +12,7 @@
 - [静态方法](#静态方法)
 - [宏任务和微任务](#宏任务和微任务)
 - [手写Promise](#手写-promise)
+- [async 与 await](#async-与-await)
 
 [Node.js](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
 
@@ -696,5 +697,461 @@ mp
     })
 ```
 
+### async 与 await
 
+- `async`：快速创建异步函数，异步函数的返回值会封装到一个 Promise 中返回。即 `async` 封装的函数，需要调用 `then` 方法访问
+
+  ```javascript
+  function fn() {
+      return Promise.resolve(10);
+  }
+  
+  // async 创建异步
+  async function fn() {
+      return 10;
+  }
+  fn().then(result => {
+      console.log(result);
+  })
+  ```
+
+- `await`：调用异步函数。暂停代码运行，直到异步代码有结果时才返回
+
+  **阻塞**：`await` 会阻塞异步函数内部代码运行，但不影响外部代码
+
+  ```javascript
+  function sum(a, b) {
+      return new Promise(resolve => {
+          setTimeout(() => {
+              resolve(a + b);
+          }, 1000);
+      });
+  }
+  async function fn() {
+      let result = await sum(1, 2);
+      console.log(result);
+  }
+  fn(); // 3
+  ```
+
+  > **注意**：
+  >
+  > - `await` 只能用于 `async` 声明的异步函数中，或 **es 模块的顶级作用域**中
+  >
+  >   - HTML `<script>` 标签类型 `type="module"` 中使用
+  >   - 扩展名为 `.mjs` 的文件中
+  >
+  > - 如果 `async` 声明的函数没有 `await` ，那么代码会依次执行，和普通函数的执行结果一样
+  >
+  >   唯一的区别在于 `async` 返回的是一个 Promise 对象
+  >
+  >   ```javascript
+  >   async function fn() {
+  >       console.log(1);
+  >       console.log(2);
+  >       console.log(3);
+  >       return 'hello';
+  >   }
+  >   fn();
+  >   console.log(4);
+  >   // 执行顺序: 1 -> 2 -> 3 -> 4
+  >   
+  >   // 等价于
+  >   function fn() {
+  >       return new Promise(resolve => {
+  >           console.log(1);
+  >           console.log(2);
+  >           console.log(3);
+  >           resolve('hello');
+  >       });
+  >   }
+  >   fn();
+  >   console.log(4);
+  >   ```
+  >
+  > - 如果使用 `await` 调用完函数后，会在函数执行完，后边所有的代码会被放入微任务队列。即后续代码放入 `then()` 中
+  >
+  >   ```javascript
+  >   async function fn() {
+  >       console.log(1);
+  >       await console.log(2);
+  >       console.log(3);
+  >   }
+  >   fn();
+  >   console.log(4);
+  >   // 执行顺序: 1 -> 2 -> 4 -> 3
+  >   ```
+
+- `try-catch`：处理异常
+
+  ```javascript
+  async function fn() {
+      try {
+          let result = await sum(1, 2);
+          result = await sum(result, 3);
+          result = await sum(result, 4);
+          console.log(result);
+      } catch (e) {
+          console.log('出错');
+      }
+  }
+  fn(); // 10
+  ```
+
+## 模块化
+
+早期的模块化，通过原始的 `script` 标签引入多个 js 文件
+
+**问题**：
+
+1. **空间浪费**：无法指定引入模块的内容
+2. 引入模块必须按照既定的顺序，容易出错
+
+**解决**：模块化
+
+- **Nodejs**：**CommonJS** 规范
+- **ES 模块化规范**
+
+> **注意**：Node 会将扩展名为 `.js`、`.cjs`、`.mjs`、`.json`、`.node` 视为 CommonJS 模块 
+
+### CommonJS
+
+在定义模块时，模块中的内容是禁止外部访问的，使用前需**导出模块**
+
+**导出模块**
+
+- 访问 `exports` 的方式：`exports`、`module.exports`
+
+- `exports` 实际上是 `require` 函数的返回值
+
+  导出单个属性
+
+  ```javascript
+  exports.a = 10;
+  ```
+
+  `module.exports`：同时导出多个值
+
+  ```javascript
+  let a = 10;
+  let b = 20;
+  module.exports = {
+      a, b
+  };
+  ```
+
+  > **注意**：`module.exports = {}` 与 `exports = {}`
+  >
+  > - `module.exports = {}` 是在修改对象的属性值 ( √ )
+  > - `exports = {}` 是在给对象赋值 ( × )
+
+**引入模块**
+
+- `require('./path')`：引入自定义模块，使用 `./` 或 `../`
+
+  `.js` 扩展名可以省略 
+
+  ```javascript
+  const m1 = require('./m1'); // 等价于 './m1.js'
+  console.log(m1.a); // 10
+  ```
+
+  > node 自动补全文件扩展名机制：
+  >
+  > - node 识别引入模块文件时，会优先寻找目录中的 `.js` 文件，如果文件不存在，则会寻找 `.json` 文件，如果 `.json` 文件也不存在，则会寻找 `.node` 文件
+  > - 如果 `.js` 和 `.json` 文件同名，则优先使用 `.js` 文件
+
+- `require()` 引入第三方模块
+
+  路径直接写模块名称
+
+  在模块前加上 `node:`：指定模块为核心模块
+
+  ```javascript
+  const path = require('path');
+  // 等价于 const path = require('node:path');
+  ```
+
+- `require()` 引入文件夹作为模块
+
+  文件夹中需要一个模块的主文件： `index.js`
+
+  如果主文件不存在，则需要在 `package.json` 中指定 `main` 属性的文件作为主文件
+
+  `node_modules`：如果引入模块是 `node_modules`，且路径没有以 `./` 或 `../` 开头，会从根目录开始向上查找，直到找到模块
+
+  ```javascript
+  // 文件目录中存在index.js则会自动识别 ./hello/index.js
+  const hello = require('./hello');
+  ```
+
+- 按需引入
+
+  ```javascript
+  // 只引入'./m3.js'中的name属性
+  const name = require('./m3').name;
+  ```
+
+- 解构赋值
+
+  ```javascript
+  const {name} = require('./m3');
+  ```
+
+- **原理**：所有 CommonJS 的模块都会被包装到一个函数中
+
+  ```javascript
+  (function(exports, require, module, __filename, __dirname) {
+      
+  };
+  ```
+
+### ES 模块
+
+ES6 标准
+
+在 Node 环境中，默认模块化标准是 CommonJS，如果想要使用 ES 标准
+
+1. 使用 `.mjs` 文件
+
+2. 修改 `package.json` 将模块化规范设置为 ES 模块，修改后 `.js` 将采用 es module 规范 
+
+   ```json
+   {
+       "type": "module"
+   }
+   ```
+
+**导出模块**
+
+- 命名导出
+
+  ```javascript
+  export let a = 10;
+  export const b = 20;
+  
+  // 等价于
+  let a = 10;
+  const b = 20;
+  export {a, b};
+  ```
+
+  > **注意**：`export` 是对外的接口，必须使用解构赋值 `{}` ，必须与模块内部变量建立一一对应的关系
+
+- 默认导出：`export default`
+
+  **注意**：一个模块中，只能有一个默认导出
+
+  ```javascript
+  function sum(a, b) {
+      return a + b;
+  }
+  export default sum;
+  ```
+
+- 导出函数和类
+
+  ```javascript
+  // 写法一
+  export function fn() {}
+  
+  // 写法二
+  function fn() {}
+  export {fn}
+  ```
+
+- `export * from`：将另一个模块的所有内容导出，而不导出默认导出。可以在一个模块集中管理多个模块
+
+  ```javascript
+  // utils.js
+  export function add(a, b) { return a + b; }
+  export function subtract(a, b) { return a - b; }
+  export function multiply(a, b) { return a * b; }
+  
+  // math.js
+  export * from './utils.js';
+  
+  // main.js
+  import { add, subtract, multiply } from './math.js';
+
+**引入模块**
+
+1. **不能省略扩展名**
+
+   ```javascript
+   import { a, b } from "./m1.js"
+   console.log(a); // 10
+   ```
+
+2. **解构赋值**：引入时**变量名必须和导出时相同**
+
+   `as`：**设置别名**
+
+   ```javascript
+   import { a as hello, b } from "./m1.js"
+   console.log(hello);
+   ```
+
+3. ES 模块导入的内容是**常量**
+
+   ```javascript
+   import {a} from './xxx.js'
+   a = {}; // Syntax Error : 'a' is read-only;
+   ```
+
+   > **注意**：
+   >
+   > 1. `export` 使用的关键字是 `let`，`import` 时引入的变量仍是 `read-only`，不能修改
+   >
+   > 2. 如果 `export` 导出的是对象，对象的属性值并不是 `read-only` 可以修改。
+   >
+   >    **原因**： `const` 只禁止变量重新赋值，只保证其引用 ( 内存地址 ) 不变，对象本身的属性值的指针仍然可以修改
+
+4. ES 模块是严格模式
+
+5. `import` 具有变量提升，代码会提升到头部先执行
+
+   ```javascript
+   foo();
+   import { foo } from 'my_module';
+   ```
+
+6. `import` 是静态执行。不能使用表达式或变量
+
+   ```javascript
+   // 报错
+   import { 'f' + 'oo' } from 'my_module';
+   
+   // 报错
+   let module = 'my_module';
+   import { foo } from module;
+   
+   // 报错
+   if (x === 1) {
+     import { foo } from 'module1';
+   } else {
+     import { foo } from 'module2';
+   }
+   ```
+
+7. `import` 是 Singleton 模式，对于同一 `import` 语句，只会执行一次，而不会执行多次
+
+   ```javascript
+   import { foo } from 'my_module';
+   import { bar } from 'my_module';
+   
+   // 等同于
+   import { foo, bar } from 'my_module';
+   ```
+
+8. 通过 Babel 转码，CommonJS 的 `require` 和 ES 模块的 `import` 可以写在同一文件中，但 import 会在静态解析阶段执行，所以`import` 是模块中最早执行的
+
+   ```javascript
+   require('core-js/modules/es6.symbol');
+   require('core-js/modules/es6.promise');
+   import React from 'React';
+   ```
+
+- `*`：导入所有 
+
+  前端慎用 `import *`：前端使用 webpack 打包时，最终打包后的文件很臃肿，性能会受影响
+
+  ```javascript
+  import * as m1 from "./m1.js"
+  console.log(m1.a); // 10
+  ```
+
+- 导入模块的默认导出
+
+  ```javascript
+  import sum from "./m1.js"
+  console.log(sum(1, 2)); // 3
+  ```
+
+  默认导出可以任意命名
+
+  ```javascript
+  import hello from "./m1.js"
+  console.log(hello(1, 2)); // 3
+  ```
+
+- 导入命名和和混合导出
+
+  ```javascript
+  import sum, {a, b} from "./m1.js"
+  ```
+
+- 如果导入的模块不带有路径，只是一个模块名称，需要通过配置文件告知 JS 引擎模块的位置
+
+  1. 单个入口：
+
+     ```json
+     // package.json
+     {
+       "name": "my-module",
+       "version": "1.0.0",
+       "exports": "./dist/index.js"
+     }
+     ```
+
+     ```javascript
+     // test.js
+     import { myMethod } from 'my-module';
+     ```
+
+  2. 多个入口
+
+     ```json
+     // package.json
+     {
+       "name": "my-module",
+       "version": "1.0.0",
+       "exports": {
+         ".": "./dist/index.js",
+         "./utils": "./dist/utils.js",
+         "./data": "./dist/data.json"
+       }
+     }
+     ```
+
+     ```javascript
+     import myModule from 'my-module'; // 导入默认入口点
+     import { someUtil } from 'my-module/utils'; // 导入 utils 模块
+     import data from 'my-module/data'; // 导入 data 模块
+     ```
+
+  3. 条件导出
+
+     ```javascript
+     {
+       "name": "my-module",
+       "version": "1.0.0",
+       "exports": {
+         ".": {
+           "import": "./dist/index.mjs",
+           "require": "./dist/index.cjs"
+         }
+       }
+     }
+     ```
+
+### 核心模块
+
+核心模块：Node 中内置的模块，可以在 Node 中直接使用
+
+> **注意**：
+>
+> - `window`：浏览器宿主对象
+>
+> - `global`：node 全局对象，类似于 `window`
+>
+> ES 标准中，全局对象的标准名为 `globalThis`
+>
+> ```javascript
+> console.log(global === globalThis); // true
+> ```
+
+- `process` 模块：表示当前的 node 进程
+- `path`
+- `fs`
 
