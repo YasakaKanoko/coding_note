@@ -812,7 +812,7 @@ mp
 - **Nodejs**：**CommonJS** 规范
 - **ES 模块化规范**
 
-> **注意**：Node 会将扩展名为 `.js`、`.cjs`、`.mjs`、`.json`、`.node` 视为 CommonJS 模块 
+> **注意**：Node 会将扩展名为 `.js`、`.cjs`、`.json`、`.node` 视为 CommonJS 模块 
 
 ### CommonJS
 
@@ -976,6 +976,37 @@ ES6 标准
 
 **引入模块**
 
+- `*`：导入所有 
+
+  前端慎用 `import *`：前端使用 webpack 打包时，最终打包后的文件很臃肿，性能会受影响
+
+  ```javascript
+  import * as m1 from "./m1.js"
+  console.log(m1.a); // 10
+  ```
+
+- 导入模块的默认导出
+
+  ```javascript
+  import sum from "./m1.js"
+  console.log(sum(1, 2)); // 3
+  ```
+
+  默认导出可以任意命名
+
+  ```javascript
+  import hello from "./m1.js"
+  console.log(hello(1, 2)); // 3
+  ```
+
+- 导入命名和和混合导出
+
+  ```javascript
+  import sum, {a, b} from "./m1.js"
+  ```
+
+**注意事项**：
+
 1. **不能省略扩展名**
 
    ```javascript
@@ -1044,96 +1075,13 @@ ES6 标准
    import { foo, bar } from 'my_module';
    ```
 
-8. 通过 Babel 转码，CommonJS 的 `require` 和 ES 模块的 `import` 可以写在同一文件中，但 import 会在静态解析阶段执行，所以`import` 是模块中最早执行的
+8. 通过 Babel 转码，CommonJS 的 `require` 和 ES 模块的 `import` 可以写在同一文件中，但 `import` 会在静态解析阶段执行，所以`import` 是模块中最早执行的
 
    ```javascript
    require('core-js/modules/es6.symbol');
    require('core-js/modules/es6.promise');
    import React from 'React';
    ```
-
-- `*`：导入所有 
-
-  前端慎用 `import *`：前端使用 webpack 打包时，最终打包后的文件很臃肿，性能会受影响
-
-  ```javascript
-  import * as m1 from "./m1.js"
-  console.log(m1.a); // 10
-  ```
-
-- 导入模块的默认导出
-
-  ```javascript
-  import sum from "./m1.js"
-  console.log(sum(1, 2)); // 3
-  ```
-
-  默认导出可以任意命名
-
-  ```javascript
-  import hello from "./m1.js"
-  console.log(hello(1, 2)); // 3
-  ```
-
-- 导入命名和和混合导出
-
-  ```javascript
-  import sum, {a, b} from "./m1.js"
-  ```
-
-- 如果导入的模块不带有路径，只是一个模块名称，需要通过配置文件告知 JS 引擎模块的位置
-
-  1. 单个入口：
-
-     ```json
-     // package.json
-     {
-       "name": "my-module",
-       "version": "1.0.0",
-       "exports": "./dist/index.js"
-     }
-     ```
-
-     ```javascript
-     // test.js
-     import { myMethod } from 'my-module';
-     ```
-
-  2. 多个入口
-
-     ```json
-     // package.json
-     {
-       "name": "my-module",
-       "version": "1.0.0",
-       "exports": {
-         ".": "./dist/index.js",
-         "./utils": "./dist/utils.js",
-         "./data": "./dist/data.json"
-       }
-     }
-     ```
-
-     ```javascript
-     import myModule from 'my-module'; // 导入默认入口点
-     import { someUtil } from 'my-module/utils'; // 导入 utils 模块
-     import data from 'my-module/data'; // 导入 data 模块
-     ```
-
-  3. 条件导出
-
-     ```javascript
-     {
-       "name": "my-module",
-       "version": "1.0.0",
-       "exports": {
-         ".": {
-           "import": "./dist/index.mjs",
-           "require": "./dist/index.cjs"
-         }
-       }
-     }
-     ```
 
 ### 核心模块
 
