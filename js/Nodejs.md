@@ -8,8 +8,12 @@
 - [then()](#then())
 - [catch()](#catch())
 - [finally()](#finally())
+- [链式调用](#链式调用)
+- [静态方法](#静态方法)
+- [宏任务和微任务](#宏任务和微任务)
+- [手写Promise](#手写-promise)
 
-[*Node.js*](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
+[Node.js](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
 
 **处理并发问题**与其他**服务端语言**不同：
 
@@ -81,7 +85,7 @@ nvm use 18.10.0
 > 1. 可读性差
 > 2. 可调式性差
 
-**解决**：*Promise*：存储数据的**对象**，代替回调函数来返回结果
+**解决**：Promise。存储数据的**对象**，代替回调函数来返回结果
 
 ```javascript
 function sum(a, b, cb) {
@@ -114,9 +118,9 @@ sum(1, 2, (res) => {
 });
 ```
 
-_Promise_：解决异步中的回调函数的问题，是一个存储数据的容器，具有特殊的存储数据的方式
+Promise：解决异步中的回调函数的问题，是一个存储数据的容器，具有特殊的存储数据的方式
 
-**创建 *Promise***
+**创建 Promise**
 
 - 创建 *Promise* 时，构造函数中需要一个函数作为参数
 
@@ -162,7 +166,7 @@ _Promise_：解决异步中的回调函数的问题，是一个存储数据的�
   > - `Promise` 对象本身创建的函数是用来存储数据
   > - `then` 中的第一个函数用来编写处理数据的代码，第二个函数用于编写处理异常的代码
 
-*Promise* 对象中的两个**隐藏属性**：
+Promise 对象中的两个**隐藏属性**：
 
 - `PromiseResult`：存储数据的属性
 
@@ -176,7 +180,7 @@ _Promise_：解决异步中的回调函数的问题，是一个存储数据的�
 
 **流程**：
 
-- 当 *Promise* 创建时，`PromiseState` 的初始值为 `pending`
+- 当 Promise 创建时，`PromiseState` 的初始值为 `pending`
   - 当通过 `resolve` 存储数据时，`PromiseState` 变为 `fulfilled` ( 已完成 )，`PromiseResult` 变为存储的数据
   - 当通过 `reject` 存储数据时，`PromiseState` 变为 `rejected` ( 拒绝或出错 )，`PromiseResult` 变为存储的数据或异常对象
 
@@ -186,7 +190,7 @@ _Promise_：解决异步中的回调函数的问题，是一个存储数据的�
 
 ### `catch()`
 
-`catch()`：和 `then()` 类似，只需一个回调函数作为参数。`catch()` 只会在 *Promise* 被拒绝时调用，_Promise_ 专门用于处理异常的方法
+`catch()`：和 `then()` 类似，只需一个回调函数作为参数。`catch()` 只会在 Promise 被拒绝时调用，Promise 专门用于处理异常的方法
 
 ```javascript
 promise.catch((reason) => {
@@ -397,7 +401,7 @@ promise.finally(() => {
   // AggregateError: All promises were rejected {stack: 'AggregateError: All promises were rejected', message: 'All promises were rejected', errors: Array(3)}
   ```
 
-## 宏任务和微任务
+### 宏任务和微任务
 
 JS 是单线程的，运行机制基于事件循环机制 ( event loop )
 
@@ -489,7 +493,7 @@ console.log(7);
 > - 同步代码 -> 微任务队列 -> 宏任务队列 -> 下一轮事件循环
 > - 未执行代码先入队，但 `Promise.resolve().then()` 的回调函数中的宏任务需要在微任务结束时才进入宏任务队列
 
-## 手写 Promise
+### 手写 Promise
 
 ```javascript
 // 定义一个常量: 表示Promise的状态
