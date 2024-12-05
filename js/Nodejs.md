@@ -1336,13 +1336,302 @@ const fs = require('node:fs');
 
 - `fs.appendFile()`：创建新文件，或将数据添加到已有文件中
 
+  如果同名文件不存在，将数据添加到新文件；
+
+  如果同名文件存在，添加数据到文件中
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  // 添加数据
+  fs.appendFile(
+      path.resolve(__dirname, "./hello.txt"),
+      "hello node"
+  ).then((result) => {
+      console.log(result);
+  })
+  ```
+
+  通过 `fs.appendFile()` 将文件内容复制到新文件
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
   
+  fs.readFile(path.resolve(__dirname, "./a.img")).then((buffer) => {
+      return fs
+          .appendFile(path.resolve(__dirname, "./haha.img"), buffer)
+          .then(() => {
+              console.log("操作结束");
+          });
+  });
+  ```
 
 - `fs.mkdir()`：创建目录
 
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  fs.mkdir(path.resolve(__dirname, "./hello/abc"))
+      .then((result) => {
+          console.log("操作成功");
+      })
+      .catch((err) => {
+          console.log("创建失败", err);
+      });
+  ```
+
+  **递归创建**：接受第二个参数对象配置方法的功能
+
+  `recursive`：设置为 `true`。如果上级目录不存在，则自动创建
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  fs.mkdir(path.resolve(__dirname, "./hello/abc"), { recursive: true })
+      .then((result) => {
+          console.log("操作成功");
+      })
+      .catch((err) => {
+          console.log("创建失败", err);
+      });
+  ```
+
 - `fs.rmdir()`：删除目录
+
+  **递归删除**：`recursive`：设置为 `true`。如果目录还存在下级目录，可以递归删除下级目录
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  fs.rmdir(path.resolve(__dirname, "./hello"), { recursive: true })
+      .then(() => {
+          console.log("删除成功");
+      })
+      .catch((err) => {
+          console.log("删除失败", err);
+      });
+  // (node:12904) [DEP0147] DeprecationWarning: In future versions of Node.js, fs.rmdir(path, { recursive: true }) will be removed. Use fs.rm(path, { recursive: true }) instead (Use `node --trace-deprecation ...` to show where the warning was created)
+  // 删除成功
+  ```
+
+  > **警告**：Node 建议使用 `fs.rm()` 方法，因为后续版本可能删除 `fs.rmdir()` 方法
+  >
+  > ```javascript
+  > fs.rm(path.resolve(__dirname, "./hello"), { recursive: true })
+  >     .then(() => {
+  >         console.log("删除成功");
+  >     })
+  >     .catch((err) => {
+  >         console.log("删除失败", err);
+  >     });
+  > ```
 
 - `fs.rename()`：重命名
 
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  
+  fs.rename(
+      path.resolve(__dirname, "./haha.jpg"),
+      path.resolve(__dirname, "a.jpg")
+  )
+      .then((result) => {
+          console.log("重名名成功");
+      })
+      .catch((error) => {
+          console.log("重命名失败", error);
+      });
+  ```
+
+  `fs.rename()` 可以实现**剪切**
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  
+  fs.rename(
+      path.resolve(__dirname, "./a.jpg"),
+      path.resolve(__dirname, "../a.jpg")
+  )
+      .then((result) => {
+          console.log("剪切成功");
+      })
+      .catch((error) => {
+          console.log("剪切失败", error);
+      });
+  ```
+
 - `fs.copyFile()`：复制文件
+
+  ```javascript
+  const fs = require("node:fs/promises");
+  const path = require("node:path");
+  
+  fs.copyFile(
+      path.resolve(__dirname, "./hello.txt"),
+      path.resolve(__dirname, "./haha.txt")
+  )
+      .then((result) => {
+          console.log("复制成功");
+      })
+      .catch((error) => {
+          console.log("复制失败", error);
+      });
+  ```
+
+## 包管理器
+
+将现成的代码导入项目中帮助开发，如：jQuery
+
+包管理器：下载、删除、更新等
+
+### npm
+
+node 中的包管理器 ( node package manage )，npm 是世界上最大的包管理库
+
+可以在 npm 中上传自己的包，也可以直接从 npm 中下载包
+
+npm 三部分：
+
+1. 官网：https://www.npmjs.com/
+2. npm CLI ( Command Line Interface，命令行 )
+3. 仓库：存储包和包的相关信息
+
+`npm -v` 检查 npm 是否安装成功
+
+```shell
+# 更新最新版npm
+npm install -g npm@latest
+```
+
+### package.json
+
+`package.json` 包的描述文件，每个项目都必须有一个 `package.json`
+
+> **注意**：
+>
+> - `json` 文件属性名不能使用单引号 `''`
+> - `json` 文件不能有注释
+
+**结构**：
+
+```json
+{
+  "name": "code_work",
+  "version": "1.0.0",
+  "main": "fs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+```
+
+- `name`：包名 ( 必填 )。可以包含包含小写字母、`_` 和 `-`
+
+- `version`：包的版本 ( 必填 ) 。格式：`x.x.x`
+
+  **规则**：
+
+  - 版本从 `1.0.0` 开始
+  - 修复错误，补丁：`1.0.1`
+  - 添加功能，兼容旧版 ( 小更新 )：`1.1.0`
+  - 更新功能，影响兼容 ( 大更新 )：`2.0.0`
+
+- `main`：入口文件。通常为 `index.js`
+
+- `scripts`：脚本
+
+- `keywords`：
+
+- `license`：版权声明
+
+- `description`：包的描述
+
+- `repository`：仓库地址
+
+**常用命令**：
+
+- `npm init`：初始化项目，手动创建 `package.json`
+
+- `npm init -y`：初始化项目，自动创建 `package.json`
+
+- `npm i <包名>`：将指定包下载到当前项目
+
+  ```shell
+  npm i lodash
+  
+  # 安装指定版本
+  npm install lodash@3.2.0
+  
+  # 安装高于指定版本
+  npm install lodash@">3.2.0"
+  
+  # --no-save: 不希望包在package.json中添加依赖
+  npm install lodash --no-save
+  
+  # -D或--save-dev: 将其添加到开发依赖
+  npm install lodash -D
+  ```
+
+  > `install` 的过程
+  >
+  > 1.  将包下载到 `node_modules`
+  >
+  > 2. 在 `package.json` 中添加 `dependencies` 属性，显示当前包所需的依赖的版本
+  >
+  >    ```shell
+  >    {  
+  >        "dependencies": {
+  >            "lodash": "^4.17.21"
+  >        }
+  >    }
+  >    ```
+  >
+  > 3. 添加 `package.lock.json` 文件，记录项目安装的包的版本，以及项目依赖的包的版本。提升包的下载速度
+  >
+  > **注意**：
+  >
+  > - `node_modules` 包含了项目所需的包，可以通过 `npm i` 安装 `dependencies` 配置的依赖项
+  >
+  >   ```shell
+  >   # 安装项目所需依赖
+  >   npm i
+  >   ```
+  >
+  > - `^4.17.21`：执行 `npm i` 命令时，匹配最新的 `4.x.x` 版本，但不匹配 `5.x.x`
+  >
+  > - `~4.17.21`：执行 `npm i` 命令时，匹配最小依赖的最新版本，即匹配 `4.17.x` 的最新版本
+  >
+  > - `*`：匹配最新版本
+
+**引入 npm 下载的包**：不需要使用绝对路径
+
+```javascript
+const _ = require("lodash");
+```
+
+**全局安装**：`npm i <包名> -g`，通常安装一些常用工具
+
+```shell
+npm i laughs@latest -g
+
+# 查看全局中安装的包
+npm list -g
+```
+
+**全局删除**
+
+```shell
+npm uninstall -g laughs
+```
+
+### 镜像
+
+
 
