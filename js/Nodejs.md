@@ -1099,7 +1099,243 @@ ES6 标准
 > console.log(global === globalThis); // true
 > ```
 
-- `process` 模块：表示当前的 node 进程
-- `path`
-- `fs`
+#### process
+
+`process` 模块：表示当前的 node 进程；是一个全局变量，可以直接使用
+
+`process.exit([code])`：结束当前进程，终止 Node；( 可选 ) `code` 状态码，自己定义
+
+```javascript
+console.log(1);
+process.exit();
+console.log(2);
+console.log(3);
+// 只打印 1
+```
+
+`process.nextTick(callback[, ...args]`：将函数插入到 tick 队列中
+
+**执行顺序**：调用栈 -> tick 队列 -> 微任务 -> 宏任务
+
+tick 队列，是在下一次事件循环之前执行
+
+```javascript
+// 宏任务队列
+setTimeout(() => {
+    console.log(1);
+});
+
+// 微任务队列
+queueMicrotask(() => {
+    console.log(2);
+});
+
+// tick队列
+process.nextTick(() => {
+    console.log(3);
+});
+
+// 调用栈
+console.log(4);
+// 执行顺序: 4 -> 3 -> 2 -> 1
+```
+
+#### path
+
+`path`：路径；通过 `path` 获取路径
+
+使用前需引入模块
+
+```javascript
+const path = require('path'); // 等价于 const path = require('node:path');
+```
+
+```shell
+# 终端中输入命令 node 可以查看包含的方法
+node .\path.js
+<ref *1> {
+  resolve: [Function: resolve],
+  normalize: [Function: normalize],
+  isAbsolute: [Function: isAbsolute],
+  join: [Function: join],
+  relative: [Function: relative],
+  toNamespacedPath: [Function: toNamespacedPath],
+  dirname: [Function: dirname],
+  basename: [Function: basename],
+  extname: [Function: extname],
+  format: [Function: bound _format],
+  parse: [Function: parse],
+  matchesGlob: [Function: matchesGlob],
+  sep: '\\',
+  delimiter: ';',
+  win32: [Circular *1],
+  posix: <ref *2> {
+    resolve: [Function: resolve],
+    normalize: [Function: normalize],
+    isAbsolute: [Function: isAbsolute],
+    join: [Function: join],
+    relative: [Function: relative],
+    toNamespacedPath: [Function: toNamespacedPath],
+    dirname: [Function: dirname],
+    basename: [Function: basename],
+    extname: [Function: extname],
+    format: [Function: bound _format],
+    parse: [Function: parse],
+    matchesGlob: [Function: matchesGlob],
+    sep: '/',
+    delimiter: ':',
+    win32: [Circular *1],
+    posix: [Circular *2],
+    _makeLong: [Function: toNamespacedPath]
+  },
+  _makeLong: [Function: toNamespacedPath]
+}
+```
+
+- `path.resolve([...path])`：生成绝对路径
+
+  ```javascript
+  const path = require('path'); // const path = require('node:path');
+  // 无参 返回当前工作路径
+  let result = path.resolve();
+  console.log(result); // D:\xsj_workshop
+  ```
+
+  根据不同方式执行代码，生成的工作目录不同
+
+  ```shell
+  node ./path.js 
+  # D:\xsj_workshop\react_project\src
+  ```
+
+  相对路径：`./` 或 `../`
+
+  绝对路径：Windows：`C:\xxx`、Linux：`/User/xxx`、网络：`https://wwww.xxx`
+
+  如果将相对路径作为参数，根据工作目录的不同，生成的绝对路径也不同
+
+  通常会将第一个参数设置为绝对路径，第二个参数为相对路径，node 会自动计算出绝对路径
+
+  ```javascript
+  const path = require('path'); // const path = require('node:path');
+  let result = path.resolve('D:\\xsj_workshop\\react_project\\src','./hello.js'); 
+  console.log(result); // D:\xsj_workshop\react_project\src\hello.js
+  ```
+
+  > **注意**：
+  >
+  > - Windows 的绝对路径反人类，使用反斜杠 `\`。路径需要转义，使用双斜杠 `\\` 或使用 `/`
+  >
+  > - Nodejs 特殊的全局变量：`__dirname` 和` __filename`
+  >
+  >   - `__dirname`：返回当前文件夹的绝对路径
+  >
+  >     ```javascript
+  >     const result = path.resolve(__dirname, './hello.js');
+  >     ```
+  >
+  >   - `__filename`：返回当前文件的绝对路径
+
+#### fs
+
+`fs`：File System，帮助 Node 操作磁盘的文件；文件操作也就是 I/O
+
+引入模块
+
+```javascript
+const fs = require('node:fs');
+```
+
+- `fs.readFileSync(path)`：同步读取文件
+
+  ```javascript
+  // 导入fs模块
+  const fs = require('node:fs');
+  // 导入path模块
+  const path = require('node:path');
+  
+  // 【相对路径不安全】
+  // 如果readFileSync()方法的参数是【相对路径】, 那么该路径会返回在上一级目录中寻找目标文件
+  // 使用path.resolve(__dirname, './hello.txt')获取指定绝对路径并拼接正确的路径
+  let buff = fs.readFileSync(path.resolve(__dirname, './hello.txt'));
+  console.log(buff); // Buffer(12) [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, buffer: ArrayBuffer(8192), byteLength: 12, byteOffset: 256, length: 12, Symbol(Symbol.toStringTag): 'Uint8Array']
+  
+  console.log(buff.toString()); // hello world!
+  ```
+
+  > `Buffer` 对象：`fs` 模块读取磁盘的数据，数据会以 `Buffer` 对象形式返回，`Buffer` 是一个临时存储数据的缓冲区
+
+- `fs.readFile(path, callback)`：异步读取文件。
+
+  1. 两个参数：1. `path` 路径； 2.  `callback` 回调函数；
+
+     回调函数需要两个参数作为参数：`error` 错误信息、`buffer` 对象
+
+     ```javascript
+     // 导入fs模块
+     const fs = require('node:fs');
+     // 导入path模块
+     const path = require('node:path');
+     
+     // 直接调用readFile()方法
+     fs.readFile(
+         path.resolve(__dirname, './hello.txt'),
+         (err, buffer) => {
+             if(err) {
+                 console.log('出错了');
+             } else {
+                 console.log(buffer.toString());
+             }
+         }
+     );
+     ```
+
+  2. 回调函数容易产生回调地狱，通常使用 Promise 中的 `then()` 方法调用
+
+     ```javascript
+     // 引入fs模块
+     const fs = require('node:fs/promises');
+     // 引入path模块
+     const path = require('node:path');
+     
+     // 使用Promise的then()方法调用
+     fs.readFile(path.resolve(__dirname, './hello.txt'))
+         .then(buffer => {
+             console.log(buffer.toString());
+         })
+         .catch(e => {
+             console.log('出错了');
+         })
+     ```
+
+  3. 使用 `async` 快速创建异步函数
+
+     ```javascript
+     const fs = require("node:fs/promises");
+     const path = require("node:path");
+     
+     // async快速创建异步
+     ; (async () => {
+         try {
+             const buffer = await fs.readFile(
+                 path.resolve(__dirname, "./hello.txt")
+             );
+             console.log(buffer.toString());
+         } catch (e) {
+             console.log("出错了");
+         }
+     })();
+     ```
+
+- `fs.appendFile()`：创建新文件，或将数据添加到已有文件中
+
+  
+
+- `fs.mkdir()`：创建目录
+
+- `fs.rmdir()`：删除目录
+
+- `fs.rename()`：重命名
+
+- `fs.copyFile()`：复制文件
 
