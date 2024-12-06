@@ -897,3 +897,25 @@ export default {
 **插值**：访问组件声明的变量  - `{{xxx}}`
 
 > 除了访问组件中的变量，vue 还提供了全局变量，如：`Date`、`Math`、`RegExp` ......
+
+{
+  "arrowParens": "always",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "semi": true,
+  "experimentalTernaries": false,
+  "singleQuote": true,
+  "jsxSingleQuote": false,
+  "quoteProps": "as-needed",
+  "trailingComma": "all",
+  "singleAttributePerLine": false,
+  "htmlWhitespaceSensitivity": "css",
+  "vueIndentScriptAndStyle": true,
+  "proseWrap": "preserve",
+  "insertPragma": false,
+  "printWidth": 80,
+  "requirePragma": false,
+  "tabWidth": 4,
+  "useTabs": false,
+  "embeddedLanguageFormatting": "auto"
+}

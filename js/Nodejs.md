@@ -11,7 +11,7 @@
 - [链式调用](#链式调用)
 - [静态方法](#静态方法)
 - [宏任务和微任务](#宏任务和微任务)
-- [手写Promise](#手写-promise)
+- [手写 Promise](#手写-promise)
 - [async 与 await](#async-与-await)
 - [模块化](#模块化)
 - [CommonJS](#commonjs)
@@ -20,6 +20,10 @@
 - [process](#process)
 - [path](#path)
 - [fs](#fs)
+- [包管理器](#包管理器)
+- [npm](#npm)
+- [yarn](#yarn)
+- [pnpm](#pnpm)
 
 [Node.js](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
 
@@ -1506,7 +1510,7 @@ npm 三部分：
 npm install -g npm@latest
 ```
 
-### package.json
+**package.json**
 
 `package.json` 包的描述文件，每个项目都必须有一个 `package.json`
 
@@ -1545,9 +1549,18 @@ npm install -g npm@latest
 
 - `main`：入口文件。通常为 `index.js`
 
-- `scripts`：脚本
+- `scripts`：脚本。自定义一些命令行的行为
 
-- `keywords`：
+  - `start` 和 `test` 可以直接通过 `npm` 命令使用，其他的命令需要加上 `run`
+
+    ```shell
+    npm test 
+    npm start
+    
+    npm run dev
+    ```
+
+- `keywords`：关键词儿
 
 - `license`：版权声明
 
@@ -1631,7 +1644,314 @@ npm list -g
 npm uninstall -g laughs
 ```
 
-### 镜像
+**镜像**
 
+`npm` 配置镜像服务器
 
+官网：https://www.npmmirror.com/
 
+- 可以使用定制的 `cnpm` 代替 `npm`
+
+  ```shell
+  npm install -g cnpm --registry=https://registry.npmmirror.com
+  ```
+
+  > `cnpm` 的缺陷：`cnpm i lodash` 命令运行后，会生成两个文件目录：`.store` 和 `lodash`
+  >
+  > `lodash` 并不是模块本身，而是模块的快捷方式。现代代码编辑器中，如：WebStorm 里会为 `node_modules` 自动构建索引，无法寻找快捷方式的索引 
+
+- 配置 `npm` 的仓库镜像
+
+  ```shell
+  # 配置镜像
+  npm config set registry https://registry.npmmirror.com
+  
+  # 查看镜像
+  npm config get registry
+  
+  # 删除镜像
+  npm config delete registry
+  ```
+
+### yarn
+
+- `npm` 全局安装 `yarn`
+
+  ```shell
+  # 安装yarn
+  npm i yarn -g
+  
+  # 删除yarn
+  npm r yarn -g
+  
+  # 查看版本
+  yarn -v # 1.22.22
+  ```
+
+- Nodejs 默认集成 `corepack` ，`corepack` 无需手动安装，就能直接使用 `npm`、`yarn`、`pnpm`
+
+  ```shell
+  # 启用corepack
+  corepack enable
+  
+  # 切换yarn版本至最新版
+  corepack prepare yarn@stable --activate
+  
+  # 切换yarn版本至1.x.x
+  corepack prepare yarn@1 --activate
+  
+  # 禁用corepack
+  corepack disable
+  ```
+
+  > `yarn` 的版本：
+  >
+  > - `3.2.4` 版本不再生成 `node_modules`，而是生成 `.yarn` 文件夹。 这是 Yarn Plug'n'Play (PnP) 功能的结果。 `.yarn` 文件夹包含了 Yarn 管理依赖项所需的所有信息，包括已安装的包及其依赖关系。
+  >
+  >   如果 `yarn` 的版本是 `3.2.4` 版本，终端运行 `.js` 文件不能使用传统的 `node` ，而需要使用 `yarn node ./xxx.js`
+  >
+  >   ```shell
+  >   # 初始化
+  >   yarn init -y
+  >   
+  >   # 安装express包
+  >   yarn add express
+  >   
+  >   # 运行
+  >   yarn node ./index.js
+  >   ```
+  >
+  > - `1.22.22`：传统 `node_modules` 文件夹包含所有已安装的包及其依赖项，这会导致文件夹非常大且结构复杂。
+  >
+  > - 可以在 `package.json` 中指定所需的 `yarn` 的版本
+  >
+  >   这样指定 `yarn` 的版本，只修改当前项目中 `yarn` 的版本，全局中 `yarn` 的版本不会修改
+  >
+  >   ```shell
+  >   "packageManager": "yarn@3.2.4"
+  >   ```
+
+**常用命令**
+
+- `yarn init`：初始化项目，手动创建 `package.json`
+- `yarn init -y`：初始化项目，自动创建 `package.json`
+
+- `yarn add <包名>`：添加包以及依赖
+- `yarn add <包名> -D`：添加开发依赖
+- `yarn remove <包名>`：移除包
+- `yarn`：自动安装依赖 ( 相当于 `npm i` )
+- `yarn run`：执行脚本
+- `yarn xxx`：执行自定义脚本
+- `yarn global add <包名>`：全局安装
+- `yarn global remove <包名>`：全局删除
+- `yarn global bin`：全局安装目录
+
+**镜像**
+
+```shell
+# 配置镜像
+yarn config set registry https://registry.npmmirror.com
+
+# 查看镜像
+yarn config get registry
+
+# 删除镜像
+yarn config delete registry
+```
+
+### pnpm
+
+**安装**
+
+```shell
+# 全局安装
+npm i pnpm -g
+# 启动corepack, 自动集成了pnpm
+corepack enable
+
+# 检查版本
+pnpm -v
+```
+
+**常用命令**
+
+- `pnpm init`：初始化。自动添加 `package.json`
+- `pnpm add <包名>`：添加依赖
+- `pnpm add -D <包名>`：添加开发依赖
+- `pnpm add -g <包名>`：全局安装
+- `pnpm install`：安装依赖
+- `pnpm remove <包名>`：移除包
+
+**镜像**
+
+```shell
+# 配置镜像
+pnpm config set registry https://registry.npmmirror.com
+
+# 查看镜像
+pnpm config get registry
+
+# 删除镜像
+pnpm config delete registry
+```
+
+## 网络
+
+网络服务器是基于**请求**和**响应**的
+
+请求和响应实质上就是一段数据，这段特殊格式有 HTTP 协议规定
+
+`https://www.xxx.com/hello/index.html`
+
+- `https://`：协议名。诸如：FTP 等
+
+- `xxx.com`：域名。domain
+
+  每个网络中存在无数服务器，每一个服务器有自己的唯一标识，称 ip 地址。如：`192.168.1.x`
+
+  由于 ip 地址不方便记忆，域名相当于 ip 地址的别名
+
+- `/hello/index.html`：网站资源路径
+
+**当浏览器在输入地址以后发生什么？**
+
+1. DNS 服务器 -> DNS 解析，获取网站的 ip 地址
+2. 浏览器需要和服务器建立连接 ( TCP/IP 协议 ：三次握手) 
+3. 向服务器发送请求 ( HTTP 协议：请求报文 )
+4. 服务器处理请求，并返回响应 ( HTTP 协议：响应报文 )
+5. 浏览器将响应的页面渲染
+6. 断开连接 ( TCP/IP 协议：四次挥手 )
+
+**客户端和服务器建立/断开连接？**
+
+- **三次握手**：三次握手是客户端与服务器建立连接的过程
+
+  1. 客户端发送连接请求：`SYN`
+
+  2. 服务器接收连接请求，向客户端返回消息：`SYN`、`ACK`
+
+  3. 客户端收到消息，向服务器发送同意连接的消息：`ACK`
+
+     > **为什么不两次握手？**
+     >
+     > - **重复的连接请求**：如果只进行两次握手，服务器发送的确认包可能丢失，客户端再次发送连接请求，服务器重新建立连接，浪费资源
+     > - **半连接攻击**：攻击者可以伪造 `SYN`，让服务器分配资源，但不发送 `ACK` 包，导致资源占用
+
+- **四次挥手**：断开连接
+  1. 客户端向服务器发送请求：`FIN`，表示客户端不再发送数据，请求关闭连接
+  2. 服务器向客户端返回数据包：`ACK`，确认客户端的数据包，客户端等待服务器关闭请求
+  3. 服务器处理完所有未发送的数据后，向客户端发送数据包：`FIN`，表示服务器准备关闭连接
+  4. 客户端收到服务器数据包，向服务器发送数据包表示确认：`ACK`
+
+### TCP/IP
+
+**TCP/IP 协议族**：包含了一组协议，规定了互联网中所有通信细节
+
+**网络通信过程**：4 层
+
+- **应用层**：**软件层**。客户端、服务器等
+
+- **传输层**：负责对数据进行拆分，将大数据拆分成一个一个小包。( 不要把鸡蛋放在一个篮子里 )
+
+- **网络层**：负责给数据包添加信息 ( 菜鸟驿站 )
+
+- **数据链路层**：传输信息
+
+  > 发送：应用层 -> 传输层 -> 网络层 -> 数据链路层
+  >
+  > 接收：数据链路层 -> 传输层 -> 网络层 -> 应用层
+
+### HTTP
+
+**HTTP 协议**就是**应用层**的协议，规定**客户端和服务器之间通信的报文格式**
+
+**报文 ( message )**：客户端和服务器之间是基于请求和响应的
+
+- 客户端向服务器发送请求 ( request )
+- 服务器向浏览器返回响应 ( response )
+
+> 客户端向服务器发送请求的过程，相当于客户端给服务器写信；
+>
+> 服务器向客户端返回响应的过程，相当于服务区给客户端回信。
+
+**请求报文 ( request )**：客户端发送给服务器的报文称为请求报文
+
+- **格式**
+
+  1. **请求首行**：请求报文的第一行
+
+     **第一部分**：请求方式
+
+     ```xml
+     GET /index.html?username=sw HTTP/1.1
+     ```
+
+     `GET`：`get` 请求，向服务器请求资源
+
+     ```html
+     <form method="get" action="#">
+         <input type="text" name="username" />
+         <button>提交</button>
+     </form>
+     ```
+
+     `POST`：`post` 请求，向服务器发送数据
+
+     ```html
+     <form method="post" action="#">
+         <input type="text" name="username" />
+         <button>提交</button>
+     </form>
+     ```
+
+     > `post` 请求
+     >
+     > - 没有请求头，只有请求体；通过请求体发送数据
+     > -  Chrome 通过 **载荷 Payload** 查看
+     > - 请求体大小没有限制，向服务器发送数据时，能用 `post` 尽量用 `post`
+
+     **第二部分**：请求资源的路径。`/index.html?username=sw`
+
+     > **查询字符串**：`?` 后面的部分称查询字符串
+     >
+     > - 查询字符串是一个名值对结构；使用 `=` 连接，多个名值对使用 `&` 分割
+     > - `get` 请求通过查询字符串将数据发送给服务器，会在地址栏直接显示，安全性差
+     > - `url` 有长度限制，`get` 请求无法发送较大的数据
+
+     **第三部分**：`HTTP/1.1` 。HTTP 协议的版本
+
+  2. **请求头**：名值对结构。告知服务器浏览器的信息
+
+     ```xml
+     Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+     Accept-Encoding: gzip, deflate, br, zstd
+     Accept-Language: zh-CN,zh;q=0.9
+     Cache-Control: max-age=0
+     Connection: keep-alive
+     Host: 127.0.0.1:5500
+     If-Modified-Since: Fri, 06 Dec 2024 15:06:28 GMT
+     If-None-Match: W/"184-1939c820b5d"
+     Referer: http://127.0.0.1:5500/http.html?username=sw
+     Sec-Fetch-Dest: document
+     Sec-Fetch-Mode: navigate
+     Sec-Fetch-Site: same-origin
+     Upgrade-Insecure-Requests: 1
+     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36
+     sec-ch-ua: "Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"
+     sec-ch-ua-mobile: ?0
+     sec-ch-ua-platform: "Windows"
+     ```
+
+     `Accept`：浏览器可接受的文件类型
+
+     `Accept-Encoding`：浏览器允许的压缩的编码
+
+     `Accept-Language`：浏览器可接受的语言
+
+     `User-Agent`：用户代理。描述浏览器信息的字符串
+
+  3. **空行**：用来分隔请求头和请求体
+
+  4. **请求体**：`post` 请求通过请求体发送数据
+
+**响应报文 ( response )**
