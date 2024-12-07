@@ -24,6 +24,10 @@
 - [npm](#npm)
 - [yarn](#yarn)
 - [pnpm](#pnpm)
+- [网络](#网络)
+- [TCP/IP](#tcp/ip)
+- [HTTP](#http)
+- [Express](#express)
 
 [Node.js](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
 
@@ -1870,9 +1874,10 @@ pnpm config delete registry
 - 客户端向服务器发送请求 ( request )
 - 服务器向浏览器返回响应 ( response )
 
-> 客户端向服务器发送请求的过程，相当于客户端给服务器写信；
+> 服务器的功能：
 >
-> 服务器向客户端返回响应的过程，相当于服务区给客户端回信。
+> 1. 接收客户端发送的请求报文
+> 2. 向客户端返回响应报文
 
 **请求报文 ( request )**：客户端发送给服务器的报文称为请求报文
 
@@ -1907,7 +1912,7 @@ pnpm config delete registry
      > `post` 请求
      >
      > - 没有请求头，只有请求体；通过请求体发送数据
-     > -  Chrome 通过 **载荷 Payload** 查看
+     > -  Chrome 通过 **载荷/Payload** 查看
      > - 请求体大小没有限制，向服务器发送数据时，能用 `post` 尽量用 `post`
 
      **第二部分**：请求资源的路径。`/index.html?username=sw`
@@ -1922,36 +1927,194 @@ pnpm config delete registry
 
   2. **请求头**：名值对结构。告知服务器浏览器的信息
 
+     `Accept`：浏览器可接受的文件类型
+  
      ```xml
      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
-     Accept-Encoding: gzip, deflate, br, zstd
-     Accept-Language: zh-CN,zh;q=0.9
-     Cache-Control: max-age=0
-     Connection: keep-alive
-     Host: 127.0.0.1:5500
-     If-Modified-Since: Fri, 06 Dec 2024 15:06:28 GMT
-     If-None-Match: W/"184-1939c820b5d"
-     Referer: http://127.0.0.1:5500/http.html?username=sw
-     Sec-Fetch-Dest: document
-     Sec-Fetch-Mode: navigate
-     Sec-Fetch-Site: same-origin
-     Upgrade-Insecure-Requests: 1
-     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36
-     sec-ch-ua: "Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"
-     sec-ch-ua-mobile: ?0
-     sec-ch-ua-platform: "Windows"
      ```
-
-     `Accept`：浏览器可接受的文件类型
-
+  
      `Accept-Encoding`：浏览器允许的压缩的编码
-
+  
+     ```xml
+     Accept-Encoding: gzip, deflate, br, zstd
+     ```
+  
      `Accept-Language`：浏览器可接受的语言
-
+  
+     ```xml
+     Accept-Language: zh-CN,zh;q=0.9
+     ```
+  
      `User-Agent`：用户代理。描述浏览器信息的字符串
+
+     ```xml
+     User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36
+     ```
 
   3. **空行**：用来分隔请求头和请求体
 
   4. **请求体**：`post` 请求通过请求体发送数据
 
 **响应报文 ( response )**
+
+- **响应首行**：`HTTP/1.1`：协议名称。`200` - 响应状态码；`OK` - 对响应状态码的描述
+
+  ```xml
+  HTTP/1.1 200 OK
+  ```
+
+  **状态码**：
+
+  - `1xx`：请求处理中
+  - `2xx`：成功
+  - `3xx`：请求的重定向
+  - `4xx`：客户端错误
+  - `5xx`：服务器错误
+
+- **响应头**：多个名值对结构组成，告诉浏览器响应的信息
+
+  ```xml
+  Vary: Origin
+  Access-Control-Allow-Credentials: true
+  Accept-Ranges: bytes
+  Cache-Control: public, max-age=0
+  Last-Modified: Sat, 07 Dec 2024 02:33:07 GMT
+  ETag: W/"152-1939ef6b049"
+  Content-Type: text/html; charset=UTF-8
+  Content-Length: 1831
+  Date: Sat, 07 Dec 2024 02:33:36 GMT
+  Connection: keep-alive
+  Keep-Alive: timeout=5
+  ```
+
+  `Content-Type: text/html;`：响应体的类型
+
+  `charset=UTF-8`：字符集是 `UTF-8`
+
+  `Content-Length: 1831`：响应体长度
+
+- **空行**：空行就是用来分隔响应头和响应体
+
+- **响应体**：响应体就是服务器返回客户端的内容。在 **响应/Response** 中查看
+
+  > **网页、CSS、js、图片会在响应报文的哪一部分发送？**
+  >
+  > 响应体
+
+## Express
+
+Express 是 node 中的服务器软件，通过 Express 快速在 node 中搭建一个 web 服务器
+
+- 初始化项目
+
+  ```shell
+  # 初始化项目
+  npm init -y
+  
+  # 安装express
+  npm i express
+  
+  # 创建index.js
+  ```
+
+- 启动服务器
+
+  ```javascript
+  // 引入express
+  const express = require('express');
+  
+  // js中, 一切皆对象, 获取服务器的实例
+  const app = express();
+  
+  // 启动服务器
+  // app.listen(端口号, [callback]): 监听端口, 用来启动服务
+  app.listen(3000, () => {
+      console.log('服务器启动了！');
+  });
+  ```
+
+- 服务器启动后，通过端口号访问：`协议名://ip地址:端口号/路径`
+
+  本地：`http://127.0.0.1:3000` 或 `http://localhost:3000`
+
+- `app.METHOD()`：设置路由
+
+  - `METHOD` 可以是 `get` 或 `post`
+
+    ```javascript
+    // app.get(path, callback);
+    // - '/' 表示localhost:3000
+    // - callback 有两个参数, request和response
+    //    - req 表示用户的请求信息, 通过 req 获取用户传递数据
+    //    - res 表示服务器发送客户端的响应信息, 通过 res 向客户端返回数据
+    app.get('/', (req, res) => {
+        console.log('有人访问了');
+        // 读取用户请求 request
+        console.log(req.url);
+        // 根据用户请求返回响应 response
+        res.sendStatus(404);
+    });
+    ```
+
+  - 如果希望服务器正常访问，需要为服务器设置路由
+
+  - 路由**可以根据不同请求方式**和**请求地址**处理用户的请求
+
+  `res.sendStatus()`：向客户端发送响应状态码
+
+  `res.status()`：设置响应状态码，但不发送
+
+  `res.send()`：向请求客户端发送 HTTP 响应消息，默认 `status 200`，可以根据设置的响应状态码自动调整响应头状态码
+
+  ```javascript
+  // 如果通过status设置了状态码, 响应头就是状态码
+  // 如果未设置状态码, 默认返回200
+  res.send('Hello world!'); 
+  ```
+
+- `app.use(path, callback)`：设置中间件
+
+  > 和路由的区别：
+  >
+  > - 中间件不区分请求方式，只看路径
+  >
+  > - 路径自定义，不写将自动匹配根目录
+  >
+  >   ```javascript
+  >   app.use((req, res) => {
+  >       res.send('hello world!');
+  >   });
+  >   ```
+  >
+  > - `callback` 有三个参数，`req`、`res`、`next` 函数；`next` 函数用于触发后续中间件
+  >
+  >   ```javascript
+  >   app.use((req, res, next) => {
+  >       console.log('第一个中间件触发了');
+  >       next();
+  >   });
+  >   app.use((req, res) => {
+  >       console.log('第二个中间件触发了');
+  >       res.send('Hello world!');
+  >   });
+  >   ```
+  >
+  >   **注意**：`res.send()` 发生后调用 `next()` 没有意义
+
+## nodemon
+
+nodemon 模块：自动监视代码修改，重启服务器
+
+- 全局安装
+
+  ```shell
+  # 全局安装
+  npm i -g nodemon
+  yarn global add nodemon
+  
+  # 启动项目
+  # nodemon命令自动启动当前目录下的 index.js
+  # nodemon ./xxx.js 启动指定的js文件
+  nodemon
+  ```
+
