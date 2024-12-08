@@ -896,26 +896,18 @@ export default {
 
 **插值**：访问组件声明的变量  - `{{xxx}}`
 
-> 除了访问组件中的变量，vue 还提供了全局变量，如：`Date`、`Math`、`RegExp` ......
+> - 除了访问组件中的变量，vue 还提供了全局变量，如：`Date`、`Math`、`RegExp` ......
+> - 插值内部只能使用表达式 ( 表达式就是带有返回值的语句 )
+> - 插值实际上是在修改元素的 `textContent` ，如果内容含有标签，标签会被转义 ( 避免 xss )
 
-{
-  "arrowParens": "always",
-  "bracketSameLine": false,
-  "bracketSpacing": true,
-  "semi": true,
-  "experimentalTernaries": false,
-  "singleQuote": true,
-  "jsxSingleQuote": false,
-  "quoteProps": "as-needed",
-  "trailingComma": "all",
-  "singleAttributePerLine": false,
-  "htmlWhitespaceSensitivity": "css",
-  "vueIndentScriptAndStyle": true,
-  "proseWrap": "preserve",
-  "insertPragma": false,
-  "printWidth": 80,
-  "requirePragma": false,
-  "tabWidth": 4,
-  "useTabs": false,
-  "embeddedLanguageFormatting": "auto"
-}
+`app.config.globalProperties.xxx`：添加全局属性
+
+```vue
+app.config.globalProperties.hello = '全局属性！';
+```
+
+#### 指令
+
+**指令**：`v-` 开头的称指令，可以为模板设置特殊的属性，设置标签显示内容的方式
+
+- `v-text`：将表达式的值作为元素 textContent 插入，作用同 `{{}}`
