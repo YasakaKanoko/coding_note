@@ -1885,7 +1885,7 @@ pnpm config delete registry
 
   1. **请求首行**：请求报文的第一行
 
-     **第一部分**：请求方式
+     **第一部分**：请求方式；`get`、`post`、`put`、`delete`
 
      ```xml
      GET /index.html?username=sw HTTP/1.1
@@ -2008,13 +2008,18 @@ Express 是 node 中的服务器软件，通过 Express 快速在 node 中搭建
 - 初始化项目
 
   ```shell
-  # 初始化项目
+  # 1. 初始化项目
   npm init -y
   
-  # 安装express
+  # 2. 安装express
   npm i express
   
-  # 创建index.js
+  # 3. 将nodemon添加至项目依赖
+  npm i nodemon -D
+  
+  # 4. 创建index.js
+  
+  # 5. 新建目录/public/index.html
   ```
 
 - 启动服务器
@@ -2037,84 +2042,441 @@ Express 是 node 中的服务器软件，通过 Express 快速在 node 中搭建
 
   本地：`http://127.0.0.1:3000` 或 `http://localhost:3000`
 
-- `app.METHOD()`：设置路由
+### 路由
 
-  - `METHOD` 可以是 `get` 或 `post`
+`app.METHOD()`：设置路由
+
+- `METHOD` 可以是 `get` 或 `post`
+
+  ```javascript
+  // app.get(path, callback);
+  // - '/' 表示localhost:3000
+  // - callback 有两个参数, request和response
+  //    - req 表示用户的请求信息, 通过 req 获取用户传递数据
+  //    - res 表示服务器发送客户端的响应信息, 通过 res 向客户端返回数据
+  app.get('/', (req, res) => {
+      console.log('有人访问了');
+      // 读取用户请求 request
+      console.log(req.url);
+      // 根据用户请求返回响应 response
+      res.sendStatus(404);
+  });
+  ```
+
+- 如果希望服务器正常访问，需要为服务器设置路由
+
+- 路由**可以根据不同请求方式**和**请求地址**处理用户的请求
+
+`res.sendStatus()`：向客户端发送响应状态码
+
+`res.status()`：设置响应状态码，但不发送
+
+`res.send()`：向请求客户端发送 HTTP 响应消息，默认 `status 200`，可以根据设置的响应状态码自动调整响应头状态码
+
+```javascript
+// 如果通过status设置了状态码, 响应头就是状态码
+// 如果未设置状态码, 默认返回200
+res.send('Hello world!'); 
+```
+
+### 中间件
+
+`app.use(path, callback)`：设置中间件
+
+- `callback` 有三个参数，`req`、`res`、`next` 函数；`next` 函数用于触发后续中间件
+
+  ```javascript
+  app.use((req, res, next) => {
+      console.log('第一个中间件触发了');
+      next();
+  });
+  app.use((req, res) => {
+      console.log('第二个中间件触发了');
+      res.send('Hello world!');
+  });
+  ```
+
+  > **注意**：`res.send()` 发生后调用 `next()` 没有意义
+
+和路由的区别：
+
+- 中间件不区分请求方式，**只看路径**
+
+- 路径自定义，不写将自动匹配根目录
+
+  ```javascript
+  app.use((req, res) => {
+      res.send('hello world!');
+  });
+  ```
+
+**常用中间件**：
+
+- 获取静态资源
+
+  ```javascript
+  // 中间件: 获取静态资源的绝对路径
+  app.use(express.static(path.resolve(__dirname, 'public')));
+  ```
+
+- 请求体解析
+
+  `extended: true`：表示更深层次嵌套解析
+
+  ```javascript
+  // 中间件: 请求体解析
+  app.use(express.urlencoded({ extended: true }));
+  ```
+
+- 解析 json 格式的请求体
+
+  ```javascript
+  // 中间件: 解析json格式的请求体
+  app.use(express.json());
+  ```
+
+- 404：配置错误路由, 这个中间件需要写在所有路由之后
+
+  - 不传路径, 表示匹配所有路径
+
+  - 当该路由执行时, 说明以上地址均未匹配
 
     ```javascript
-    // app.get(path, callback);
-    // - '/' 表示localhost:3000
-    // - callback 有两个参数, request和response
-    //    - req 表示用户的请求信息, 通过 req 获取用户传递数据
-    //    - res 表示服务器发送客户端的响应信息, 通过 res 向客户端返回数据
-    app.get('/', (req, res) => {
-        console.log('有人访问了');
-        // 读取用户请求 request
-        console.log(req.url);
-        // 根据用户请求返回响应 response
-        res.sendStatus(404);
+    app.use((req, res) => {
+        res.status(404);
+        res.send('<h1>404 Not Found!</h1>');
     });
     ```
 
-  - 如果希望服务器正常访问，需要为服务器设置路由
-
-  - 路由**可以根据不同请求方式**和**请求地址**处理用户的请求
-
-  `res.sendStatus()`：向客户端发送响应状态码
-
-  `res.status()`：设置响应状态码，但不发送
-
-  `res.send()`：向请求客户端发送 HTTP 响应消息，默认 `status 200`，可以根据设置的响应状态码自动调整响应头状态码
-
-  ```javascript
-  // 如果通过status设置了状态码, 响应头就是状态码
-  // 如果未设置状态码, 默认返回200
-  res.send('Hello world!'); 
-  ```
-
-- `app.use(path, callback)`：设置中间件
-
-  > 和路由的区别：
-  >
-  > - 中间件不区分请求方式，只看路径
-  >
-  > - 路径自定义，不写将自动匹配根目录
-  >
-  >   ```javascript
-  >   app.use((req, res) => {
-  >       res.send('hello world!');
-  >   });
-  >   ```
-  >
-  > - `callback` 有三个参数，`req`、`res`、`next` 函数；`next` 函数用于触发后续中间件
-  >
-  >   ```javascript
-  >   app.use((req, res, next) => {
-  >       console.log('第一个中间件触发了');
-  >       next();
-  >   });
-  >   app.use((req, res) => {
-  >       console.log('第二个中间件触发了');
-  >       res.send('Hello world!');
-  >   });
-  >   ```
-  >
-  >   **注意**：`res.send()` 发生后调用 `next()` 没有意义
-
 ## nodemon
 
-nodemon 模块：自动监视代码修改，重启服务器
+`nodemon` 模块：自动监视代码修改，重启服务器
 
 - 全局安装
 
   ```shell
   # 全局安装
   npm i -g nodemon
-  yarn global add nodemon
   
-  # 启动项目
-  # nodemon命令自动启动当前目录下的 index.js
-  # nodemon ./xxx.js 启动指定的js文件
+  # 启动项目: nodemon命令自动启动当前目录下的 index.js
+  # 启动指定的js文件: nodemon ./xxx/xxx.js 
   nodemon
   ```
+
+  > 使用 `yarn` 命令全局安装 `nodemon` ，`nodemon` 可能运行失败
+  >
+  > ```shell
+  > yarn global add nodemon
+  > ```
+  >
+  > **原因**：`yarn` 的目录并不在环境变量中，需要手动创建**环境变量**
+  >
+  > ```shell
+  > # 获取yarn的目录
+  > yarn global bin
+  > ```
+  >
+  > 将读取到 `yarn` 的 `bin` 目录添加到 `Path` 环境变量中即可
+
+- 添加项目依赖
+
+  ```shell
+  npm i nodemon -D
+  yarn add nodemon -D
+  
+  # 启动项目
+  npx nodemon
+  ```
+
+  可以添加 `scripts` 到 `package.json`，只需执行 `npm start` 或 `yarn start`
+
+  ```shell
+  "scripts": {
+  	"start": "npx nodemon"
+  }
+  ```
+
+## 静态资源
+
+服务器中代码，对外部而言是不可见的，浏览器无法直接访问
+
+如果希望浏览器访问 html 页面，需要将页面所在目录设置静态资源目录
+
+> **注意**：apache/nginx 反向代理 -> node
+
+设置 `static` 中间件，浏览器访问时，自动访问
+
+```javascript
+const express = require('express');
+const path = require('path');
+const app = express();
+
+app.listen(3000, () => {
+    console.log('服务器已经启动了~');
+});
+
+// 将绝对路径中的public目录设置为静态资源
+app.use(express.static(path.resolve(__dirname, './public')));
+app.get('/', (req, res) => {});
+```
+
+> **为什么用 `path` 绝对路径？**
+>
+> 因为 VSCode 默认的 F5 启动是在根目录下启动，而不是当前目录
+>
+> **为什么要将中间件放在路由之前执行呢？**
+>
+> 
+>
+> `public` 设置为静态资源时，等价于 `localhost:3000`，服务器会自动在这个目录中寻找名为 `index` 文件
+
+### get 请求
+
+- `req.query`：返回**查询字符串**中的数据
+
+- `param` 参数：以冒号命名的参数
+
+  ```javascript
+  // 定义为/hello/:id, 当用户访问/hello/xxx时会触发
+  app.get('/hello/:id', (req, res) => {
+      res.send('<h1>Hello world!</h1>');
+  });
+  ```
+
+  - 通过 `req.params` 获取参数
+  - **约定大于配置**
+
+练习：一个表单，表单提交实现判断
+
+```html
+<!-- ./public/index.html -->
+<form action="/login" method="get">
+    <div>用户名: <input name="username" type="text" /></div>
+    <div>密码: <input name="password" type="password" /></div>
+    <div>
+        <input type="submit" value="登录" />
+    </div>
+</form>
+```
+
+```javascript
+// index.js
+const express = require('express');
+const path = require('path');
+const app = express();
+
+app.listen(3000, () => {
+    console.log('服务器已经启动了~');
+});
+
+app.use(express.static(path.resolve(__dirname, './public')));
+app.get('/login', (req, res) => {
+    if (req.query.username === 'admin' && req.query.password === '123456') {
+        res.send('登录成功!');
+    } else {
+        res.send('用户名或密码错误!');
+    }
+});
+```
+
+### post 请求
+
+`req.body`：获取 `post` 请求 ( **请求体** ) 的参数
+
+默认情况下，express 不会自动请求请求体，需要通过**中间件**增加功能
+
+```javascript
+// 1. 引入解析请求体的中间件
+app.use(express.urlencoded());
+
+// 2. 通过req.body获取请求体的参数
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    if (username === 'admin' && password === '123456') {
+        res.send('登录成功~');
+    } else {
+        res.send('用户名或密码错误~');
+    }
+});
+```
+
+利用数组模拟数据库
+
+```javascript
+// 创建一个数组模拟数据库
+const USERS = [
+    { username: 'admin', password: '123456' },
+    { username: 'jolyne', password: '123123' },
+];
+
+// 2. 通过req.body获取请求体的参数
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    // 去用户数组查找用户
+    for (let users of USERS) {
+        if (users.username === username) {
+            if (users.password === password) {
+                res.send(`登录成功, ${username} ~`);
+                return;
+            }
+        }
+    }
+    res.send(`登录失败 ~~`);
+});
+```
+
+使用高阶函数
+
+```javascript
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    let loginUsers = USERS.find((item) => {
+        return item.username === username && item.password === password;
+    });
+    if (loginUsers) {
+        res.send(`Hello, ${loginUsers.username}~~`);
+    } else {
+        res.send('用户名或密码错误~');
+    }
+});
+```
+
+完成注册
+
+```html
+<form action="/register" method="post">
+    <div>用户名: <input name="username" type="text" /></div>
+    <div>密码: <input name="password" type="password" /></div>
+    <div>确认密码: <input name="repassword" type="password" /></div>
+    <div>
+        <input type="submit" value="注册" />
+    </div>
+</form>
+```
+
+```javascript
+const express = require('express');
+const path = require('path');
+const app = express();
+
+// 创建一个数组模拟数据库
+const USERS = [
+    { username: 'admin', password: '123456' },
+    { username: 'jolyne', password: '123123' },
+];
+
+app.listen(3000, () => {
+    console.log('服务器已经启动了~');
+});
+
+// 将绝对路径中的public目录设置为静态资源
+app.use(express.static(path.resolve(__dirname, './public')));
+
+// 引入解析请求体的中间件
+app.use(express.urlencoded());
+
+app.post('/login', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    let loginUsers = USERS.find((item) => {
+        return item.username === username && item.password === password;
+    });
+    if (loginUsers) {
+        res.send(`Hello, ${loginUsers.username}~~`);
+    } else {
+        res.send('用户名或密码错误~');
+    }
+});
+
+app.post('/register', (req, res) => {
+    const { username, password, repassword } = req.body;
+    if (password !== repassword) {
+        res.send('两次密码不一致，注册失败~');
+        return; // 重要：添加 return 语句，避免继续执行
+    }
+    let users = USERS.find((item) => {
+        return item.username === username;
+    });
+    if (!users) {
+        USERS.push({ username, password });
+        res.send('注册成功~');
+    } else {
+        res.send('用户名已存在，注册失败~');
+    }
+});
+```
+
+### 模板引擎
+
+模板，在网页中嵌入变量
+
+模板引擎：EJS
+
+1. 安装 EJS
+
+   ```shell
+   npm i ejs
+   ```
+
+2. 配置 express 模板引擎为 `ejs`
+
+   ```javascript
+   // 将EJS设置为默认模板引擎
+   app.set('view engine', 'ejs');
+   // 配置模板的路径
+   app.set('views', path.resolve(__dirname, 'views'));
+   ```
+
+3. 新建 `views` 目录存放模板
+
+   **注意**：模板引擎需要被 express 渲染后才能使用
+
+4. `res.render(path, object)`：渲染模板引擎并返回给浏览器
+
+   ```javascript
+   app.get('/students', (req, res) => {
+       res.render('students');
+   });
+   ```
+
+   `render()` 传一个对象作为 `render` 的第二个参数，渲染后，ejs 模板可以直接访问对象中的数据
+
+   ```javascript
+   app.get('/students', (req, res) => {
+       res.render('students', {msg:'Hello world!'});
+   });
+   ```
+
+   ```ejs
+   <h1><%=msg %></h1>
+   ```
+
+   `<%= %>`：转义输出
+
+   `<%- %>`：原样输出
+
+   `<%# %>`：注释
+
+   `<% %>`：直接编写 js 代码
+
+   ```ejs
+   <% if(name === 'Jack') {%>
+   <h1>Hello Jack!</h1>
+   <%} else {%>
+   <h1>Fake News</h1>
+   <%}%>
+   ```
+
+
+
+数据持久化
+
+
+
+
+
+
 
