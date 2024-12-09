@@ -321,13 +321,13 @@ promise.catch((reason) => {
 
 ### 静态方法
 
-- `Promise.resolve()`：创建一个立即完成的 **Promise**
+- `Promise.resolve()`：创建一个**立即完成**的 **Promise**
 
   ```javascript
   Promise.resolve('Hello world!').then(res => { console.log(res); }); // Hello world!
   ```
 
-- `Promise.reject()`：创建一个立即拒绝的 **Promise**
+- `Promise.reject()`：创建一个**立即拒绝**的 **Promise**
 
   ```javascript
   Promise.reject('New Error!').then(null, (res) => { console.log(res); }); // New Error!
@@ -831,15 +831,11 @@ mp
 - **Nodejs**：**CommonJS** 规范
 - **ES 模块化规范**
 
-> **注意**：Node 会将扩展名为 `.js`、`.cjs`、`.json`、`.node` 视为 CommonJS 模块 
-
 ### CommonJS
 
-在定义模块时，模块中的内容是禁止外部访问的，使用前需**导出模块**
+> **注意**：Node 会将扩展名为 `.js`、`.cjs`、`.json`、`.node` 视为 CommonJS 模块 
 
-**导出模块**
-
-- 访问 `exports` 的方式：`exports`、`module.exports`
+**导出模块**：在定义模块时，模块中的内容是禁止外部访问的，使用前需**导出模块**
 
 - `exports` 实际上是 `require` 函数的返回值
 
