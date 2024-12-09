@@ -56,38 +56,42 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
 - `React.createElement(type, [props], [...children])` ：用来创建一个 React 元素
 
   - `type`：组件名。例如：字符串标签名 ( 如：`'div'` 或 `'span'` ) 或 React 组件。 ( html 标签名必须小写 )
-  - `props`：元素的属性。参数通常是对象或 `null`
+  - `props`：元素的属性。参数通常是**对象**或 `null`
+    
     - `class` 属性要使用 `className` 设置
     - 设置事件时，属性名需要使用驼峰命名法。如： `onclick()` 必须改成 `onClick()`
   - `...children`：元素的子节点、内容
     
     ```javascript
-      // 1. 创建一个React元素
-      const button = React.createElement('button', {
-      id: 'btn',
-      type: 'button',
-      className: 'hello',
-      onClick: () => {
-          return console.log('Hello world!');
-      }
-      }, 'Hello world');
+    // 1. 创建一个React元素
+    const button = React.createElement('button', {
+        id: 'btn',
+        type: 'button',
+        className: 'hello',
+        onClick: () => {
+            return console.log('Hello world!');
+        }
+    }, 'Hello world');
     
-      // 2. 获取根元素对应的React元素
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      // 3. 将div渲染到根元素
-      root.render(button);
+    // 2. 获取根元素对应的React元素
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    // 3. 将div渲染到根元素
+    root.render(button);
     ```
-
-  > **注意**：
-  >
-  > - React 元素最终会通过虚拟 DOM 转换为真实 DOM
-  > - React 元素一旦创建就无法修改，只能使用新创建的元素进行替换
 
 - `ReactDOM.render(element)`：将 React 元素渲染到根元素中
 
   - 首次调用时，容器节点的所有 DOM 元素都会被替换；后续调用则使用 React 的 DOM 差分算法 ( DOM diffing algorithm ) 进行高效更新
+
   - 当重复调用 `render()` 渲染页面时，React 会自动比较两次渲染的元素，只在真实 DOM 中更新发生变化的部分
+
   - 不会修改容器节点，只修改容器的子节点。
+
+    >**注意**：
+    >
+    >- React 元素最终会通过虚拟 DOM 转换为真实 DOM
+    >
+    >- React 元素一旦创建就无法修改，只能使用新创建的元素进行替换
 
 - `ReactDOM.createRoot(domNode, [options])`：用来创建 React 的根容器，根容器用来放置 React 元素
 
@@ -96,6 +100,7 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
   ReactDOM.render(div, document.getElementById('root'));
   
   // React 18
+  const div = React.createElement('div', {}, 'Hello world!');
   // 1. 先获取根元素, 根元素就是React要插入的位置
   const root = ReactDOM.createRoot(document.getElementById('root'));
   // 2. 将元素通过render()渲染
@@ -133,13 +138,17 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
 
   - JSX 实际上是 `createElement()` 的语法糖，JSX 执行前都会被 babel 转换为 js 代码
 
-    ```jsx
-    const div = <div>
-        一个div
-        <button>按钮</button>
-    </div>;
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(div);
+    > **注意**：使用 JSX 语法必须在 `script` 标签上加上 `text/babel`
+    
+    ```html
+    <script type="text/babel">
+        const div = <div>
+            一个div
+            <button>按钮</button>
+        </div>;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(div);
+    </script>
     ```
 
 
@@ -164,10 +173,10 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
 
    ```jsx
    // 根标签内部可以嵌入多个标签, 但根标签只能有一个
-   const div = <div>
-       一个div
-       <button>按钮</button>
-   </div>;
+       const div = <div>
+           一个div
+           <button>按钮</button>
+       </div>;
    const root = ReactDOM.createRoot(document.getElementById('root'));
    ```
 
@@ -189,7 +198,7 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
    </div>;
    ```
 
-6. 如果表达式返回值是空值、布尔值、`undefined` ，将不显示
+   如果表达式返回值是空值、布尔值、`undefined` ，将不显示
 
    ```jsx
    // 这个true将不显示
@@ -198,17 +207,27 @@ React 的常规开发方式并不通过浏览器引入外部 js 脚本来使用
    </div>;
    ```
 
-7. 属性的 `class` 属性要写成 `className`，`style` 属性必须使用**对象**设置，并且属性名要用驼峰命名法
+6. 属性的 `class` 属性要写成 `className`，`style` 属性必须使用**对象**设置，并且属性名要用驼峰命名法
 
    ```jsx
-   const div = <div id="box" class="box1" style={{backgroundColor: "yellowgreen"}}>这是一个div</div>;
+   const div = <div id="box" className="box1" style={{ backgroundColor: "yellowgreen" }}>
+       这是一个div
+   </div>;
    ```
 
-8. 注释：`{/**/}`
+7. 注释：`{/**/}`
+
+   ```jsx
+   const div = <div>
+       一个div
+       {/*注释*/}
+       <button>按钮</button>
+   </div>;
+   ```
 
 ### 渲染列表
 
-第一种方式：`for` 循环遍历
+**第一种方式**：`for` 循环遍历
 
 ```jsx
 const data = ['Lucy', 'Jack', 'Jolyne'];
@@ -221,7 +240,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(list);
 ```
 
-第二种方式：使用 `map()`
+**第二种方式**：使用 `map()`
 
 ```jsx
 const data = ['Lucy', 'Jack', 'Jolyne'];
@@ -237,7 +256,7 @@ root.render(list);
 
 React 将通过虚拟 DOM 将 React 元素和原生 DOM 进行映射，通过操作 React 元素在真实 DOM 中显现
 
-优势：
+**优势**：
 
 1. 降低 API 复杂度
 2. 解决兼容问题
@@ -254,7 +273,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(list);
 ```
 
-每当调用 `root.render()` 时，页面就会重新渲染。React 会通过 `diffing` 算法，将旧元素和新元素进行比较，只改变发生变化的元素
+当调用 `root.render()` 时，页面就会重新渲染。React 会通过 `diffing` 算法，将旧元素和新元素进行比较，只改变发生变化的元素
 
 比较时，React 会先比较父元素，
 
@@ -263,17 +282,31 @@ root.render(list);
 
 JSX 显示数组时，数组中的每个元素都需要设置一个唯一的 `key` 属性 ( `Warning: Each child in a list should have a unique "key prop."` )
 
-```jsx
-document.getElementById('btn').onclick = function () {
+```html
+<button id="btn">点击</button>
+<hr>
+<div id="root"></div>
+
+<script type="text/babel">
     // 1. 创建数据
-    const data = ['Alice', 'Lucy', 'Jack', 'Jolyne'];
+    const data = ['Lucy', 'Jack', 'Jolyne'];
     // 2. 创建列表
     const list = <ul>{data.map((item) => <li key={item}>{item}</li>)}</ul>;
     // 3. 获取根元素
     const root = ReactDOM.createRoot(document.getElementById('root'));
     // 4. 渲染元素
     root.render(list);
-};
+    document.getElementById('btn').onclick = function () {
+        // 1. 创建数据
+        const data = ['Alice', 'Lucy', 'Jack', 'Jolyne'];
+        // 2. 创建列表
+        const list = <ul>{data.map((item) => <li key={item}>{item}</li>)}</ul>;
+        // 3. 获取根元素
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        // 4. 渲染元素
+        root.render(list);
+    };
+</script>
 ```
 
 > 如果在列表前面加上一个新元素了，其他元素内容并没有发生改变，由于新元素添加到开始位置，其余位置也发生变化，React 根据位置比较元素，所有元素都被修改
