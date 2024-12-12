@@ -902,19 +902,32 @@ CommonJS 模块化，模块内部定义一个 `module` 对象，`module` 对象�
 
 1. **文件作为模块**，模块路径需以 `./` 或 `../` 开头，否则会被 node 识别为**核心模块**或 `node_modules` 中的模块
 
-   核心模块：
+   **核心模块**：
 
    ```javascript
    const path = require('path'); // 等价于 const path = require('node:path');
    ```
 
+   **按需引入**
+
+   ```javascript
+   // 只引入'./m3.js'中的name属性
+   const name = require('./m3').name;
+   ```
+
+   **解构赋值**
+
+   ```javascript
+   const {name} = require('./m3');
+
 2. node **自动补全文件扩展名机制**：先在目录中找同名的 `.js` 文件，`.js` 不存在再找同名的 `.json` 或 `.node` 文件 
 
-3. **文件目录作为模块**，需要在 `package.json` 中指定 `main` 属性的主文件
+3. **文件目录作为模块**，需要重构文件夹解构，需要在 `package.json` 中指定 `main` 属性的主文件
 
    ```xml
    D:\test\
    ├── module/
+   │   ├── package.json
    │   └── m1.js
    └── myapp.js 
    ```
@@ -938,34 +951,26 @@ CommonJS 模块化，模块内部定义一个 `module` 对象，`module` 对象�
    console.log(a); // {a: 1}
    ```
 
-4. `node_modules`
+4. `node_modules`：如果加载模块没有以 `./` 或 `../` 开头，且加载模块不是核心模块，会自动去 `node_modules` 中寻找模块，如果存在就是用，不存在就在父目录中查找 `node_modules` 以此类推
 
-5. **原理**
+**原理**
 
-   ```javascript
-   (function(exports, require, module, __filename, __dirname) {
-       // 模块代码会被放到这里
-   });
-   ```
+```javascript
+(function(exports, require, module, __filename, __dirname) {
+    // xxx
+});
+```
 
-- 按需引入
-
-  ```javascript
-  // 只引入'./m3.js'中的name属性
-  const name = require('./m3').name;
-  ```
-
-- 解构赋值
-
-  ```javascript
-  const {name} = require('./m3');
-  ```
+- `exports`：向外部暴露的部分
+- `require`：引入模块的方法
+- `__filename`：模块的路径
+- `__dirname`：模块所在目录
 
 ### ES 模块
 
 ES6 标准
 
-在 Node 环境中，默认模块化标准是 CommonJS，如果想要使用 ES 标准
+在 Node 环境中，默认模块化标准是 CommonJS，如果想要**使用 ES 标准**
 
 1. 使用 `.mjs` 文件
 
@@ -979,21 +984,44 @@ ES6 标准
 
 **导出模块**
 
-- **命名导出**
+- 命名导出
 
   ```javascript
+  // 导出变量
   export let a = 10;
   export const b = 20;
   
-  // 等价于
+  // 导出函数和类
+  export function fn() { }
+  export class className() {  }
+  ```
+
+- 导出一组
+
+  ```javascript
   let a = 10;
   const b = 20;
   export {a, b};
   ```
 
-  > **注意**：`export` 是对外的接口，必须使用解构赋值 `{}` ，**必须与模块内部变量建立一一对应的关系**
+- `as`：设置别名导出
 
-- **默认导出**：`export default`
+  ```javascript
+  export { variable as name };
+  ```
+
+- 解构导出
+
+  ```javascript
+  const name = "John Doe";
+  const age = 30;
+  const city = "New York";
+  
+  // name被重命名为userName
+  export const { name: userName, age: userAge, city: userCity } = { name, age, city };
+  ```
+
+- `export default xxx`：默认导出。**一个模块只能有一个默认导出**
 
   ```javascript
   function sum(a, b) {
@@ -1002,20 +1030,7 @@ ES6 标准
   export default sum;
   ```
 
-  > **注意**：**一个模块中，只能有一个默认导出**
-
-- **导出函数和类**
-
-  ```javascript
-  // 写法一
-  export function fn() {}
-  
-  // 写法二
-  function fn() {}
-  export {fn}
-  ```
-
-- `export * from`：将另一个模块的**所有内容导出**，而**不导出默认导出**。可以**在一个模块集中管理多个模块**
+- `export * from`：**将另一个模块的所有内容导出，而不导出默认导出**。可以**在一个模块集中管理多个模块**
 
   ```javascript
   // utils.js
@@ -1028,16 +1043,26 @@ ES6 标准
   
   // main.js
   import { add, subtract, multiply } from './math.js';
+  ```
 
 **引入模块**
 
-- `*`：导入所有 
+- 引入模块
 
-  前端慎用 `import *`：前端使用 webpack 打包时，最终打包后的文件很臃肿，性能会受影响
+  ```javascript
+  import "modules.js";
+  ```
+
+- `*`：导入所有模块内容至指定命名空间
 
   ```javascript
   import * as m1 from "./m1.js"
-  console.log(m1.a); // 10
+  ```
+
+- 导入模块的指定内容
+
+  ```javascript
+  import {export1, export2} from "./m1.js"
   ```
 
 - 导入模块的默认导出
