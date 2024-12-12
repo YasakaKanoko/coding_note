@@ -1050,60 +1050,52 @@ ES6 标准
 - 引入模块
 
   ```javascript
-  import "modules.js";
+  import "./modules.js";
   ```
 
 - `*`：导入所有模块内容至指定命名空间
 
   ```javascript
-  import * as m1 from "./m1.js"
+  import * as m1 from "./modules.js"
   ```
 
 - 导入模块的指定内容
 
   ```javascript
-  import {export1, export2} from "./m1.js"
+  import {export1, export2} from "./modules.js"
   ```
 
 - 导入模块的默认导出
 
   ```javascript
-  import sum from "./m1.js"
-  console.log(sum(1, 2)); // 3
+  import defaultExport from "./modules.js"
   ```
 
-  默认导出可以任意命名
+  导入默认导出可以任意命名
 
   ```javascript
-  import hello from "./m1.js"
-  console.log(hello(1, 2)); // 3
+  import hello from "./modules.js"
   ```
 
-- 导入命名和和混合导出
+  导入默认导出和命名导出混合导出
 
   ```javascript
-  import sum, {a, b} from "./m1.js"
+  import defaultExport, {a, b} from "./modules.js"
   ```
 
-**注意事项**：
+**特点**：
 
-1. **不能省略扩展名**
+1. 相对/绝对均可解析：基于文件路径解析，即可以解析 `./` 或 `../` 开头的或者 `file:/` 开头，但都**必须包含文件扩展名**
+2. 支持加载内置模块，在模块前加上 `node:` 表示内置模块
+3. 没有默认文件扩展名，必须明确指定 `.js`，`.cjs` 或 `.mjs` 
+4. 文件夹模块没有主文件，导入一个文件夹时，会先根据该文件夹中的 `package.json` 中的 `main` 字段确定入口文件并尝试加载，没有找到则报错。
+5. 支持 `node_modules` 包，和 CommonJS 模块一样，在目录中按照算法查找指定包
 
-   ```javascript
-   import { a, b } from "./m1.js"
-   console.log(a); // 10
-   ```
+注意事项：
 
-2. **解构赋值**：引入时**变量名必须和导出时相同**
+1. **解构赋值**：导入时必须使用解构赋值，否则将视为默认导出
 
-   `as`：**设置别名**
-
-   ```javascript
-   import { a as hello, b } from "./m1.js"
-   console.log(hello);
-   ```
-
-3. ES 模块导入的内容是**常量**
+2. ES 模块导入的内容是**常量**
 
    ```javascript
    import {a} from './xxx.js'
@@ -1118,16 +1110,16 @@ ES6 标准
    >
    >    **原因**： `const` 只禁止变量重新赋值，只保证其引用 ( 内存地址 ) 不变，对象本身的属性值的指针仍然可以修改
 
-4. ES 模块是严格模式
+3. ES 模块是严格模式
 
-5. `import` 具有变量提升，代码会提升到头部先执行
+4. `import` 具有变量提升，代码会提升到头部先执行
 
    ```javascript
    foo();
    import { foo } from 'my_module';
    ```
 
-6. `import` 是静态执行。不能使用表达式或变量
+5. `import` 是静态执行。不能使用表达式或变量
 
    ```javascript
    // 报错
@@ -1145,7 +1137,7 @@ ES6 标准
    }
    ```
 
-7. `import` 是 Singleton 模式，对于同一 `import` 语句，只会执行一次，而不会执行多次
+6. `import` 是 Singleton 模式，对于同一 `import` 语句，只会执行一次，而不会执行多次
 
    ```javascript
    import { foo } from 'my_module';
@@ -1155,7 +1147,7 @@ ES6 标准
    import { foo, bar } from 'my_module';
    ```
 
-8. 通过 Babel 转码，CommonJS 的 `require` 和 ES 模块的 `import` 可以写在同一文件中，但 `import` 会在静态解析阶段执行，所以`import` 是模块中最早执行的
+7. 通过 Babel 转码，CommonJS 的 `require` 和 ES 模块的 `import` 可以写在同一文件中，但 `import` 会在静态解析阶段执行，所以`import` 是模块中最早执行的
 
    ```javascript
    require('core-js/modules/es6.symbol');
@@ -1167,141 +1159,93 @@ ES6 标准
 
 核心模块：Node 中内置的模块，可以在 Node 中直接使用
 
-> **注意**：
->
-> - `window`：浏览器宿主对象
->
-> - `global`：node 全局对象，类似于 `window`
->
-> ES 标准中，全局对象的标准名为 `globalThis`
->
-> ```javascript
-> console.log(global === globalThis); // true
-> ```
+- `window`：浏览器宿主对象
+
+- `global`：node 全局对象，类似于 `window`
+
+ES 标准中，全局对象的标准名为 `globalThis`
+
+```javascript
+console.log(global === globalThis); // true
+```
 
 #### process
 
 `process` 模块：表示当前的 node 进程；是一个全局变量，可以直接使用
 
-`process.exit([code])`：结束当前进程，终止 Node；( 可选 ) `code` 状态码，自己定义
+- `process.exit([code])`：结束当前进程，终止 Node；( 可选 ) `code` 状态码，自己定义
 
-```javascript
-console.log(1);
-process.exit();
-console.log(2);
-console.log(3);
-// 只打印 1
-```
+  ```javascript
+  console.log(1);
+  process.exit();
+  console.log(2);
+  console.log(3);
+  // 只打印 1
+  ```
 
-`process.nextTick(callback[, ...args]`：将函数插入到 tick 队列中
+- `process.nextTick(callback[, ...args]`：将函数插入到 **tick 队列**中
 
-**执行顺序**：调用栈 -> tick 队列 -> 微任务 -> 宏任务
+  **执行顺序**：调用栈 -> **tick 队列** -> 微任务 -> 宏任务
 
-tick 队列，是在下一次事件循环之前执行
+  **tick 队列**：在下一次事件循环之前执行
 
-```javascript
-// 宏任务队列
-setTimeout(() => {
-    console.log(1);
-});
-
-// 微任务队列
-queueMicrotask(() => {
-    console.log(2);
-});
-
-// tick队列
-process.nextTick(() => {
-    console.log(3);
-});
-
-// 调用栈
-console.log(4);
-// 执行顺序: 4 -> 3 -> 2 -> 1
-```
+  ```javascript
+  // 宏任务队列
+  setTimeout(() => {
+      console.log(1);
+  });
+  
+  // 微任务队列
+  queueMicrotask(() => {
+      console.log(2);
+  });
+  
+  // tick队列
+  process.nextTick(() => {
+      console.log(3);
+  });
+  
+  // 调用栈
+  console.log(4);
+  // 执行顺序: 4 -> 3 -> 2 -> 1
+  ```
 
 #### path
 
 `path`：路径；通过 `path` 获取路径
 
-使用前需引入模块
+- **引入模块**
 
-```javascript
-const path = require('path'); // 等价于 const path = require('node:path');
-```
-
-```shell
-# 终端中输入命令 node 可以查看包含的方法
-node .\path.js
-<ref *1> {
-  resolve: [Function: resolve],
-  normalize: [Function: normalize],
-  isAbsolute: [Function: isAbsolute],
-  join: [Function: join],
-  relative: [Function: relative],
-  toNamespacedPath: [Function: toNamespacedPath],
-  dirname: [Function: dirname],
-  basename: [Function: basename],
-  extname: [Function: extname],
-  format: [Function: bound _format],
-  parse: [Function: parse],
-  matchesGlob: [Function: matchesGlob],
-  sep: '\\',
-  delimiter: ';',
-  win32: [Circular *1],
-  posix: <ref *2> {
-    resolve: [Function: resolve],
-    normalize: [Function: normalize],
-    isAbsolute: [Function: isAbsolute],
-    join: [Function: join],
-    relative: [Function: relative],
-    toNamespacedPath: [Function: toNamespacedPath],
-    dirname: [Function: dirname],
-    basename: [Function: basename],
-    extname: [Function: extname],
-    format: [Function: bound _format],
-    parse: [Function: parse],
-    matchesGlob: [Function: matchesGlob],
-    sep: '/',
-    delimiter: ':',
-    win32: [Circular *1],
-    posix: [Circular *2],
-    _makeLong: [Function: toNamespacedPath]
-  },
-  _makeLong: [Function: toNamespacedPath]
-}
-```
+  ```javascript
+  // 使用前必须引入模块
+  const path = require('path'); // 等价于 const path = require('node:path');
+  ```
 
 - `path.resolve([...path])`：生成绝对路径
 
   ```javascript
-  const path = require('path'); // const path = require('node:path');
-  // 无参 返回当前工作路径
+  // F5 执行
   let result = path.resolve();
   console.log(result); // D:\xsj_workshop
   ```
-
-  根据不同方式执行代码，生成的工作目录不同
-
+  
+  **注意**：控制台执行，生成的目录和 F5命令 不一致
+  
+  **原因**：因为 VSCode 默认的 F5 启动是在根目录下启动，而不是当前目录
+  
   ```shell
   node ./path.js 
   # D:\xsj_workshop\react_project\src
   ```
-
-  相对路径：`./` 或 `../`
-
-  绝对路径：Windows：`C:\xxx`、Linux：`/User/xxx`、网络：`https://wwww.xxx`
-
-  如果将相对路径作为参数，根据工作目录的不同，生成的绝对路径也不同
-
-  通常会将第一个参数设置为绝对路径，第二个参数为相对路径，node 会自动计算出绝对路径
-
+  
+  通常会将第一个参数设置为绝对路径 ( 全局变量：`__dirname` ) ，第二个参数为相对路径，node 会自动计算出绝对路径
+  
   ```javascript
   const path = require('path'); // const path = require('node:path');
   let result = path.resolve('D:\\xsj_workshop\\react_project\\src','./hello.js'); 
   console.log(result); // D:\xsj_workshop\react_project\src\hello.js
   ```
-
+  
   > **注意**：
   >
   > - Windows 的绝对路径反人类，使用反斜杠 `\`。路径需要转义，使用双斜杠 `\\` 或使用 `/`
@@ -1310,23 +1254,29 @@ node .\path.js
   >
   >   - `__dirname`：返回当前文件夹的绝对路径
   >
+  >   - `__filename`：返回当前文件的绝对路径
+  >   
   >     ```javascript
   >     const result = path.resolve(__dirname, './hello.js');
   >     ```
-  >
-  >   - `__filename`：返回当前文件的绝对路径
 
 #### fs
 
-`fs`：File System，帮助 Node 操作磁盘的文件；文件操作也就是 I/O
+`fs`：File System，帮助 Node 操作磁盘的文件，也就是 I/O
 
-引入模块
+`Buffer` 对象：`fs` 模块读取磁盘的数据，数据会以 `Buffer` 对象形式返回，`Buffer` 是一个临时存储数据的缓冲区
 
-```javascript
-const fs = require('node:fs');
-```
+- 引入模块
 
-- `fs.readFileSync(path)`：同步读取文件
+  ```javascript
+  const fs = require('node:fs');
+  ```
+
+- `fs.readFileSync(path)`：同步读取文件。同步易出现**阻塞问题**，通常使用异步的 `fs.readFile()`  来读取文件
+
+  **两个参数**：第一个参数是文件的路径，第二个参数是可选项，通常使用选项 `encoding` 指定文件编码
+
+  如果不指定文件编码类型，将返回一个 `Buffer` 对象，可以调用 `toString()` 方法查看文件内容
 
   ```javascript
   // 导入fs模块
@@ -1334,78 +1284,77 @@ const fs = require('node:fs');
   // 导入path模块
   const path = require('node:path');
   
-  // 【相对路径不安全】
-  // 如果readFileSync()方法的参数是【相对路径】, 那么该路径会返回在上一级目录中寻找目标文件
-  // 使用path.resolve(__dirname, './hello.txt')获取指定绝对路径并拼接正确的路径
-  let buff = fs.readFileSync(path.resolve(__dirname, './hello.txt'));
-  console.log(buff); // Buffer(12) [104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, buffer: ArrayBuffer(8192), byteLength: 12, byteOffset: 256, length: 12, Symbol(Symbol.toStringTag): 'Uint8Array']
-  
-  console.log(buff.toString()); // hello world!
+  try {
+      const data = fs.readFileSync(
+          path.resolve(__dirname, './test.txt'),
+          'utf-8'
+      );
+      console.log(data);
+  } catch (err) {
+      console.log('读取文件出错', err);
+  }
   ```
-
-  > `Buffer` 对象：`fs` 模块读取磁盘的数据，数据会以 `Buffer` 对象形式返回，`Buffer` 是一个临时存储数据的缓冲区
 
 - `fs.readFile(path, callback)`：异步读取文件。
 
-  1. 两个参数：1. `path` 路径； 2.  `callback` 回调函数；
+  **两个参数**：`path` 路径；可选参数 ( `encoding` )； `callback` 回调函数；
 
-     回调函数需要两个参数作为参数：`error` 错误信息、`buffer` 对象
+  回调函数需要两个参数作为参数：`error` 错误信息、`buffer` 对象
 
-     ```javascript
-     // 导入fs模块
-     const fs = require('node:fs');
-     // 导入path模块
-     const path = require('node:path');
-     
-     // 直接调用readFile()方法
-     fs.readFile(
-         path.resolve(__dirname, './hello.txt'),
-         (err, buffer) => {
-             if(err) {
-                 console.log('出错了');
-             } else {
-                 console.log(buffer.toString());
-             }
-         }
-     );
-     ```
+  ```javascript
+  const fs = require('node:fs');
+  const path = require('node:path');
+  fs.readFile(path.resolve(__dirname, './test.txt'), 'utf-8', (err, data) => {
+      if (err) {
+          console.error('读取文件出错', err);
+          return;
+      }
+      console.log('readFile执行了');
+      console.log(data);
+  });
+  console.log('栈中的任务执行了');
+  /*
+  栈中的任务执行了
+  readFile执行了
+  hello world!
+  */
+  ```
 
-  2. 回调函数容易产生回调地狱，通常使用 Promise 中的 `then()` 方法调用
+  **改进**：由于回调函数容易产生回调地狱
 
-     ```javascript
-     // 引入fs模块
-     const fs = require('node:fs/promises');
-     // 引入path模块
-     const path = require('node:path');
-     
-     // 使用Promise的then()方法调用
-     fs.readFile(path.resolve(__dirname, './hello.txt'))
-         .then(buffer => {
-             console.log(buffer.toString());
-         })
-         .catch(e => {
-             console.log('出错了');
-         })
-     ```
+  通过 `then` 方法调用
 
-  3. 使用 `async` 快速创建异步函数
+  ```javascript
+  // 引入fs.promises API
+  const fs = require('node:fs/promises');
+  const path = require('node:path');
+  
+  fs.readFile(path.resolve(__dirname, './test.txt'), 'utf-8')
+      .then((buff) => {
+          console.log(buff);
+      })
+      .catch((err) => {
+          console.log('读取文件出错', err);
+      });
+  ```
 
-     ```javascript
-     const fs = require("node:fs/promises");
-     const path = require("node:path");
-     
-     // async快速创建异步
-     ; (async () => {
-         try {
-             const buffer = await fs.readFile(
-                 path.resolve(__dirname, "./hello.txt")
-             );
-             console.log(buffer.toString());
-         } catch (e) {
-             console.log("出错了");
-         }
-     })();
-     ```
+  使用 `async` 快速创建异步函数
+
+  ```javascript
+  const fs = require('node:fs/promises');
+  const path = require('node:path');
+  ; (async () => {
+      try {
+          const data = await fs.readFile(
+              path.resolve(__dirname, './test.txt'),
+              'utf-8'
+          );
+          console.log(data);
+      } catch (e) {
+          console.log(e);
+      }
+  })();
+  ```
 
 - `fs.appendFile()`：创建新文件，或将数据添加到已有文件中
 
@@ -2285,9 +2234,9 @@ app.use(express.static(path.resolve(__dirname, './public')));
 app.get('/', (req, res) => {});
 ```
 
-> **为什么用 `path` 绝对路径？**
+> 
 >
-> 因为 VSCode 默认的 F5 启动是在根目录下启动，而不是当前目录
+> 
 >
 > **为什么要将中间件放在路由之前执行呢？**
 >
