@@ -1534,7 +1534,7 @@ npm install -g npm@latest
 
 > **注意**：
 >
-> - `json` 文件属性名不能使用单引号 `''`
+> - `json` 文件属性名必须使用双引号 `""`
 > - `json` 文件不能有注释
 
 **结构**：
@@ -1543,7 +1543,7 @@ npm install -g npm@latest
 {
   "name": "code_work",
   "version": "1.0.0",
-  "main": "fs.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -1567,24 +1567,19 @@ npm install -g npm@latest
 
 - `main`：入口文件。通常为 `index.js`
 
-- `scripts`：脚本。自定义一些命令行的行为
+- `scripts`：自动脚本。自定义一些命令行的行为
 
-  - `start` 和 `test` 可以直接通过 `npm` 命令使用，其他的命令需要加上 `run`
+  > `start` 和 `test` 可以直接通过 `npm` 命令使用，其他的命令需要加上 `run`
 
-    ```shell
-    npm test 
-    npm start
-    
-    npm run dev
-    ```
+- `keywords`：关键词
 
-- `keywords`：关键词儿
+- `author`：作者。格式：`userName <email@example.com>`
 
 - `license`：版权声明
 
 - `description`：包的描述
 
-- `repository`：仓库地址
+- `repository`：仓库地址 ( `.git` )
 
 **常用命令**：
 
@@ -1594,8 +1589,17 @@ npm install -g npm@latest
 
 - `npm i <包名>`：将指定包下载到当前项目
 
+- `npm i -g <包名>`：全局安装
+
+- `npm list -g`：查看全局安装的项
+
+- `npm uninstall -g <包名>`：全局删除
+
   ```shell
   npm i lodash
+  # added 1 package 安装了一个包
+  # audited 2 packages 检查了两个包的安全漏洞
+  # found 0 vulnerabilities 发现了0个漏洞
   
   # 安装指定版本
   npm install lodash@3.2.0
@@ -1609,14 +1613,20 @@ npm install -g npm@latest
   # -D或--save-dev: 将其添加到开发依赖
   npm install lodash -D
   ```
-
-  > `install` 的过程
+  
+  > `npm install` 过程
   >
-  > 1.  将包下载到 `node_modules`
+  > 1. 连接至 `npm` 服务器，将包下载到项目的 `node_modules` 目录 ( 不存在该目录则自动构建 )
   >
-  > 2. 在 `package.json` 中添加 `dependencies` 属性，显示当前包所需的依赖的版本
+  > 2. 修改 `package.json` 中的 `dependencies` 属性，将包设置为依赖项
   >
-  >    ```shell
+  >    `^4.17.21`：执行 `npm i` 命令时，匹配最新的 `4.x.x` 版本，但不匹配 `5.x.x`
+  >
+  >    `~4.17.21`：执行 `npm i` 命令时，匹配最小依赖的最新版本，即匹配 `4.17.x` 的最新版本
+  >
+  >    `*`：匹配最新版本
+  >
+  >    ```json
   >    {  
   >        "dependencies": {
   >            "lodash": "^4.17.21"
@@ -1624,60 +1634,20 @@ npm install -g npm@latest
   >    }
   >    ```
   >
-  > 3. 添加 `package.lock.json` 文件，记录项目安装的包的版本，以及项目依赖的包的版本。提升包的下载速度
-  >
-  > **注意**：
-  >
-  > - `node_modules` 包含了项目所需的包，可以通过 `npm i` 安装 `dependencies` 配置的依赖项
-  >
-  >   ```shell
-  >   # 安装项目所需依赖
-  >   npm i
-  >   ```
-  >
-  > - `^4.17.21`：执行 `npm i` 命令时，匹配最新的 `4.x.x` 版本，但不匹配 `5.x.x`
-  >
-  > - `~4.17.21`：执行 `npm i` 命令时，匹配最小依赖的最新版本，即匹配 `4.17.x` 的最新版本
-  >
-  > - `*`：匹配最新版本
-
-**引入 npm 下载的包**：不需要使用绝对路径
-
-```javascript
-const _ = require("lodash");
-```
-
-**全局安装**：`npm i <包名> -g`，通常安装一些常用工具
-
-```shell
-npm i laughs@latest -g
-
-# 查看全局中安装的包
-npm list -g
-```
-
-**全局删除**
-
-```shell
-npm uninstall -g laughs
-```
+  > 3. 自动生成`package.lock.json` 文件，用于记录项目的包的结构和版本，提升重新下载包的速度，确保包的版本正确。
 
 **镜像**
 
-`npm` 配置镜像服务器
+配置镜像服务器，官网：https://www.npmmirror.com/
 
-官网：https://www.npmmirror.com/
-
-- 可以使用定制的 `cnpm` 代替 `npm`
-
-  ```shell
-  npm install -g cnpm --registry=https://registry.npmmirror.com
-  ```
+- `cnpm` ：`npm install -g cnpm --registry=https://registry.npmmirror.com`
 
   > `cnpm` 的缺陷：`cnpm i lodash` 命令运行后，会生成两个文件目录：`.store` 和 `lodash`
   >
-  > `lodash` 并不是模块本身，而是模块的快捷方式。现代代码编辑器中，如：WebStorm 里会为 `node_modules` 自动构建索引，无法寻找快捷方式的索引 
-
+  > `lodash` 并不是模块本身，而是**模块的快捷方式**。
+  >
+  > 现代编辑器会为 `node_modules` 自动构建索引，无法寻找快捷方式的索引 
+  
 - 配置 `npm` 的仓库镜像
 
   ```shell
@@ -1693,76 +1663,91 @@ npm uninstall -g laughs
 
 ### yarn
 
-- `npm` 全局安装 `yarn`
+`npm` 全局安装 `yarn`
 
-  ```shell
-  # 安装yarn
-  npm i yarn -g
-  
-  # 删除yarn
-  npm r yarn -g
-  
-  # 查看版本
-  yarn -v # 1.22.22
-  ```
+```shell
+# 安装yarn
+npm i yarn -g
 
-- Nodejs 默认集成 `corepack` ，`corepack` 无需手动安装，就能直接使用 `npm`、`yarn`、`pnpm`
+# 删除yarn
+npm r yarn -g
 
-  ```shell
-  # 启用corepack
-  corepack enable
-  
-  # 切换yarn版本至最新版
-  corepack prepare yarn@stable --activate
-  
-  # 切换yarn版本至1.x.x
-  corepack prepare yarn@1 --activate
-  
-  # 禁用corepack
-  corepack disable
-  ```
+# 查看版本
+yarn -v
+```
 
-  > `yarn` 的版本：
-  >
-  > - `3.2.4` 版本不再生成 `node_modules`，而是生成 `.yarn` 文件夹。 这是 Yarn Plug'n'Play (PnP) 功能的结果。 `.yarn` 文件夹包含了 Yarn 管理依赖项所需的所有信息，包括已安装的包及其依赖关系。
-  >
-  >   如果 `yarn` 的版本是 `3.2.4` 版本，终端运行 `.js` 文件不能使用传统的 `node` ，而需要使用 `yarn node ./xxx.js`
-  >
-  >   ```shell
-  >   # 初始化
-  >   yarn init -y
-  >   
-  >   # 安装express包
-  >   yarn add express
-  >   
-  >   # 运行
-  >   yarn node ./index.js
-  >   ```
-  >
-  > - `1.22.22`：传统 `node_modules` 文件夹包含所有已安装的包及其依赖项，这会导致文件夹非常大且结构复杂。
-  >
-  > - 可以在 `package.json` 中指定所需的 `yarn` 的版本
-  >
-  >   这样指定 `yarn` 的版本，只修改当前项目中 `yarn` 的版本，全局中 `yarn` 的版本不会修改
-  >
-  >   ```shell
-  >   "packageManager": "yarn@3.2.4"
-  >   ```
+Nodejs 默认集成 `corepack` ，`corepack` 无需手动安装，就能直接使用 `npm`、`yarn`、`pnpm`
 
-**常用命令**
+```shell
+# 启用corepack
+corepack enable
+
+# 禁用corepack
+corepack disable
+
+# 切换yarn版本最新版
+corepack prepare yarn@stable --activate
+
+# 切换yarn版本至1.x.x
+corepack prepare yarn@1 --activate
+```
+
+**常用命令**：
 
 - `yarn init`：初始化项目，手动创建 `package.json`
+
 - `yarn init -y`：初始化项目，自动创建 `package.json`
 
 - `yarn add <包名>`：添加包以及依赖
-- `yarn add <包名> -D`：添加开发依赖
-- `yarn remove <包名>`：移除包
-- `yarn`：自动安装依赖 ( 相当于 `npm i` )
-- `yarn run`：执行脚本
-- `yarn xxx`：执行自定义脚本
+
+- `yarn remove <包名>`：删除包
+
 - `yarn global add <包名>`：全局安装
+
 - `yarn global remove <包名>`：全局删除
-- `yarn global bin`：全局安装目录
+
+- `yarn add <包名> -D`：添加开发依赖
+
+- `yarn`：自动安装依赖 ( 相当于 `npm i` )
+
+- `yarn run xxx`：执行脚本
+
+- `yarn global bin`：查看 `yarn` 全局安装目录
+
+  **环境变量**：`yarn` 的目录并不在环境变量中，需要手动创建**环境变量**
+
+  ```shell
+  # 获取yarn的目录
+  yarn global bin
+  
+  # 将读取到yarn的bin目录添加到Path环境变量中
+  ```
+
+
+- `yarn init -2`：安装稳定的 `yarn 2` 版本
+
+  ```shell
+  # 等价于
+  yarn init --install stable
+  
+  # 如果项目已经创建, 则使用
+  yarn set version stable
+  yarn set version latest
+  yarn set version berry
+  ```
+
+  在 `package.json` 中指定 `yarn` 的版本，不会更改全局中的 `yarn` 版本
+
+  ```json
+  "packageManager": "yarn@3.2.4"
+  ```
+
+  Yarn Plug'n'Play (PnP) 功能：`.yarn` 依赖项存在于全局缓存中，通过全局缓存加载依赖项，而非通过遍历 `node_modules` 查找和加载依赖项，占用空间小
+
+  ```shell
+  # PnP模式下, 直接使用node找不到node_modules的依赖项
+  yarn node ./index.js
+  ```
 
 **镜像**
 
@@ -1784,6 +1769,7 @@ yarn config delete registry
 ```shell
 # 全局安装
 npm i pnpm -g
+
 # 启动corepack, 自动集成了pnpm
 corepack enable
 
@@ -1795,8 +1781,8 @@ pnpm -v
 
 - `pnpm init`：初始化。自动添加 `package.json`
 - `pnpm add <包名>`：添加依赖
-- `pnpm add -D <包名>`：添加开发依赖
 - `pnpm add -g <包名>`：全局安装
+- `pnpm add -D <包名>`：添加开发依赖
 - `pnpm install`：安装依赖
 - `pnpm remove <包名>`：移除包
 
@@ -2176,21 +2162,6 @@ res.send('Hello world!');
   # 启动指定的js文件: nodemon ./xxx/xxx.js 
   nodemon
   ```
-
-  > 使用 `yarn` 命令全局安装 `nodemon` ，`nodemon` 可能运行失败
-  >
-  > ```shell
-  > yarn global add nodemon
-  > ```
-  >
-  > **原因**：`yarn` 的目录并不在环境变量中，需要手动创建**环境变量**
-  >
-  > ```shell
-  > # 获取yarn的目录
-  > yarn global bin
-  > ```
-  >
-  > 将读取到 `yarn` 的 `bin` 目录添加到 `Path` 环境变量中即可
 
 - 添加项目依赖
 
