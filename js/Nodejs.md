@@ -31,50 +31,87 @@
 
 [Node.js](https://nodejs.org/en) 是一个在 V8 引擎上的 JavaScript 运行环境，可以在浏览器之外的地方运行
 
+> Node.js 和 JavaScript 的区别
+>
+> - **Node**：ECMAScript
+> - **JavaScript**：ECMAScript、DOM、BOM
+
 **处理并发问题**与其他**服务端语言**不同：
 
 - **单线程**
 - **异步**
 
-## 安装
+## 安装 nvm
 
-**命令**：
+[nvm 安装](https://github.com/coreybutler/nvm-windows/releases)
 
-- `nvm list`：查看已安装的 Node 版本
-- `nvm install 版本`：安装指定版本的 Node
+- `Select Destination Location`：nvm 安装路径
+- `Set Node.js Symlink`：Node.js 安装路径
 
-**配置 `nvm` 镜像**：
+安装 `nvm` 成功，获取 `root` 路径
+
+```shell
+# 获取nvm安装路径
+nvm root
+# Current Root: D:\nvm
+```
+
+**配置镜像源**：更改根目录下的 `settings.txt`
+
+```xml
+root: D:\nvm
+path: D:\nodejs
+node_mirror: https://npmmirror.com/mirrors/node/
+npm_mirror: https://npmmirror.com/mirrors/npm/
+```
+
+- `arch`：操作系统的位数
+- `proxy`：配置代理
+
+**环境变量**
+
+- `NVM_HOME`：`D:\nvm`
+- `NVM_SYMLINK`：`D:\nodejs`
+- `Path`：`%NVM_HOME%`、`%NVM_SYMLINK%`
+
+**配置 nvm 镜像**
 
 ```shell
 nvm node_mirror https://npmmirror.com/mirrors/node/
 ```
 
-**安装 Node**：
+**命令**：
 
-```shell
-# 安装最新版Node
-nvm install latest
+- `nvm list` 或 `nvm ls`：查看已安装的 Node 版本
 
-# 安装稳定版
-nvm install lts
-```
+- `nvm install version`：安装指定版本的 Node
 
-**查看版本**
+  ```shell
+  # 安装最新版Node
+  nvm install latest
+  
+  # 安装稳定版
+  nvm install lts
+  ```
 
-```shell
-node -v
-```
+- `nvm use version`：切换指定版本的 Node
 
-**切换版本**：`nvm use` 指定要使用的 node 版本
+  ```shell
+  nvm use 18.10.0
+  ```
 
-```bash
-nvm use 18.10.0
-```
+- `nvm alias <name> <version>`：给指定版本设置别名
+- `nvm run <version> <script>`：指定版本下运行脚本
+- `nvm current`：显示当前正在使用的 Node 版本
+- `nvm uninstall <version>`：卸载指定版本 Node
 
-> Node.js 和 JavaScript 的区别
->
-> - **Node**：ECMAScript
-> - **JavaScript**：ECMAScript、DOM、BOM
+`node` 常用命令
+
+- `node -v`：查看版本
+- `node -e 'console.log("Hello world!");'`：执行脚本字符串
+- `node ./index.js`：执行指定脚本文件
+
+- `node --help`：查看帮助
 
 ## 异步
 
@@ -821,6 +858,8 @@ mp
 
 早期的模块化，通过原始的 `script` 标签引入多个 js 文件
 
+- 请求过多，难以维护
+
 - 容易出现模块间互相覆盖的情况
 - 有一些模块是相互依赖的，必须先引入某个组件再引入某个组件，模块才能够正常工作模块化
 
@@ -829,6 +868,8 @@ mp
 模块，就是内部任何变量或其他对象都是私有的，不会暴露给外部模块。
 
 - CommonJS ( Nodejs 默认模块化标准 )
+- AMD 规范
+- CMD 规范
 - ES 模块化
 
 ### CommonJS
@@ -1803,9 +1844,9 @@ pnpm config delete registry
 
 网络服务器是基于**请求**和**响应**的
 
-请求和响应实质上就是一段数据，这段特殊格式有 HTTP 协议规定
+**请求和响应实质上就是一段数据**，这段数据格式由 HTTP 协议规定
 
-`https://www.xxx.com/hello/index.html`
+如：`https://www.xxx.com/hello/index.html`
 
 - `https://`：协议名。诸如：FTP 等
 
@@ -1893,30 +1934,16 @@ pnpm config delete registry
 
      `GET`：`get` 请求，向服务器请求资源
 
-     ```html
-     <form method="get" action="#">
-         <input type="text" name="username" />
-         <button>提交</button>
-     </form>
-     ```
-
      `POST`：`post` 请求，向服务器发送数据
-
-     ```html
-     <form method="post" action="#">
-         <input type="text" name="username" />
-         <button>提交</button>
-     </form>
-     ```
-
+     
      > `post` 请求
      >
      > - 没有请求头，只有请求体；通过请求体发送数据
      > -  Chrome 通过 **载荷/Payload** 查看
      > - 请求体大小没有限制，向服务器发送数据时，能用 `post` 尽量用 `post`
-
+     
      **第二部分**：请求资源的路径。`/index.html?username=sw`
-
+     
      > **查询字符串**：`?` 后面的部分称查询字符串
      >
      > - 查询字符串是一个名值对结构；使用 `=` 连接，多个名值对使用 `&` 分割
@@ -1924,11 +1951,11 @@ pnpm config delete registry
      > - `url` 有长度限制，`get` 请求无法发送较大的数据
 
      **第三部分**：`HTTP/1.1` 。HTTP 协议的版本
-
+     
   2. **请求头**：名值对结构。告知服务器浏览器的信息
-
-     `Accept`：浏览器可接受的文件类型
   
+     `Accept`：浏览器可接受的文件类型
+
      ```xml
      Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
      ```
@@ -1938,21 +1965,21 @@ pnpm config delete registry
      ```xml
      Accept-Encoding: gzip, deflate, br, zstd
      ```
-  
+
      `Accept-Language`：浏览器可接受的语言
-  
+
      ```xml
      Accept-Language: zh-CN,zh;q=0.9
      ```
   
      `User-Agent`：用户代理。描述浏览器信息的字符串
-
+  
      ```xml
      User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36
      ```
-
+  
   3. **空行**：用来分隔请求头和请求体
-
+  
   4. **请求体**：`post` 请求通过请求体发送数据
 
 **响应报文 ( response )**
@@ -2044,16 +2071,19 @@ Express 是 node 中的服务器软件，通过 Express 快速在 node 中搭建
 
 ### 路由
 
-`app.METHOD()`：设置路由
+路由机制：**根据不同请求方式**和**请求地址**处理用户的请求
 
-- `METHOD` 可以是 `get` 或 `post`
+`app.METHOD(PATH, HANDLER)`
+
+- `METHOD`：`get`、`post`、`put`、`delete`
+- `PATH`：服务器路径
+- `HANDLER`：回调函数，路由匹配时执行
+
+- `req`：表示用户的请求信息，通过 `req` 获取用户传递的数据
+
+- `res`：表示服务器发送客户端的响应信息, 通过 `res` 向客户端返回数据
 
   ```javascript
-  // app.get(path, callback);
-  // - '/' 表示localhost:3000
-  // - callback 有两个参数, request和response
-  //    - req 表示用户的请求信息, 通过 req 获取用户传递数据
-  //    - res 表示服务器发送客户端的响应信息, 通过 res 向客户端返回数据
   app.get('/', (req, res) => {
       console.log('有人访问了');
       // 读取用户请求 request
@@ -2063,9 +2093,7 @@ Express 是 node 中的服务器软件，通过 Express 快速在 node 中搭建
   });
   ```
 
-- 如果希望服务器正常访问，需要为服务器设置路由
-
-- 路由**可以根据不同请求方式**和**请求地址**处理用户的请求
+  
 
 `res.sendStatus()`：向客户端发送响应状态码
 
@@ -2148,7 +2176,7 @@ res.send('Hello world!');
     });
     ```
 
-## nodemon
+### nodemon
 
 `nodemon` 模块：自动监视代码修改，重启服务器
 

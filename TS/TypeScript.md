@@ -37,7 +37,7 @@
 
 # 编译
 
-注意：基于 Vue 或 React 通过 Webpack 或 Vite 进行配置可以跳过此步 
+> **注意**：基于 Vue 或 React 通过 Webpack 或 Vite 进行配置可以跳过此步 
 
 1. 新建  `.ts` 文件
 
@@ -61,33 +61,35 @@
    tsc --init
    ```
 
-   1. 生成一个 `tsconfig.json` 配置文件，包含很多编译时的配置
-   2. 可以手动更改编译的 js 版本，默认 `ES7`
+   生成一个 `tsconfig.json` 配置文件，包含很多编译时的配置
 
-       > **注意**：如果运行 `tsc --init` 遇到错误提示 " 无法加载文件 C:\Users\20681\AppData\Roaming\npm\tsc.pc1 "，这是由于 PowerShell 执行策略设置导致的。
-       >
-       > 1. **检查当前执行策略**：`Get-ExecutionPolicy`，如果执行策略是 `AllSigned` 或 `Restricted`，更改策略为 `RemoteSigned` 或 `Unrestricted`
-       > 2. **更改执行策略**：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-       > 
-       >    - `RemoteSigned`：允许本地脚本运行，但需要从互联网下载的脚本进行签名。
-       > 
-       >    - `Unrestricted`：允许所有脚本运行，但会提示确认。
-       > 
-       > 4. 确认策略更改后，输入 `Get-ExecutionPolicy` 检查策略是否更改
+   可以手动更改编译的 js 版本，默认 `ES7`
+
+   > **注意**：如果运行 `tsc --init` 遇到错误提示 " 无法加载文件 C:\Users\20681\AppData\Roaming\npm\tsc.pc1 "，这是由于 PowerShell 执行策略设置导致的。
+   >
+   > 1. **检查当前执行策略**：`Get-ExecutionPolicy`，如果执行策略是 `AllSigned` 或 `Restricted`，更改策略为 `RemoteSigned` 或 `Unrestricted`
+   > 2. **更改执行策略**：`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+   > 
+   >    - `RemoteSigned`：允许本地脚本运行，但需要从互联网下载的脚本进行签名。
+   > 
+   >    - `Unrestricted`：允许所有脚本运行，但会提示确认。
+   > 
+   > 4. 确认策略更改后，输入 `Get-ExecutionPolicy` 检查策略是否更改
 
 2. 监视 `.ts` 文件变化
 
    ```bash
-   tsc --watch # tsc -w
+   # tsc -w
+   tsc --watch 
    ```
 
-3. 优化：当编译出错时不生成 `.js` 文件
+3. **优化**：当编译出错时不生成 `.js` 文件
 
    ```bash
+   # 修改配置文件tsconfig.json的"noEmitOnError": true
    tsc --noEmitOnError --watch
    ```
-
-   > 修改配置文件 `tsconfig.json` 的   `"noEmitOnError": true`
+   
 
 `tsc` **参数**：
 
@@ -98,21 +100,11 @@
 - `--noEmitOnError`：报错停止编译，不生成文件
 - `--noEmit`：只检查类型是否正确
 
-```json
-{
-    "compilerOptions": {
-        "outFile": "./dist/bundle.js", // 所有文件都被编译到一个文件中
-        "outDir": "./dist", // 所有文件编译到dist目录
-        "target": "es2015", // 指定ES版本
-        "noEmitOnError": true, // 编译出错不生成文件
-        "noEmit":false // true不生成文件, false生成文件(默认)
-    }
-}
-```
-
-> `outFile` 的优先级大于 `outDir`，如果设置了 `outFile` 会忽略 `outDir`
+> **注意**：
 >
-> `noEmit` 的优先级大于 `noEmitOnError`，如果设置了 `noEmit` 会忽略 `noEmitOnError`
+> - `outFile` 的优先级大于 `outDir`，如果设置了 `outFile` 会忽略 `outDir`
+>
+> - `noEmit` 的优先级大于 `noEmitOnError`，如果设置了 `noEmit` 会忽略 `noEmitOnError`
 
 # 类型声明
 
@@ -157,7 +149,7 @@ console.log(res);
 - `value as Type`
 - `<Type>value`
 
-> tsx 语法 React 的 jsx 语法的 ts 版中必须使用 `value as Type`
+> **注意**：tsx 语法 React 的 jsx 语法的 ts 版中必须使用 `value as Type`
 
 **场景**：
 
