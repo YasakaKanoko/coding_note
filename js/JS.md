@@ -1388,6 +1388,8 @@ greet('JavaScript', (msg) => {
 
 - `map()`：传入一个函数依次作用于数组中的每个元素，并返回一个新数组
 
+  可选参数：数组下标
+
   ```javascript
   let arr = [1, 2, 3, 4, 5];
   let result = arr.map((x) => x ** 2);
