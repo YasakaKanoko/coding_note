@@ -150,17 +150,19 @@ Vite 是一个构建工具，提供了一个更快和更轻量级的开发服务
 - **文件结构**：
 
   ```pseudocode
-  - 根目录
-      - node_modules
-  	- public
-  	- src
-  		- components
-  		- App.vue
-  		- index.js (main.js)
-  	- index.html
-  	- package-lock.json
-  	- package.json
-  	- vite.config.js
+  Project
+  ├── node_modules
+  │   ├── @types
+  │   └── xxx
+  ├── public
+  ├── src
+  │   ├── components
+  │   ├── App.vue
+  │   └── index.js
+  ├── index.html
+  ├── package-lock.json
+  ├── package.json
+  └── vite.config.js
   ```
 
 - **初始化**
