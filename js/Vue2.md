@@ -1,4 +1,14 @@
-# Vue
+# Vue2
+
+----
+
+**目录**：
+
+- [Hello world!](#hello-world)
+- [模板](#模板)
+- [组件](#组件)
+
+---
 
 Vue 是一套**构建用户界面**的**渐进式** JavaScript 框架
 
@@ -10,15 +20,15 @@ Vue 是一套**构建用户界面**的**渐进式** JavaScript 框架
 
 2. **声明式**：无需直接操作 DOM，提升开发效率
 
-**Vue 官网**：https://v2.cn.vuejs.org/v2/guide/
+**Vue 官网**：https://v2.cn.vuejs.org/
 
 [awesome-vue](https://github.com/vuejs/awesome-vue)：Vue.js 相关的优秀 Demo 精选列表
 
 [awesome-js](https://awesomejs.dev/for/vue/)：浏览与 Vue 相关的包
 
-## 安装
+# Hello world!
 
-- 开发版本：包含有帮助的命令行警告
+- 开发版本：包含完整的警告和调试模式
 
   ```html
   <!-- 开发环境版本，包含了有帮助的命令行警告 -->
@@ -42,33 +52,208 @@ Vue 是一套**构建用户界面**的**渐进式** JavaScript 框架
   Vue.config.productionTip = 'false';
   ```
 
-## Hello Vue
+- **Hello Vue!**
 
-Vue 的核心是采用简洁的模板语法声明式地将数据渲染到 DOM
+  ```vue
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  
+  <div id="app">
+      <h1>{{msg}}</h1>
+  </div>
+  
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              msg: 'Hello vue!',
+          },
+      })
+  </script>
+  ```
 
-```html
-<!-- 1. 准备好一个容器 -->
-<div id="root">
-    {{msg}}
-</div>
-<script>
-    // 2. 创建Vue实例
-    var vm = new Vue({
-        // 3. el: 指定Vue实例为根容器
-        el: '#root',
-        data: {
-            // 4. data: 存储的数据将提供给el容器使用
-            msg: 'Hello, Vue!'
-        }
-    });
-    Vue.config.productionTip = 'false';
-</script>
-```
+- **注入**：vue 会将以下配置注入到 vue 实例中，即模板中可以直接使用 vue 实例中的成员
 
-使用 Vue：
+  - `data` ：和界面相关的数据
 
-1. **初始化 Vue**：使用前，必须创建 Vue 实例，并传入配置对象
-2. **Vue 模板**：root 容器被称为 【Vue 模板】，其代码规范仍符合 html 规范，只是需要配合特殊的 Vue 语法 —— 插值
+  - `computed` ：通过已有的数据计算得到的数据
 
+  - `methods` ：方法
 
+- **虚拟 DOM**：vue 采用了虚拟 DOM ( `vnode` ) 的方式描述要渲染的内容
 
+  `vnode` 是一个普通的 js 对象，用于描述界面上有什么
+
+  ```javascript
+  let vnode = {
+      tag: 'h1',
+      children: [{
+          tag: undefined,
+          text: 'Hello world!'
+      }]
+  };
+  ```
+
+  模板被解构为类似结构的虚拟 DOM
+
+  ```javascript
+  {
+      tag: "div",
+      children: [
+          { tag: "h1", children: [ { text: "Hello world!" } ] }
+      ]
+  }
+  ```
+
+  **渲染原理**：`render()`
+
+  ```javascript
+  render(h) {
+      return h('div', [ // 根节点
+          // 子节点
+          h('h1', `${this.msg}`),
+          h('p', `xxx`),
+          h('div', `xxx`),
+      ])
+  }
+  ```
+
+  **渲染的查找顺序**：`template` —— `render()` —— vue 模板
+
+  > **注意**：
+  >
+  > 1. **vue 模板不是真实 DOM，会编译为虚拟 DOM**
+  > 2. 虚拟 DOM 最终会生成真实 DOM 树
+
+- `diff` **算法**：数据发生变化后重新渲染，vue 会比较新旧两棵 `vnode tree`，只更新差异部分到真实 DOM 中
+
+  > **注意**：虚拟节点树，必须是单根的
+
+- **挂载**：生成真实 DOM 树，放置到某个元素位置，称之为**挂载**
+  1. 通过 `el: 'css选择器'` 配置
+  2. 通过 `vue实例.$mount('css选择器')` 配置
+- **流程**：
+  - 创建 vue 实例 —— 注入 —— 生成虚拟 DOM 树 —— 挂载 —— 渲染
+  - 数据发生变化 —— `diff` 算法重新生成虚拟DOM树 —— 重新挂载 —— 重新渲染
+
+# 模板
+
+**内容**：Mustache 语法，文本插值  `{{expr}}`
+
+**指令**：
+
+- `v-if`：控制元素是否被渲染
+
+  ```vue
+  <div id="app">
+      <p v-if="seen">现在你看到我了</p>
+      <button @click="clicked">按钮</button>
+  </div>
+  
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              seen: true
+          },
+          methods: {
+              clicked() {
+                  this.seen = !this.seen;
+              }
+          }
+      })
+  </script>
+  ```
+
+- `v-for`：绑定数组，渲染列表
+
+  ```vue
+  <div id="app">
+      <ol>
+          <li v-for="(item, i) in todos" :key="item.id">
+              {{ item.text }}
+          </li>
+      </ol>
+  </div>
+  
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              todos: [
+                  { text: '学习 JavaScript', id: 1 },
+                  { text: '学习 Vue', id: 2 },
+                  { text: '整个牛项目', id: 3 }
+              ]
+          }
+      })
+  </script>
+  ```
+
+  > **为什么数组的项都要 `v-bind` 唯一的 `key` ？**
+  >
+  > 避免不必要的 DOM 操作，vue 根据 `key` 值比较列表中的新旧元素，如果没有 `key`，vue 只能根据索引比较元素
+
+- `v-bind`：动态绑定属性；可以简写为 `: `
+
+  ```vue
+  <div id="app">
+      <span v-bind:title="msg">鼠标悬停几秒查看此处动态绑定的提示信息</span>
+  </div>
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              msg: '页面加载于' + new Date().toLocaleDateString(),
+          },
+      })
+  </script>
+  ```
+
+- `v-model`：双向数据绑定
+
+  ```vue
+  <div id="app">
+      <p>{{msg}}</p>
+      <input v-model="msg">
+  </div>
+  
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              msg: 'Hello world!'
+          }
+      })
+  </script>
+  ```
+
+- `v-on`：添加事件监听器。可以简写为 `@`
+
+  ```vue
+  <div id="app">
+      <p>{{msg}}</p>
+      <button @click="reverseMessage">反转消息</button>
+  </div>
+  
+  <script>
+      let vm = new Vue({
+          el: '#app',
+          data: {
+              msg: "你是年少的欢喜"
+          },
+          methods: {
+              reverseMessage() {
+                  this.msg = this.msg.split('').reverse().join('');
+              }
+          },
+      })
+  </script>
+  ```
+
+**配置**
+
+- `data` ：和界面相关的数据
+- `methods` ：界面相关的方法
+- `template` ：配置模板
+- `render` ：渲染方法，生成 `vnode`
+- `el` ：挂载的目标
