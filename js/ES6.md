@@ -19,14 +19,6 @@
 - [Map](#map)
 - [函数](#函数)
 
-
-
-
-
-
-
-
-
 ----
 
 ## 严格模式
@@ -491,6 +483,30 @@ for(let ele of elements){
   }; // { name: 'John', age: 18, gender: 'male' }
   ```
 
+- 练习
+
+  ```javascript
+  // 创建一个函数, 如果未传参, 参数为默认值, 如果传参, 参数修改默认值, 不修改其他属性
+  function createOptions(options) {
+      options = options || {};
+      const defaultOptions = {
+          time: 1000,
+          speed: 50,
+          text: ''
+      };
+      return {
+          ...defaultOptions,
+          ...options
+      };
+  };
+  let result = createOptions(); //  { time: 1000, speed: 50, text: '' }
+  result = createOptions({
+      time: 500,
+      text: 'Hello world!'
+  });
+  console.log(result);
+  ```
+
 ### 解构
 
 - **对象解构**
@@ -569,7 +585,34 @@ for(let ele of elements){
   }
   ```
 
+- **解构练习**
+
+  ```javascript
+  // 调用createUser函数解构获得fullName
+  // 创建一个对象
+  /*
+  {
+      firstName: xxx,
+      lastName: xxx,
+      fullName: xxx,
+      sayHello: fn
+  }
+  */
+  function createUser(firstName, lastName) {
+      return {
+          firstName,
+          lastName,
+          fullName: `${firstName} ${lastName}`,
+          sayHello() {
+              console.log(`Hello ${fullName}`);
   
+          }
+      }
+  }
+  // 调用createUser函数解构获得fullName
+  const { fullName } = createUser('Jolyne', 'Kujo');
+  console.log(fullName);
+  ```
 
 ### 属性描述符
 
@@ -647,6 +690,31 @@ obj.a = 2;
 console.log(obj.a); // 2
 ```
 
+练习
+
+```javascript
+const user = {
+    name: 'Jolyne',
+    age: 17,
+    gender: 'female'
+};
+// 遍历对象user, 将每一个属性变为getter和setter, 读写功能不变
+Object.entries(user).forEach(([key, value]) => {
+    Object.defineProperty(user, key, {
+        // 读取属性时, 输出: 正在读取xxx属性, 值为xxx
+        get() {
+            console.log(`正在读取${key}属性, 值为${value}`);
+            return value;
+        },
+        // 属性赋值时, 输出: 正在设置xxx属性, xxx为yyy
+        set(val) {
+            console.log(`正在设置${key}属性, ${key}的值为${val}`);
+            value = val;
+        }
+    })
+});
+```
+
 ### 键值对
 
 - `Object.keys(obj)`：获取对象的属性名组成的数组
@@ -672,6 +740,57 @@ console.log(obj.a); // 2
   for (let [key, value] of Object.entries(user)) {
       console.log(`${key}: ${value}`);
   }
+  ```
+
+- 练习
+
+  ```javascript
+  const obj = {
+      a: 1,
+      b: 2,
+      c: 3
+  };
+  
+  // 1. 遍历对象的属性名
+  // 方法一
+  for (let key of Object.keys(obj)) {
+      console.log(key);
+  }
+  // 方法二
+  Object.keys(obj).forEach((key) => {
+      console.log(key);
+  
+  });
+  
+  // 2. 遍历对象的属性值
+  for (let value of Object.values(obj)) {
+      console.log(value);
+  }
+  
+  // 3. 遍历对象的属性名和属性值
+  for (let entry of Object.entries(obj)) {
+      console.log(entry);
+  }
+  
+  // 4. 复制obj的所有属性获得一个新对象
+  // 方法一
+  const newObj = {
+      ...obj
+  };
+  
+  // 方法二
+  const newObj = Object.fromEntries(Object.entries(obj));
+  
+  
+  // 5. 复制obj除a以外的所有属性得到一个新对象
+  // 方法一
+  const newObj = {
+      ...obj
+  };
+  delete newObj.a;
+  
+  // 方法二
+  const { a, ...newObj } = obj;
   ```
 
 ### 冻结
@@ -762,7 +881,7 @@ console.log(obj.a); // 2
 
 `Map` 是一种数据集合，用于存储一系列的键值对
 
-> 注意：
+> **注意**：
 >
 > 1. 键 ( `key` ) 是唯一的
 > 2. `key` 可以是任何属性，`Object` 的 `key` 只能是字符串或符号
@@ -786,7 +905,142 @@ console.log(obj.a); // 2
 
 ## 函数
 
+### 箭头函数
 
+**语法**：
+
+- `(参数列表) => { 函数体 }`
+
+- `参数 => { 函数体 }`
+
+- `(参数列表) => 返回语句`
+
+  ```jsx
+  const sum = (a, b) => {
+  		return a + b;
+  }
+  ```
+
+**特点**：
+
+1. 不能使用 `new` 调用
+
+2. 没有原型，没有 `prototype` 属性
+
+3. 没有 `arguments`
+
+4. 没有 `this`
+
+   > **注意**：`this` 使用的是外层的 `this`
+
+### 剩余参数
+
+`...args` ：剩余参数收集未知数量的参数，存放在数组中
+
+```jsx
+function sum(...args) {
+    console.log(args.reduce((x, y) => {
+        return x + y;
+    }, 0));
+}
+```
+
+> **注意**：剩余参数只能声明在参数的最后一项
+
+### 参数默认值
+
+当参数没有传递或参数为 `undefined` 时，会使用默认值
+
+```jsx
+function sum(a, b = 1) {
+    return a + b;
+};
+console.log(sum(1)); // 2
+```
+
+### 类语法
+
+函数的两种调用方式
+
+```jsx
+function A() {};
+
+// 直接调用
+A();
+
+// 构造函数形式调用
+new A();
+```
+
+**旧类**
+
+```jsx
+function User(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.fullName = `${firstName} ${lastName}`;
+}
+// 静态方法
+User.isUser = function (u) {
+    // xxx
+}
+
+// 调用静态方法
+User.isUser(xxx);
+
+// 原型方法/公共方法
+User.prototype.sayHello = function () {
+    // xxx
+}
+
+// 实例方法
+const u = new User(xxx);
+u.sayHello();
+```
+
+**新类**
+
+```jsx
+class User {
+    constructor(firstName, lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fullName = `${firstName} ${lastName}`;
+    }
+    // 静态方法
+    static isUser = function (u) {
+        // xxx
+    }
+    // 公共方法
+    sayHello() {
+        // xxx
+    }
+}
+```
+
+**类的继承**
+
+```jsx
+// 旧类的继承
+function Animal() { }
+function Dog() { }
+// 设置继承关系
+Dog.prototype = Object.create(Animal.prototype);
+
+// 新类的继承
+class Animal { }
+class Dog extends Animal { }
+```
+
+### 函数 API
+
+| API                                      | **含义**                                             |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `Function.prototype.call(obj, ...args)`  | 调用函数，绑定 `this` 为 `obj`                       |
+| `Function.prototype.apply(obj, ...args)` | 调用函数，绑定 `this` 为 `obj`，以**数组**的形式传参 |
+| `Function.prototype.bind(obj, ...args)`  | 将函数 `this` 绑定为 `obj`                           |
+
+## 异步
 
 
 
