@@ -36,24 +36,25 @@
 
 - [全局 API](https://v2.cn.vuejs.org/v2/api/#%E5%85%A8%E5%B1%80-API)：修改全局配置
 
-- **Hello Vue!**
 
-  ```vue
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-  
-  <div id="app">
-      <h1>{{msg}}</h1>
-  </div>
-  
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              msg: 'Hello vue!',
-          },
-      })
-  </script>
-  ```
+**Hello Vue!**
+
+```vue
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+
+<div id="app">
+    <h1>{{msg}}</h1>
+</div>
+
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            msg: 'Hello vue!',
+        },
+    })
+</script>
+```
 
 - **注入**：vue 会将以下配置注入到 vue 实例中，即模板中可以直接使用 vue 实例中的成员
 
@@ -332,19 +333,147 @@ vm.$mount('#app');
 
 # 工程结构
 
+## vue-cli
+
+`vue-cli` 是一个脚手架，用于搭建 vue 工程
+
+`vue-cli` 官网：https://cli.vuejs.org/zh/
+
+内部使用 `webpack`，并预置了诸多插件 ( `plugin` ) 和加载器 ( `loader` )，达到开箱即用的效果
+
+`vue-cli` 预置
+
+- `babel`
+- `webpack-dev-server`
+- `eslint`
+- `postcss`
+- `less-loader`
+
+安装 `vue-cli`
+
+```shell
+npm i -g @vue/cli
+
+# yarn global add @vue/cli
+```
+
+检查 `vue` 版本
+
+```shell
+vue --version
+```
+
+创建项目
+
+```shell
+# 创建项目
+vue create project_name
+
+# ? Please pick a preset:
+#   Default ([Vue 3] babel, eslint)
+#   Default ([Vue 2] babel, eslint)
+# > Manually select features 手动选择
+```
+
 ```pseudocode
 Project
-
+├── node_modules
+├── public
+│   ├───── favicon.ico
+│   └───── index.html
 ├── src
-│   ├── vue.browse.js 
-│   └───── main.js
-├── index.html
+│   ├───── assets
+│   ├───── components
+│   ├───── App.vue
+│   └───── main.js 
 └── package.json
 ```
 
-- `main.js`
+启动项目
 
-  ```javascript
+```shell
+npm run serve
+```
+
+**SFC**：单文件组件 ( Single File Component  )，一个文件中包含一个组件所需的全部代码
+
+```jsx
+<template>
+	<!-- 组件模板代码 -->
+</template>
+
+<script>
+	// 组件配置
+</script>
+
+<style>
+	/* 组件样式 */
+</style>
+```
+
+`Vetur` 插件：输入 `default` 自动补全默认代码
+
+**配置个人组件**
+
+```jsx
+<!-- ./components/Avatar.vue -->
+<template>
+    <img :src="url" alt="" />
+</template>
+
+<script>
+    export default {
+        props: ['url'],
+    };
+</script>
+
+<style></style>
+
+<!-- ./App.vue -->
+<template>
+    <div>
+        <h1>Hello world!</h1>
+        <Avatar url="https://www.loliapi.com/acg/pp/" />
+    </div>
+</template>
+
+<script>
+    import Avatar from './components/Avatar.vue';
+    export default {
+        components: {
+            Avatar,
+        },
+    };
+</script>
+
+// ./main.js
+import Vue from 'vue';
+import App from './App.vue';
+
+new Vue({
+    render: (h) => h(App),
+}).$mount('#app');
+```
+
+**优化**：
+
+- 组件注册时给定可以给定一个 `name` 属性，指定组件的名字
+
+- `props` 属性用于声明组件的属性；两种方式：数组、对象
+
+  详见 [prop 验证](https://v2.cn.vuejs.org/v2/guide/components-props.html#Prop-%E9%AA%8C%E8%AF%81)
+
+  ```jsx
+  // 数组
+  props: ['url']
+  
+  // 对象
+  props: {
+      url: {
+          type: String, // 属性必须是字符串
+          required: true, // 属性必须传递
+      },
+  },
   ```
 
   
