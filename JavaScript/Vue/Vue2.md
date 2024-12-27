@@ -194,6 +194,8 @@
   </script>
   ```
 
+  > **注意**：当属性为 `style` 时，需要绑定一个对象
+
 - `v-model`：双向数据绑定
 
   ```vue
@@ -243,6 +245,7 @@
 - `render` ：渲染方法，生成 `vnode`
 - `el` ：挂载的目标
 - `components`：局部注册组件
+- `computed`：计算属性
 
 # 组件
 
@@ -395,6 +398,8 @@ Project
 npm run serve
 ```
 
+## SFC
+
 **SFC**：单文件组件 ( Single File Component  )，一个文件中包含一个组件所需的全部代码
 
 ```jsx
@@ -459,9 +464,9 @@ new Vue({
 
 - 组件注册时给定可以给定一个 `name` 属性，指定组件的名字
 
-- `props` 属性用于声明组件的属性；两种方式：数组、对象
+- `props` 属性用于声明组件的属性；
 
-  详见 [prop 验证](https://v2.cn.vuejs.org/v2/guide/components-props.html#Prop-%E9%AA%8C%E8%AF%81)
+  两种方式：**数组**、**对象**：详见 [prop 验证](https://v2.cn.vuejs.org/v2/guide/components-props.html#Prop-%E9%AA%8C%E8%AF%81)
 
   ```jsx
   // 数组
@@ -476,4 +481,108 @@ new Vue({
   },
   ```
 
+
+### 属性约束
+
+- `type`：约束属性的类型
+- `required`：属性可选或必填
+- `default`：属性默认值
+
+### v-bind
+
+`v-bind`：简写为 ⌈ `:` ⌋
+
+绑定内联样式 `style` 属性时，绑定为一个对象，让模板变得更清晰
+
+```jsx
+<template>
+    <img
+        class="avatar-img"
+        :src="url"
+        :style="{
+            width: size + 'px',
+            height: size + 'px',
+        }"
+    />
+</template>
+
+<script>
+    export default {
+        props: {
+            url: {
+                type: String,
+                required: true,
+            },
+            size: {
+                type: Number,
+            },
+        },
+    };
+</script>
+
+<!-- scoped: 带有作用域的style -->
+<style scoped>
+    .avatar-img {
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+</style>
+```
+
+绑定类 `class` 属性时
+
+- 字符串
+- 对象
+- 数组
+
+## 预编译
+
+`vue-cli` 进行打包，直接把组件中的模板转换为 `render` 函数，称 模板预编译
+
+- 运行时不再需要编译模板，提升运行效率
+- 打包结果不再需要 vue 的编译代码，减少了打包体积
+
+# 计算属性
+
+计算属性的结果会被缓存，`this` 自动绑定 vue 实例
+
+1. 不要使用箭头函数，箭头函数的 `this` 不会指向这个组件的示例
+2. 如果某个依赖在实例范畴之外，计算属性不会更新
+3. 不建议使用随机数、异步、当前时间等副作用操作
+
+> **`computed` 和 `methods` 有什么区别？**
+>
+> - 计算属性本质上是包含 `getter` 和 `setter` 方法
+>
+>   当获取计算属性时，实际上是在调用计算属性的 `getter` 方法，vue 会收集计算属性的依赖，并缓存计算属性返回结果。只有当依赖发生变化时，才会重新进行计算。
+>
+> - 方法没有缓存，每次调用方法都会导致重新执行。
+
+- 完整计算属性
+
+  ```javascript
+  computed: {
+      propName: {
+          get() {
+              // getter
+          },
+          set(val) {   
+              // setter
+          }
+      }
+  }
+  ```
+
+- **简写**：只包含 `getter` 计算属性
+
+  ```javascript
+  computed: {
+      propName() {
+          // getter
+      }
+  }
+  ```
+
   
+
