@@ -430,11 +430,11 @@ vue 中的模板语法分为两类：
    <div id="root">
        姓：<input type="text" v-model="firstName" /><br />
        名：<input type="text" v-model="lastName" /><br />
-       全名：<span>{{showName}}</span>
+       全名：<span>{{fullName}}</span>
    </div>
-   
    <script>
-       const vm = new Vue({
+   
+       let vm = new Vue({
            el: '#root',
            data() {
                return {
@@ -443,8 +443,16 @@ vue 中的模板语法分为两类：
                }
            },
            computed: {
-               showName() {
-                   return this.firstName + this.lastName;
+               fullName: {
+                   get() {
+                       return this.firstName + ' ' + this.lastName;
+   
+                   },
+                   set(value) {
+                       let arr = value.split(' ');
+                       this.firstName = arr[0];
+                       this.lastName = arr[1];
+                   }
                }
            }
        });
@@ -454,13 +462,6 @@ vue 中的模板语法分为两类：
 4. 计算属性最终出现在 `vm` 中，可以直接读取，相当于调用属性的 `getter` 方法
 
 5. 修改计算属性：当使用 `setter` 函数修改计算属性时，其依赖的数据需要**完全修改**，响应数据才会发生变化
-
-   ```jsx
-   ```
-
-   
-
-
 
 ## vue-cli
 
