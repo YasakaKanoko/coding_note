@@ -4,28 +4,22 @@
 
 **目录**：
 
-- [Hello world!](#hello-world)
-- [模板](#模板)
-- [组件](#组件)
-
 ---
 
-**Vue 官网**：https://v2.cn.vuejs.org/
+- **Vue 官网**：https://v2.cn.vuejs.org/
 
-[awesome-vue](https://github.com/vuejs/awesome-vue)：Vue.js 相关的优秀 Demo 精选列表
+- [awesome-vue](https://github.com/vuejs/awesome-vue)：Vue.js 相关的优秀 Demo 精选列表
 
-[awesome-js](https://awesomejs.dev/for/vue/)：浏览与 Vue 相关的包
+- [awesome-js](https://awesomejs.dev/for/vue/)：浏览与 Vue 相关的包
 
-# Hello world!
-
-- 开发版本：包含完整的警告和调试模式
+- **开发版本**：包含完整的警告和调试模式
 
   ```html
   <!-- 开发环境版本，包含了有帮助的命令行警告 -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   ```
 
-- 生产版本：删除了警告
+- **生产版本**：删除了警告
 
   ```html
   <!-- 生产环境版本，优化了尺寸和速度 -->
@@ -36,305 +30,437 @@
 
 - [全局 API](https://v2.cn.vuejs.org/v2/api/#%E5%85%A8%E5%B1%80-API)：修改全局配置
 
+- 阻止 vue 启动时生成生产提示
 
-**Hello Vue!**
+  ```javascript
+  Vue.config.productionTip = false;
+  ```
 
-```vue
-<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+## Hello Vue!
 
-<div id="app">
-    <h1>{{msg}}</h1>
+1. 想让 vue 工作，必须先**创建 vue 实例**，并且**传入配置对象**；
+
+2. `root` 容器中的代码依旧符合 html 规范，并且混入了特殊的 vue 语法：**Mustache**
+
+3. `root` 容器被称为 **vue 模板**
+
+4. vue 实例和容器具有一一对应的关系
+
+5. 真是开发中，只有一个 vue 实例
+
+6. **Mustache 语法**：插值语法 `{{}}` 中只能写 js 表达式，插值语法会自动读取 `data` 中的所有属性；
+
+   ```jsx
+   <!-- vue 模板 -->
+   <div id="root">
+       <h1>Hello, {{name}}!</h1>
+   </div>
+   
+   <script>
+       new Vue({
+           el: '#root',
+           data: {
+               name: 'vue'
+           }
+       });
+   </script>
+   ```
+
+   - `el`：指定当前 vue 实例为指定容器服务，值通常为 css 选择器字符串
+   - `data`：存储数据，数据供 `el` 指定容器使用
+
+   > **注意**：
+   >
+   > 1. `el` 的两种写法：`el`、`vm.$mount('#root')`
+   > 2. `data` 的两种写法：对象式、函数式
+   > 3. 重要的原则：vue 中函数，不要使用箭头函数，因为箭头函数的 `this` 不会指向 vue 实例
+
+## MVVM
+
+1. M ( Model，模型 )：对应 `data` 中的数据
+
+2. V ( View，视图 )：对应模板
+
+3. VM ( View Model，视图模型 )：对应 vue 实例对象
+
+   ```pseudocode
+   // 当页面变化时, vue实例监听DOM
+   View (DOM) -> (vm)DOM Listeners -> Model(Plain JavaScript Objects)
+   
+   // 当JavaScript中原型中的如data等数据变化时, 绑定到DOM中
+   Model(Plain JavaScript Objects) -> (vm)DOM Bindings -> View (DOM)
+   ```
+
+   - `data` 中的所有属性，最后都会出现在 `vm` 中
+   - `vm` 中的属性及 vue 原型中的属性，都可以在 vue 模板中直接使用
+
+## 数据代理
+
+`Object.defineProperty(obj, 'prop', { options })`：精确定义或修改对象的属性
+
+- `obj`：定义或修改属性的对象是
+- `'prop'`：对象的属性名称
+
+- `options`：选项
+
+  - `value`：属性值
+
+  - `enumerable`：属性是否可以枚举，默认 `false`
+
+  - `writeable`：属性是否可以修改，默认 `false`
+
+  - `configurable`：属性是否可以删除，默认 `false`
+
+  - `get()`：当你尝试读取属性的值时，会调用 `getter`。
+
+  - `set(value)`：当你尝试为属性赋值时，会调用 `setter`。
+
+    > **注意事项**：`value` / `writeable` 和 `getter` / `setter` 不能同时出现
+    >
+    > ```javascript
+    > let obj = {
+    >     name: 'Jolyne',
+    > };
+    > Object.defineProperty(obj, 'age', {
+    >     enumerable: true,
+    >     configurable: true,
+    >     get() {
+    >         return this._age;
+    >     },
+    >     set(val) {
+    >         this._age = val;
+    >     }
+    > });
+    > obj.age = 18;
+    > console.log(obj.age); // 18
+    > ```
+
+**例**：通过一个对象代理另一个对象中的属性
+
+```javascript
+let obj1 = {
+    x: 100,
+};
+let obj2 = {
+    x: obj1.x,
+    y: 200
+};
+Object.defineProperty(obj2, 'x', {
+    get() {
+        return obj1.x;
+    },
+    set(val) {
+        obj1.x = val;
+    }
+});
+
+console.log(obj1.x); // 100
+obj2.x = 18;
+console.log(obj1.x); // 18
+```
+
+**vue 中的数据代理**：通过 vue 对象实例 `vm` 去代理模板对象 `data` 中属性的操作 ( 读 / 写 )
+
+原理：通过 `Object.defineProperty()` 把 `data` 对象中的属性添加到 `vm` 上，并指定一个 `getter` / `setter` 去对 `data` 的属性进行读/写操作 
+
+```jsx
+const vm = new Vue({
+    el: '#root',
+    data() {
+        return {
+            name: 'Hello vue'
+        }
+    }
+});
+
+// 模板中的数据和vm实例中的数据是等价的
+data.name === vm._data.name
+```
+
+## 指令语法
+
+vue 中的模板语法分为两类：
+
+1. **插值语法**：用于解析标签体的**内容**，值通常是 js 表达式，可以直接读取 `data` 中的属性
+
+2. **指令语法**：用于解析标签 ( 包括标签属性、标签体内容、绑定事件…… )；值同样也是 js 表达式；
+
+   vue 的指令语法形式都以 `v-` 开头
+
+### 数据绑定
+
+- `v-bind`：简写 「`:`」；单向数据绑定
+
+  ```jsx
+  <a :href="url">点此跳转</a>
+  ```
+
+- `v-model`：双向数据绑定；简写：可以将「 `v-model:value` 」简写为「`v-model`」
+
+  ```jsx
+  <div id="root">
+      <p>{{msg}}</p>
+      <input type="text" v-model="msg" />
+  </div>
+  
+  <script>
+      new Vue({
+          el: '#root',
+          data: {
+              msg: 'Hello vue'
+          }
+      });
+  </script>
+  ```
+
+  **备注**：
+
+  1. **单向绑定**：数据只能从 `data` 流向页面
+
+  2. **双向绑定**：数据不仅可以从 `data` 流向页面，也可以从页面流向 `data`；
+
+     双向绑定通常用于表单类元素中 ( 如：`input`、`select` )
+
+### 事件处理
+
+`v-on`：事件监听器。简写为「`@`」
+
+```jsx
+<div id="root">
+    <p>{{msg}}</p>
+    <button v-on:click="reverseMsg">点此反转信息</button>
 </div>
 
 <script>
-    let vm = new Vue({
-        el: '#app',
-        data: {
-            msg: 'Hello vue!',
+    const vm = new Vue({
+        el: '#root',
+        data() {
+            return {
+                msg: '你是年少的欢喜'
+            }
         },
-    })
+        methods: {
+            reverseMsg() {
+                this.msg = this.msg.split('').reverse().join('');
+            }
+        },
+    });
 </script>
 ```
 
-- **注入**：vue 会将以下配置注入到 vue 实例中，即模板中可以直接使用 vue 实例中的成员
+**备注**： 
 
-  - `data` ：和界面相关的数据
+- 事件的回调需要配置在 `methods` 对象中
+- `methods` 中配置的函数 `this` 指向是 `vm` 实例或组件实例；最好不要使用箭头函数，否则 `this` 指向将不再是 `vm`
+- `@click="demo"` 和 `@click="demo($event)"` 的区别在于后者可以传参
 
-  - `computed` ：通过已有的数据计算得到的数据
+#### 事件修饰符
 
-  - `methods` ：方法
+1. `prevent`：阻止默认事件
 
-- **虚拟 DOM**：vue 采用了虚拟 DOM ( `vnode` ) 的方式描述要渲染的内容
+   ```jsx
+   // a标签的默认行为是跳转至指定页面, 以下将不跳转
+   <a href="www.baidu.com" @click.prevent="showInfo">点此跳转</a>
+   
+   // 等价于
+   showInfo(e) {
+       e.preventDefault();
+       alert('Hello');
+   }
+   ```
 
-  `vnode` 是一个普通的 js 对象，用于描述界面上有什么
+2. `stop`：阻止事件冒泡
 
-  ```javascript
-  let vnode = {
-      tag: 'h1',
-      children: [{
-          tag: undefined,
-          text: 'Hello world!'
-      }]
-  };
-  ```
+   ```jsx
+   <div @click="showInfo">
+       <button @click.stop="showInfo">点此查看</button>
+   </div>
+   
+   // 等价于
+   showInfo(e) {
+       e.stopPropagation();
+       alert('Hello');
+   }
+   ```
 
-  模板被解构为类似结构的虚拟 DOM
+3. `once`：事件只触发一次
 
-  ```javascript
-  {
-      tag: "div",
-      children: [
-          { tag: "h1", children: [ { text: "Hello world!" } ] }
-      ]
-  }
-  ```
+4. `capture`：使用事件的捕获模式
 
-  **渲染原理**：`render()`
+   事件分为：捕获阶段 -> 冒泡阶段；事件处理通常是在冒泡阶段，`capture` 是将事件触发改为捕获阶段触发
 
-  ```javascript
-  render(h) {
-      return h('div', [ // 根节点
-          // 子节点
-          h('h1', `${this.msg}`),
-          h('p', `xxx`),
-          h('div', `xxx`),
-      ])
-  }
-  ```
+   ```jsx
+   // 默认情况下, 捕获阶段: 点击div2时, 捕获顺序是 1 -> 2, 冒泡阶段: 2 -> 1
+   // 当1事件更改为capture时, 冒泡阶段也变为: 1 -> 2
+   <div @click.capture="test">
+       div1
+       <div @click="test">
+           div2
+       </div>
+   </div>
+   ```
 
-  **渲染的查找顺序**：`template` —— `render()` —— vue 模板
+5. `self`：类似于 `stop`；只有 `event.target` 是当前操作的元素时才触发；都可用来阻止事件冒泡
 
-  > **注意**：
-  >
-  > 1. **vue 模板不是真实 DOM，会编译为虚拟 DOM**
-  > 2. 虚拟 DOM 最终会生成真实 DOM 树
+   ```jsx
+   <div @click.self="showInfo">
+       <button @click="showInfo">点此查看</button>
+   </div>
+   ```
 
-- `diff` **算法**：数据发生变化后重新渲染，vue 会比较新旧两棵 `vnode tree`，只更新差异部分到真实 DOM 中
+6. `passive`：事件的默认行为立即执行，无需等待回调执行完毕
 
-  > **注意**：虚拟节点树，必须是单根的
+   常用于手机端
 
-- **挂载**：生成真实 DOM 树，放置到某个元素位置，称之为**挂载**
-  1. 通过 `el: 'css选择器'` 配置
-  2. 通过 `vue实例.$mount('css选择器')` 配置
-- **流程**：
-  - 创建 vue 实例 —— 注入 —— 生成虚拟 DOM 树 —— 挂载 —— 渲染
-  - 数据发生变化 —— `diff` 算法重新生成虚拟DOM树 —— 重新挂载 —— 重新渲染
+   > **注意**：不能和 `prevent` 一起使用
 
-# 模板
+#### 按键修饰符
 
-**内容**：Mustache 语法，文本插值  `{{expr}}`
+- `keyup`：抬起时
 
-**指令**：
+- `keydown`：按下时
 
-- `v-if`：控制元素是否被渲染
+  - `.enter`：回车
 
-  ```vue
-  <div id="app">
-      <p v-if="seen">现在你看到我了</p>
-      <button @click="clicked">按钮</button>
-  </div>
-  
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              seen: true
-          },
-          methods: {
-              clicked() {
-                  this.seen = !this.seen;
-              }
-          }
-      })
-  </script>
-  ```
-
-- `v-for`：绑定数组，渲染列表
-
-  ```vue
-  <div id="app">
-      <ol>
-          <li v-for="(item, i) in todos" :key="item.id">
-              {{ item.text }}
-          </li>
-      </ol>
-  </div>
-  
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              todos: [
-                  { text: '学习 JavaScript', id: 1 },
-                  { text: '学习 Vue', id: 2 },
-                  { text: '整个牛项目', id: 3 }
-              ]
-          }
-      })
-  </script>
-  ```
-
-  > **为什么数组的项都要 `v-bind` 唯一的 `key` ？**
-  >
-  > 避免不必要的 DOM 操作，vue 根据 `key` 值比较列表中的新旧元素，如果没有 `key`，vue 只能根据索引比较元素
-
-- `v-bind`：动态绑定属性；可以简写为 `: `
-
-  ```vue
-  <div id="app">
-      <span v-bind:title="msg">鼠标悬停几秒查看此处动态绑定的提示信息</span>
-  </div>
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              msg: '页面加载于' + new Date().toLocaleDateString(),
-          },
-      })
-  </script>
-  ```
-
-  > **注意**：当属性为 `style` 时，需要绑定一个对象
-
-- `v-model`：双向数据绑定
-
-  ```vue
-  <div id="app">
-      <p>{{msg}}</p>
-      <input v-model="msg">
-  </div>
-  
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              msg: 'Hello world!'
-          }
-      })
-  </script>
-  ```
-
-- `v-on`：添加事件监听器。可以简写为 `@`
-
-  ```vue
-  <div id="app">
-      <p>{{msg}}</p>
-      <button @click="reverseMessage">反转消息</button>
-  </div>
-  
-  <script>
-      let vm = new Vue({
-          el: '#app',
-          data: {
-              msg: "你是年少的欢喜"
-          },
-          methods: {
-              reverseMessage() {
-                  this.msg = this.msg.split('').reverse().join('');
-              }
-          },
-      })
-  </script>
-  ```
-
-**配置**
-
-- `data` ：和界面相关的数据
-- `methods` ：界面相关的方法
-- `template` ：配置模板
-- `render` ：渲染方法，生成 `vnode`
-- `el` ：挂载的目标
-- `components`：局部注册组件
-- `computed`：计算属性
-
-# 组件
-
-**目标**：
-
-1. **细粒度**：降低整体复杂度，提升可读性和可维护性
-2. **复用性**：提高局部代码的可复用性
-
-一个组件就是一个区域，组件包含该区域的功能 ( js )、内容 ( 模板 )、样式 (css)
-
-> 组件中包含样式，需要构建工具支撑
-
-**创建组件**
-
-组件就是根据一个普通配置对象创建的，开发一个组件，只需写一个配置对象
-
-配置对象与 vue 实例几乎一致
-
-```jsx
-let myButton = {
-    data() {
-        return {
-            count: 0,
+    ```jsx
+    <input type="text" placeholder="按下回车后提示输入信息" @keyup.enter="showInfo" />
+    
+    // vue实例
+    methods: {
+        // 等价于
+        showInfo(e) {
+            console.log(e.target.value);
         }
     },
-    template: `<button @click="count++">当前按钮点击了{{count}}次</button> `
-};
-```
+    ```
 
-组件配置对象和 vue 实例的差异：
+  - `.tab`：换行
 
-- 无 `el`
-- `data` 必须是一个函数，函数返回一个对象作为数据
-- 由于没有 `el` 配置，组件的虚拟 DOM 必须定义在 `template` 或 `render()` 中
+    `tab` 比较特殊；当按下 `tab` 键时，光标会直接失去焦点，因此只能配合 `keydown` 使用
 
-**注册组件**
+  - `.delete` (捕获“删除”和“退格”键)
 
-- **全局注册**：一旦全局注册，应用的任何位置处都可以使用该组件
+  - `.esc`：退出
 
-  `Vue.component("组件名称", 组件对象)`
+  - `.space`：空格
 
-  ```javascript
-  Vue.component("MyButton", myButton);
+  - `.up`：上
+
+  - `.down`：下
+
+  - `.left`：左
+
+  - `.right`：右
+
+- `keyCode`：按键码。( 已废弃 )
+
+  ```jsx
+  <input type="text" placeholder="按下回车后提示输入信息" @keyup.13="showInfo" />
   ```
 
-- **局部注册**：
+- vue 未提供别名的按键，按照原始的 `key` 键绑定，要转化为 `keybab-case` ( 短横线命名 )
 
-  语法：在 vue 实例中注册；`components: { 组件名: 组件对象 }` 
-
-  ES6 速写：如果组件名和组件对象相同，可以只写一个
-
-  ```javascript
-  let vm = new Vue({
-      components: {
-          MyButton: myButton
-      },
-      template: `<div>
-          <MyButton />    
-      </div>`
-  });
-  vm.$mount('#app');
+  ```jsx
+  <input type="text" placeholder="按下回车后提示输入信息" @keyup.caps-lock="showInfo" />
   ```
 
-**组件使用**：
+- 系统修饰键：`ctrl`、`alt`、`shift`、`meta` 
 
-1. 组件必须有结束标签
-2. 组件命名：短横线命名法 `<kebab-case>`、大驼峰命名法 `<PascalCase>`
+  - 配合 `keyup` 使用时，除了需要按下系统修饰键的同时，还要按下其他按键时，事件才能被触发
+  - 配合 `keydown` 使用时，正常触发事件 
 
-**组件树**：组件可以多次出现在实例中，也可以包含在其他组件中，大组件包含小组件，就形成了组件树
+- 自定义键名：`Vue.config.keyCodes.[alias] = keyCode;` 
 
-**组件中注入数据**：`props` 属性中用一个数组存放需要向注入的数据
+  ```jsx
+  Vue.config.keyCodes.f1 = 112
+  ```
 
-```javascript
-let MyTitle = {
-    props: ["item"],
-    template: `<h1>{{item}}</h1>`
-};
-let vm = new Vue({
-    components: {
-        MyTitle
-    },
-    template: `<div>
-                <MyTitle item="Hello world!" />    
-            </div>`
-});
-vm.$mount('#app');
-```
+## 计算属性
 
-# 工程结构
+**计算属性**：
+
+1. **定义**：页面所需的数据 / 属性，需要通过计算得出时
+
+2. `computed` 底层借助了 `Object.defineproperty()` 方法所提供的 `getter` 和 `setter`
+
+   ```javascript
+   // 计算属性完整写法, setter通常不使用
+   computed: {
+       get() {
+           // xxx
+       },
+       set(val) {
+           // xxx
+       }
+   }
+   ```
+
+3. **优点**：与 `methods` 相比，内部有缓存机制，效率高
+
+   `methods` 实现
+
+   ```jsx
+   <div id="root">
+       姓：<input type="text" v-model="firstName" /><br />
+       名：<input type="text" v-model="lastName" /><br />
+       全名：<span>{{showName()}}</span>
+   </div>
+       
+   <script>
+       const vm = new Vue({
+           el: '#root',
+           data() {
+               return {
+                   firstName: 'Jolyne',
+                   lastName: 'Kujo'
+               }
+           },
+           methods: {
+               showName() {
+                   return this.firstName + this.lastName;
+               }
+           },
+       });
+   </script>
+   ```
+
+   `computed` 实现：
+
+   ```jsx
+   <div id="root">
+       姓：<input type="text" v-model="firstName" /><br />
+       名：<input type="text" v-model="lastName" /><br />
+       全名：<span>{{showName}}</span>
+   </div>
+   
+   <script>
+       const vm = new Vue({
+           el: '#root',
+           data() {
+               return {
+                   firstName: 'Jolyne',
+                   lastName: 'Kujo'
+               }
+           },
+           computed: {
+               showName() {
+                   return this.firstName + this.lastName;
+               }
+           }
+       });
+   </script>
+   ```
+
+4. 计算属性最终出现在 `vm` 中，可以直接读取，相当于调用属性的 `getter` 方法
+
+5. 修改计算属性：当使用 `setter` 函数修改计算属性时，其依赖的数据需要**完全修改**，响应数据才会发生变化
+
+   ```jsx
+   ```
+
+   
+
+
 
 ## vue-cli
 
