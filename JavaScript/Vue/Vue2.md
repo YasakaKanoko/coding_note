@@ -36,6 +36,11 @@
   Vue.config.productionTip = false;
   ```
 
+- 插件：
+
+  - `Vue 3 Snippets`
+
+
 ## Hello Vue!
 
 1. 想让 vue 工作，必须先**创建 vue 实例**，并且**传入配置对象**；
@@ -221,6 +226,101 @@ vue 中的模板语法分为两类：
 
      双向绑定通常用于表单类元素中 ( 如：`input`、`select` )
 
+#### 样式绑定
+
+`class` 样式绑定：
+
+```jsx
+<div class="basic" :class="xxx" @click="changeMood">{{name}}</div>
+```
+
+- **字符串写法**：样式的名称不确定，需要动态指定
+
+  ```jsx
+  new Vue({
+      el: '#root',
+      data: {
+          // 指定样式别名
+          mood: 'data_title'
+      }
+  });
+  ```
+
+- **数组写法**：样式的数量、名称不确定
+
+  ```jsx
+  new Vue({
+      el: '#root',
+      data: {
+          // ...
+          classArr: ['data_title', 'dm_text', 'desc_info']
+      }
+  });
+  ```
+
+- **对象写法**：样式的数量、名称确定，决定是否应用
+
+  ```jsx
+  new Vue({
+      el: '#root',
+      data: {
+          // ...
+          classObj: {
+              data_title: true,
+              dm_text: false,
+              desc_info: true
+          }
+      }
+  });
+  ```
+
+`style` 样式绑定
+
+- **对象写法**：`:style="{fontSize: xxx + 'px'}"`；注意：驼峰命名
+
+  ```jsx
+  <div class="basic" :style="styleObj" @click="changeMood">{{name}}</div>
+  
+  // ...
+  new Vue({
+      el: '#root',
+      data: {
+          // ...
+          styleObj: {
+              fontSize: '40px',
+              backgroundColor: 'orange'
+          }
+      }
+  });
+  ```
+
+- **数组写法**：`:style="[a, b]"`；`a`、`b` 是样式对象
+
+  ```jsx
+  <div class="basic" :style="styleArr" @click="changeMood">{{name}}</div>
+  
+  // ...
+  new Vue({
+      el: '#root',
+      data: {
+          // ...
+          styleArr:[ 
+              {
+                  fontSize: '40px',
+                  backgroundColor: 'orange'
+              },
+              {
+                  color: 'blue'
+              }
+          ]
+      }
+  });
+  ```
+
+  
+
+  
+
 ### 事件处理
 
 `v-on`：事件监听器。简写为「`@`」
@@ -251,8 +351,16 @@ vue 中的模板语法分为两类：
 **备注**： 
 
 - 事件的回调需要配置在 `methods` 对象中
+
 - `methods` 中配置的函数 `this` 指向是 `vm` 实例或组件实例；最好不要使用箭头函数，否则 `this` 指向将不再是 `vm`
+
 - `@click="demo"` 和 `@click="demo($event)"` 的区别在于后者可以传参
+
+- `@xxx="yyy"` ：`yyy` 除了可以写 `methods` 中的方法，还可以写一些简单的语句
+
+  ```jsx
+  <button @click="isHot = !isHot">点击切换</button>
+  ```
 
 #### 事件修饰符
 
@@ -375,6 +483,68 @@ vue 中的模板语法分为两类：
   Vue.config.keyCodes.f1 = 112
   ```
 
+### 条件渲染
+
+```jsx
+<p>当前数据为：{{a}}</p>
+<button @click="a++">点此a+1</button>
+
+<!-- v-show -->
+<!-- <div v-show="a===1">vue</div> -->
+
+<div v-if="a===1">React</div>
+<div v-else-if="a===2">vue</div>
+<div v-else>Angular</div>
+```
+
+- `v-if`：适用于切换频次较低的场景；不展示的 DOM 会被直接移除
+- `v-show`：适用于切换频次较高的场景；不展示的部分未被移除，仅仅使用样式隐藏
+
+**备注**：
+
+- `v-if` 与 `v-else-if`、`v-else` 嵌套使用时，结构能被打断
+- `template` 中可以使用 `v-if`，不能使用 `v-show`
+- 使用 `v-if` 时元素可能获取不到，但使用 `v-show` 一定可以获取到 ( 原因：部分场景中，`v-if` 直接将 DOM 节点的元素抹除了 )
+
+### 列表渲染
+
+`v-for`：用于展示列表数据
+
+**语法**：`v-for="(item, index) in items" :key="item.id"`
+
+```jsx
+<div id="root">
+<ul>
+    <li v-for="item of person" :key="item.id">{{item.name}} {{item.age}}</li>
+</ul>
+</div>
+<script>
+
+new Vue({
+    el: '#root',
+    data: {
+        person: [
+            { id: 1, name: 'Jack', age: 18 },
+            { id: 2, name: 'Jolyne', age: 19 },
+            { id: 3, name: 'Alice', age: 30 }
+        ]
+    }
+});
+</script>
+```
+
+可用于遍历：**数组**、**对象**、**字符串**、**指定次数**
+
+> **注意**：
+>
+> - `key`：根据 vue 的虚拟 DOM 算法，会比较两棵新旧 DOM 树，会根据 `key` 的变化重新排列元素的顺序，移除 `key` 不存在的元素；
+>
+> - 相同父元素的子元素的 `key` 必须是独一无二的，避免造成渲染错误
+>
+> - 最好不要使用 `index` 作为 `key`，列表项顺序发生变化时，列表项的本身并未发生变化，会导致重新渲染，降低性能；或列表中的内容存在相同的项，由于 key 为索引，vue 会误以为是新项，重复渲染。
+
+
+
 ## 计算属性
 
 **计算属性**：
@@ -462,6 +632,165 @@ vue 中的模板语法分为两类：
 4. 计算属性最终出现在 `vm` 中，可以直接读取，相当于调用属性的 `getter` 方法
 
 5. 修改计算属性：当使用 `setter` 函数修改计算属性时，其依赖的数据需要**完全修改**，响应数据才会发生变化
+
+**计算属性的简写**：
+
+```jsx
+// 只包含getter
+fullName() {
+    // ...
+}
+```
+
+## 监视属性
+
+1. 通过 `vm` 对象中的 `$watch()` 或 `watch` 配置指定属性
+
+2. 当属性变化时，回调函数自动调用，在函数内部计算
+
+   - `immediate`：初始化时立即调用一次 `handler`
+
+   - `handler`：当监测属性发生变化时，`handler` 被调用
+
+3. 监视属性必须存在，才能进行监视
+
+监视属性的两种写法：
+
+```jsx
+<div id="root">
+    <p>今天天气很{{info}}</p>
+    <button @click="isHot = !isHot">点击切换</button>
+</div>
+
+<script>
+    let vm = new Vue({
+        el: '#root',
+        data: {
+            isHot: true
+        },
+        computed: {
+            info() {
+                return this.isHot ? '炎热' : '凉爽'
+            }
+        },
+    })
+</script>
+```
+
+- 在 `new Vue` 传入 `watch` 配置时；适用于定义时已知属性是否需要被监视
+
+  ```jsx
+  watch: {
+      isHot: {
+          immediate: true,
+          handler(newValue, oldValue) {
+              console.log('属性发生变化', newValue, oldValue);
+          }
+      }
+  }
+  ```
+
+- 通过 `vm.$watch()` 监视
+
+  ```jsx
+  vm.$watch('isHot', {
+      immediate: true,
+      handler(newValue, oldValue) {
+          console.log('属性发生变化', newValue, oldValue);
+      }
+  });
+  ```
+
+### 深度监视
+
+- vue 默认的 `watch` 不监测对象内部值的改变
+
+- `deep: true`：可以监测对象内部值的改变 ( 多层 )
+
+  ```jsx
+  data: {
+      numbers: {
+          a: 1
+      }
+  },
+  watch: {
+      numbers: {
+          deep: true,
+          handler() {
+              console.log('numbers改变了');
+          }
+      }
+  }
+  ```
+
+**备注**：
+
+- vue 自身是可以监测对象内部值的改变，但 vue 提供的 `watch` 默认不可以
+- 使用 `watch` 可以根据数据的具体结构，决定是否采用深度监测
+
+**监视属性的简写形式**：
+
+当监视属性不再需要 `immediate`、`deep` 时，才可以简写
+
+```jsx
+// new Vue参数简写形式
+watch: {
+    isHot(newValue, oldValue) {
+        console.log('isHot修改了');
+    }
+}
+
+// vm.$watch()简写形式
+vm.$watch('isHot', function (newValue, oldValue) {
+    console.log('numbers改变了');
+});
+```
+
+`computed` 和 `watch` 的**区别**：
+
+```jsx
+<div id="root">
+    姓：<input type="text" v-model="firstName" /><br />
+    名：<input type="text" v-model="lastName" /><br />
+    全名：<span>{{fullName}}</span>
+</div>
+```
+
+1. `computed` 能实现的功能，`watch` 也能实现
+
+   ```jsx
+   let vm = new Vue({
+       el: '#root',
+       data() {
+           return {
+               firstName: 'Jolyne',
+               lastName: 'Kujo',
+               fullName: 'Jolyne' + ' ' + 'Kujo'
+           }
+       },
+       // computed: {
+       //     fullName() {
+       //         return this.firstName + ' ' + this.lastName;
+       //     }
+       // }
+       watch: {
+           firstName(val) {
+               this.fullName = val + ' ' + this.lastName;
+           },
+           lastName(val) {
+               this.fullName = this.firstName + ' ' + val;
+           }
+       }
+   });
+   ```
+
+2. `watch` 可以实现的功能，`computed` 不一定能完成；如：`watch` 可以进行异步
+
+   > `computed` 的整个缓存机制是依赖同步的，使用 `return` 立即返回
+   >
+   > `watch` 返回通过回调函数返回，因此它可以实现异步
+
+3. vue 内部管理的函数 ( 诸如：事件、监听、计算等属性 )最好使用普通函数，不被 vue 管理的函数 ( 诸如：定时器的回调、ajax 的回调等 ) 最好使用箭头函数
 
 ## vue-cli
 
