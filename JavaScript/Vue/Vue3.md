@@ -1,14 +1,118 @@
 # Vue3
 
+----
+
 **目录**
 
-- [Hello vue3](#hello-vue3)
-- [组件](#组件)
-- [vite](#vite)
-- [子组件](#子组件)
-- [代理](#代理)
-- [methods](#methods)
-- [computed](#computed)
+
+
+----
+
+# 创建工程
+
+## 基于 vue-cli
+
+```sh
+# 查看@vue/cli的版本, @vue/cli版本建议在4.5.0以上
+vue --version
+
+# 安装@vue/cli
+npm i -g @vue/cli
+
+# 执行创建命令
+vue create vue_project
+
+# Choose a version of Vue.js that you want to start the project with (Use arrow keys)
+# > 3.x
+#   2.x
+```
+
+## 基于 vite
+
+`vite` 新一代构建工具，官方地址：https://vitejs.cn
+
+- `HMR`：轻量快速的热重载，实现极速的服务启动
+- **开箱即用**：对 TypeScript、JSX、CSS 等开箱即用
+- **按需编译**：不必等待整个应用编译完成
+
+**创建工程**
+
+```sh
+# 创建命令
+npm create vue@latest
+
+# 配置
+## 配置项目名称
+√ Project name: vue3_test
+## 是否添加TypeScript支持
+√ Add TypeScript? Yes
+## 是否添加JSX支持
+√ Add JSX Support? No
+## 是否添加路由环境
+√ Add Vue Router for Single Page Application development? No
+## 是否添加pinia环境
+√ Add Pinia for state management? No
+## 是否添加单元测试
+√ Add Vitest for Unit Testing? No
+## 是否添加端到端测试方案
+√ Add an End-to-End Testing Solution? No
+## 是否添加ESLint语法检查
+√ Add ESLint for code quality? Yes
+## 是否添加Prettier代码格式化
+√ Add Prettier for code formatting? Y
+
+# 安装依赖
+npm i
+
+# 启动项目
+npm run dev
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
